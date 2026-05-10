@@ -36,7 +36,7 @@ export default function WorkspacesPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-gray-500 dark:text-gray-400">Loading workspace...</p>
+        <p className="text-gray-500 dark:text-gray-400">Loading organization...</p>
       </div>
     );
   }
