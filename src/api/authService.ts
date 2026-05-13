@@ -1,4 +1,5 @@
-import API from './api.config';
+import API from '@/api/api.config';
+import { removeToken } from '@/utils/token';
 import {
   InitiateSignupPayload,
   VerifyOtpPayload,
@@ -39,7 +40,7 @@ export const authService = {
     } catch (error) {
       console.error("Backend logout failed, proceeding with local cleanup:", error);
     } finally {
-      localStorage.removeItem('token'); 
+      removeToken(); 
       window.location.href = '/signin';
     }
   },
