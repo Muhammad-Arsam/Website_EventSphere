@@ -53,6 +53,12 @@ export default function EventsOversightPage() {
     fetchEventsFlow();
   }, []);
 
+  // --- SORTING LOGIC ADDED HERE ---
+  // Create a sorted copy of the events array in ascending order (closest dates first)
+  const sortedEvents = [...events].sort((a, b) => {
+    return new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime();
+  });
+
   return (
     <div className="max-w-7xl mx-auto p-6 lg:p-8">
       {/* Page Header */}
@@ -97,7 +103,8 @@ export default function EventsOversightPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {events.map((event) => (
+          {/* --- MAP OVER sortedEvents INSTEAD OF events --- */}
+          {sortedEvents.map((event) => (
             <EventCard key={event.id} event={event} />
           ))}
         </div>

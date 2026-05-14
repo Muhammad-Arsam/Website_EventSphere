@@ -1,16 +1,16 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { EventResponse } from '@/types/event.types';
 import { Calendar, MapPin, Image as ImageIcon, Pencil } from 'lucide-react';
-import EditEventForm from './EditEventForm'; // Import your newly created modal component
+import EditEventForm from './EditEventForm'; 
 
 interface EventCardProps {
     event: EventResponse;
 }
 
 export default function EventCard({ event }: EventCardProps) {
-    // State to control the visibility of the Edit Modal
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     const formattedDate = new Date(event.startDateTime).toLocaleDateString('en-US', {
@@ -21,60 +21,61 @@ export default function EventCard({ event }: EventCardProps) {
 
     return (
         <>
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col transition-all hover:shadow-md">
-                {/* Top Banner Image */}
-                <div className="h-40 w-full bg-gray-50 relative border-b border-gray-100 flex items-center justify-center overflow-hidden">
-                    {event.imageUrl ? (
-                        <img
-                            src={event.imageUrl}
-                            alt={event.title}
-                            className="w-full h-full object-cover"
-                        />
-                    ) : (
-                        // Placeholder if no image (like Drafts)
-                        <div className="flex flex-col items-center justify-center text-gray-400">
-                            <ImageIcon className="w-8 h-8 mb-2 opacity-50" />
-                            <span className="text-xs font-medium uppercase tracking-wider">No Banner</span>
-                        </div>
-                    )}
-                </div>
+            <div className="group bg-white rounded-2xl border border-gray-200/80 overflow-hidden flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-gray-300">
+                
+                {/* Clickable Area navigating to Event Details Page */}
+                <Link href={`/events/${event.id}`} className="flex flex-col grow cursor-pointer">
+                    {/* Top Banner Image */}
+                    <div className="relative h-48 w-full bg-gray-50/50 flex items-center justify-center overflow-hidden border-b border-gray-100">
+                        {event.imageUrl ? (
+                            <img
+                                src={event.imageUrl}
+                                alt={event.title}
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                        ) : (
+                            // Placeholder if no image
+                            <div className="flex flex-col items-center justify-center text-gray-400 transition-transform duration-500 group-hover:scale-105">
+                                <ImageIcon className="w-10 h-10 mb-2 opacity-40" />
+                                <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">No Banner</span>
+                            </div>
+                        )}
+                        {/* Subtle gradient overlay that appears on hover for a premium feel */}
+                        <div className="absolute inset-0 bg-linear-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    </div>
 
-                {/* Card Body */}
-                <div className="p-5 grow flex flex-col">
-                    <div className="flex justify-between items-start mb-4">
-                        <h3 className="font-semibold text-gray-900 text-lg leading-tight line-clamp-2 pr-2">
+                    {/* Card Body */}
+                    <div className="p-5 grow flex flex-col">
+                        <h3 className="font-bold text-gray-900 text-xl leading-snug line-clamp-2 mb-5 transition-colors group-hover:text-brand-600">
                             {event.title}
                         </h3>
 
-                        {/* Status Badge */}
-                        <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${event.status === 'DRAFT'
-                                ? 'bg-gray-100 text-gray-600'
-                                : 'bg-green-50 text-green-700'
-                            }`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${event.status === 'DRAFT' ? 'bg-gray-400' : 'bg-green-500'}`}></span>
-                            {event.status}
+                        {/* Details Grid */}
+                        <div className="grid gap-3 mt-auto">
+                            <div className="flex items-center gap-3 text-sm text-gray-600">
+                                <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100 shrink-0">
+                                    <Calendar className="w-4 h-4 text-gray-500" />
+                                </div>
+                                <span className="font-medium">{formattedDate}</span>
+                            </div>
+                            <div className="flex items-center gap-3 text-sm text-gray-600">
+                                <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100 shrink-0">
+                                    <MapPin className="w-4 h-4 text-gray-500" />
+                                </div>
+                                <span className="font-medium truncate">{event.venue || event.city || 'Location TBA'}</span>
+                            </div>
                         </div>
                     </div>
+                </Link>
 
-                    {/* Details Grid */}
-                    <div className="grid gap-3 mt-auto">
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Calendar className="w-4 h-4 text-gray-400" />
-                            <span>{formattedDate}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <MapPin className="w-4 h-4 text-gray-400" />
-                            <span className="truncate">{event.venue || event.city || 'Location TBA'}</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Footer / Action */}
-                <div className="p-4 border-t border-gray-50 flex justify-end">
-                    {/* Changed from <Link> to <button> to trigger the modal state */}
+                {/* Footer / Action (Outside of Link to prevent routing conflicts) */}
+                <div className="px-5 pb-5 pt-2">
                     <button
-                        onClick={() => setIsEditModalOpen(true)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                        onClick={(e) => {
+                            e.preventDefault(); // Extra safety to ensure no link bubbling
+                            setIsEditModalOpen(true);
+                        }}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all duration-300 relative z-10"
                     >
                         <Pencil className="w-4 h-4" />
                         Edit Event
@@ -82,12 +83,14 @@ export default function EventCard({ event }: EventCardProps) {
                 </div>
             </div>
 
-            {/* Render the Edit Modal outside the visual card box */}
-            <EditEventForm
-                isOpen={isEditModalOpen}
-                closeModal={() => setIsEditModalOpen(false)}
-                event={event}
-            />
+            {/* Conditionally render the modal to prevent phantom DOM height and improve performance */}
+            {isEditModalOpen && (
+                <EditEventForm
+                    isOpen={isEditModalOpen}
+                    closeModal={() => setIsEditModalOpen(false)}
+                    event={event}
+                />
+            )}
         </>
     );
 }

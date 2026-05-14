@@ -51,7 +51,7 @@ export default function EditEventForm({ isOpen, closeModal, event }: EditEventMo
         lat: 0,
         lon: 0,
         layoutType: '',
-        tags: '', // Handling tags as a comma-separated string for the input
+        tags: '', 
         typeSpecificData: '',
     });
     const [imageFile, setImageFile] = useState<File | null>(null);
@@ -67,7 +67,16 @@ export default function EditEventForm({ isOpen, closeModal, event }: EditEventMo
     // Pre-fill data when modal opens and lookup lists are ready
     useEffect(() => {
         if (event && isOpen && countries.length > 0) {
-            const formatForInput = (isoString?: string) => isoString ? new Date(isoString).toISOString().slice(0, 16) : '';
+            
+            // THE FIX: Adjusting for local timezone offset before slicing
+            const formatForInput = (isoString?: string) => {
+                if (!isoString) return '';
+                const date = new Date(isoString);
+                // Subtract the timezone offset (in minutes converted to milliseconds) 
+                // to trick toISOString() into printing your local time
+                const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+                return localDate.toISOString().slice(0, 16);
+            };
 
             setFormData({
                 title: event.title || '',
@@ -87,19 +96,21 @@ export default function EditEventForm({ isOpen, closeModal, event }: EditEventMo
                 typeSpecificData: event.typeSpecificData || '',
             });
 
-            // Attempt to reverse-map country name to ISO code to populate states dropdown
+            // Attempt to reverse-map country name to ISO code
             if (event.country) {
-                const foundCountry = countries.find(c => c.name === event.country);
+                const foundCountry = countries.find(c => (c.name || c.label || c.country) === event.country);
                 if (foundCountry) {
-                    setSelectedCountryIso(foundCountry.iso2);
-                    locationService.getStates(foundCountry.iso2).then((fetchedStates) => {
+                    const cIso = foundCountry.iso2 || foundCountry.isoCode || foundCountry.code;
+                    setSelectedCountryIso(cIso);
+                    
+                    locationService.getStates(cIso).then((fetchedStates) => {
                         setStates(fetchedStates);
-                        // Attempt to reverse-map state name to ISO code
                         if (event.state) {
-                            const foundState = fetchedStates.find((s: any) => s.name === event.state);
+                            const foundState = fetchedStates.find((s: any) => (s.name || s.label) === event.state);
                             if (foundState) {
-                                setSelectedStateIso(foundState.iso2);
-                                locationService.getCities(foundCountry.iso2, foundState.iso2).then(setCities).catch(console.error);
+                                const sIso = foundState.iso2 || foundState.isoCode || foundState.code;
+                                setSelectedStateIso(sIso);
+                                locationService.getCities(cIso, sIso).then(setCities).catch(console.error);
                             }
                         }
                     }).catch(console.error);
@@ -118,30 +129,32 @@ export default function EditEventForm({ isOpen, closeModal, event }: EditEventMo
     };
 
     const handleCountryChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const iso2 = e.target.value;
-        const countryName = countries.find(c => c.iso2 === iso2)?.name || '';
+        const iso = e.target.value;
+        const countryObj = countries.find(c => (c.iso2 || c.isoCode || c.code) === iso);
+        const countryName = countryObj ? (countryObj.name || countryObj.label || countryObj.country) : '';
 
-        setSelectedCountryIso(iso2);
+        setSelectedCountryIso(iso);
         setFormData(prev => ({ ...prev, country: countryName, state: '', city: '' }));
 
         setStates([]);
         setCities([]);
-        if (iso2) {
-            const fetchedStates = await locationService.getStates(iso2);
+        if (iso) {
+            const fetchedStates = await locationService.getStates(iso);
             setStates(fetchedStates);
         }
     };
 
     const handleStateChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const iso2 = e.target.value;
-        const stateName = states.find(s => s.iso2 === iso2)?.name || '';
+        const iso = e.target.value;
+        const stateObj = states.find(s => (s.iso2 || s.isoCode || s.code) === iso);
+        const stateName = stateObj ? (stateObj.name || stateObj.label) : '';
 
-        setSelectedStateIso(iso2);
+        setSelectedStateIso(iso);
         setFormData(prev => ({ ...prev, state: stateName, city: '' }));
 
         setCities([]);
-        if (selectedCountryIso && iso2) {
-            const fetchedCities = await locationService.getCities(selectedCountryIso, iso2);
+        if (selectedCountryIso && iso) {
+            const fetchedCities = await locationService.getCities(selectedCountryIso, iso);
             setCities(fetchedCities);
         }
     };
@@ -181,8 +194,11 @@ export default function EditEventForm({ isOpen, closeModal, event }: EditEventMo
         setError(null);
 
         try {
+            // Also ensuring the dates get converted back strictly to valid ISO formats upon saving
             const payload = {
                 ...formData,
+                startDateTime: formData.startDatetime ? new Date(formData.startDatetime).toISOString() : '',
+                endDateTime: formData.endDatetime ? new Date(formData.endDatetime).toISOString() : '',
                 tags: formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
                 ...(imageFile && { image: imageFile }),
             };
@@ -219,9 +235,11 @@ export default function EditEventForm({ isOpen, closeModal, event }: EditEventMo
 
                         <div className="col-span-1">
                             <Label>Category</Label>
-                            <select name="categoryId" value={formData.categoryId} onChange={handleInputChange} disabled={isLoading} className="mt-1.5 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                            <select name="categoryId" value={formData.categoryId} onChange={handleInputChange} disabled={isLoading} className="mt-1.5 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
                                 <option value="" disabled>Select Category</option>
-                                {categories.map((cat) => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+                                {categories.map((cat) => (
+                                    <option key={cat.id} value={cat.id} className="text-gray-900 dark:text-white bg-white dark:bg-gray-900">{cat.name}</option>
+                                ))}
                             </select>
                         </div>
 
@@ -250,35 +268,47 @@ export default function EditEventForm({ isOpen, closeModal, event }: EditEventMo
 
                         <div className="col-span-1">
                             <Label>Country</Label>
-                            <select value={selectedCountryIso} onChange={handleCountryChange} className="mt-1.5 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                            <select value={selectedCountryIso} onChange={handleCountryChange} className="mt-1.5 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
                                 <option value="">Select Country</option>
-                                {countries.map((c) => <option key={c.iso2} value={c.iso2}>{c.name}</option>)}
+                                {countries.map((c, i) => (
+                                    <option key={c.iso2 || c.isoCode || c.code || i} value={c.iso2 || c.isoCode || c.code} className="text-gray-900 dark:text-white bg-white dark:bg-gray-900">
+                                        {c.name || c.label || c.country}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 
                         <div className="col-span-1">
                             <Label>State</Label>
-                            <select value={selectedStateIso} onChange={handleStateChange} disabled={!selectedCountryIso} className="mt-1.5 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                            <select value={selectedStateIso} onChange={handleStateChange} disabled={!selectedCountryIso} className="mt-1.5 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
                                 <option value="">Select State</option>
-                                {states.map((s) => <option key={s.iso2} value={s.iso2}>{s.name}</option>)}
+                                {states.map((s, i) => (
+                                    <option key={s.iso2 || s.isoCode || s.code || i} value={s.iso2 || s.isoCode || s.code} className="text-gray-900 dark:text-white bg-white dark:bg-gray-900">
+                                        {s.name || s.label}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 
                         <div className="col-span-1">
                             <Label>City</Label>
-                            <select name="city" value={formData.city} onChange={handleCityChange} disabled={!selectedStateIso} className="mt-1.5 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                            <select name="city" value={formData.city} onChange={handleCityChange} disabled={!selectedStateIso} className="mt-1.5 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
                                 <option value="">Select City</option>
-                                {cities.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
+                                {cities.map((c, i) => (
+                                    <option key={c.name || c.label || i} value={c.name || c.label} className="text-gray-900 dark:text-white bg-white dark:bg-gray-900">
+                                        {c.name || c.label}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 
                         <div className="col-span-1">
                             <Label>Venue Name</Label>
-                            <Input type="text" name="venue" value={formData.venue} onChange={handleInputChange} placeholder="e.g. Grand Hall" />
+                            <Input type="text" name="venue" value={formData.venue} onChange={handleInputChange} placeholder="e.g. Grand Hall, Virtual, etc." />
                         </div>
 
                         {/* Address & Lat/Lon Picker */}
-                        <div className="col-span-1 sm:col-span-2 bg-gray-50 dark:bg-gray-800 p-4 rounded-xl">
+                        <div className="col-span-1 sm:col-span-2 bg-gray-50 dark:bg-gray-800 p-4 rounded-xl mt-2">
                             <Label>Search OpenStreetMap for Address & Coordinates</Label>
                             <div className="flex gap-2 mt-1.5 mb-3">
                                 <Input type="text" value={addressSearchQuery} onChange={(e) => setAddressSearchQuery(e.target.value)} placeholder="Type address to search..." />
@@ -319,18 +349,8 @@ export default function EditEventForm({ isOpen, closeModal, event }: EditEventMo
                         <div className="col-span-1 sm:col-span-2 mt-4"><h5 className="font-semibold text-brand-500 border-b pb-2">Advanced</h5></div>
 
                         <div className="col-span-1">
-                            <Label>Layout Type</Label>
-                            <Input type="text" name="layoutType" value={formData.layoutType} onChange={handleInputChange} placeholder="e.g. standard" />
-                        </div>
-
-                        <div className="col-span-1">
                             <Label>Tags (Comma separated)</Label>
                             <Input type="text" name="tags" value={formData.tags} onChange={handleInputChange} placeholder="tech, networking, global" />
-                        </div>
-
-                        <div className="col-span-1 sm:col-span-2">
-                            <Label>Type Specific Data (JSON string)</Label>
-                            <Input type="text" name="typeSpecificData" value={formData.typeSpecificData} onChange={handleInputChange} placeholder='{"key": "value"}' />
                         </div>
 
                         {error && (

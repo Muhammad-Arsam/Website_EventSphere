@@ -3,26 +3,26 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { eventService } from '@/api/eventService';
-import { categoryService } from '@/api/categoryService'; 
-import { Category } from '@/types/category.types'; 
+import { categoryService } from '@/api/categoryService';
+import { Category } from '@/types/category.types';
 import { getOrgId } from '@/utils/token';
 import { Calendar, Clock, Type, LayoutGrid, Loader2 } from 'lucide-react';
-import Alert from '@/components/ui/alert/Alert'; 
+import Alert from '@/components/ui/alert/Alert';
 
 export default function CreateEventForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const [alertConfig, setAlertConfig] = useState<{
     id: number;
     variant: 'success' | 'error' | 'warning' | 'info';
     title: string;
     message: string;
   } | null>(null);
-  
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
-  
+
   const [formData, setFormData] = useState({
     title: '',
     categoryId: '',
@@ -67,12 +67,12 @@ export default function CreateEventForm() {
       }
 
       await eventService.createDraft(orgId, formData);
-      
+
       showAlert('success', 'Draft Created!', 'Your event draft has been successfully saved.');
-      
+
       setTimeout(() => {
         router.push('/events');
-        router.refresh(); 
+        router.refresh();
       }, 1500);
 
     } catch (err: any) {
@@ -84,17 +84,19 @@ export default function CreateEventForm() {
 
   return (
     <>
-      {/* Render the Alert toast dynamically if we have a config */}
+      {/* Fixed Alert Container with high z-index to overlay header */}
       {alertConfig && (
-        <Alert 
-          key={alertConfig.id} 
-          variant={alertConfig.variant} 
-          title={alertConfig.title} 
-          message={alertConfig.message} 
-        />
+        <div className="fixed top-6 right-6 z-99999 w-full max-w-sm drop-shadow-xl animate-in fade-in slide-in-from-top-4 duration-300">
+          <Alert
+            key={alertConfig.id}
+            variant={alertConfig.variant}
+            title={alertConfig.title}
+            message={alertConfig.message}
+          />
+        </div>
       )}
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 max-w-2xl">
+      <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 max-w-2xl relative">
         <div className="space-y-6">
           {/* Title */}
           <div>
@@ -110,7 +112,7 @@ export default function CreateEventForm() {
                 required
                 value={formData.title}
                 onChange={handleChange}
-                className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 text-sm"
+                className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 text-sm transition-colors shadow-sm hover:border-gray-400"
                 placeholder="e.g., Annual Tech Summit 2026"
               />
             </div>
@@ -134,7 +136,7 @@ export default function CreateEventForm() {
                 disabled={isLoadingCategories}
                 value={formData.categoryId}
                 onChange={handleChange}
-                className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white disabled:bg-gray-50"
+                className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white shadow-sm hover:border-gray-400 transition-colors disabled:bg-gray-50 disabled:cursor-not-allowed cursor-pointer appearance-none"
               >
                 <option value="" disabled>
                   {isLoadingCategories ? 'Loading categories...' : 'Select a category...'}
@@ -143,6 +145,12 @@ export default function CreateEventForm() {
                   <option key={cat.id} value={cat.id}>{cat.name}</option>
                 ))}
               </select>
+              {/* Custom Dropdown Arrow since we used appearance-none to hide the default browser one */}
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
             </div>
           </div>
 
@@ -151,9 +159,9 @@ export default function CreateEventForm() {
             {/* Start Date */}
             <div>
               <label htmlFor="startDatetime" className="block text-sm font-medium text-gray-700 mb-1">Start Date & Time</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Calendar className="h-5 w-5 text-gray-400" />
+              <div className="relative overflow-hidden rounded-lg border border-gray-300 shadow-sm focus-within:ring-1 focus-within:ring-emerald-500 focus-within:border-emerald-500 hover:border-gray-400 transition-colors bg-white">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+                  <Calendar className={`h-5 w-5 ${formData.startDatetime ? 'text-emerald-500' : 'text-gray-400'}`} />
                 </div>
                 <input
                   type="datetime-local"
@@ -162,7 +170,14 @@ export default function CreateEventForm() {
                   required
                   value={formData.startDatetime}
                   onChange={handleChange}
-                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 text-sm"
+                  className="block w-full pl-10 pr-3 py-2.5 text-sm outline-none bg-transparent cursor-pointer relative z-20 
+                    [&::-webkit-calendar-picker-indicator]:opacity-0 
+                    [&::-webkit-calendar-picker-indicator]:absolute 
+                    [&::-webkit-calendar-picker-indicator]:inset-0 
+                    [&::-webkit-calendar-picker-indicator]:w-full 
+                    [&::-webkit-calendar-picker-indicator]:h-full 
+                    [&::-webkit-calendar-picker-indicator]:cursor-pointer
+                    text-gray-700"
                 />
               </div>
             </div>
@@ -170,9 +185,9 @@ export default function CreateEventForm() {
             {/* End Date */}
             <div>
               <label htmlFor="endDatetime" className="block text-sm font-medium text-gray-700 mb-1">End Date & Time</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Clock className="h-5 w-5 text-gray-400" />
+              <div className="relative overflow-hidden rounded-lg border border-gray-300 shadow-sm focus-within:ring-1 focus-within:ring-emerald-500 focus-within:border-emerald-500 hover:border-gray-400 transition-colors bg-white">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+                  <Clock className={`h-5 w-5 ${formData.endDatetime ? 'text-emerald-500' : 'text-gray-400'}`} />
                 </div>
                 <input
                   type="datetime-local"
@@ -181,7 +196,14 @@ export default function CreateEventForm() {
                   required
                   value={formData.endDatetime}
                   onChange={handleChange}
-                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 text-sm"
+                  className="block w-full pl-10 pr-3 py-2.5 text-sm outline-none bg-transparent cursor-pointer relative z-20 
+                    [&::-webkit-calendar-picker-indicator]:opacity-0 
+                    [&::-webkit-calendar-picker-indicator]:absolute 
+                    [&::-webkit-calendar-picker-indicator]:inset-0 
+                    [&::-webkit-calendar-picker-indicator]:w-full 
+                    [&::-webkit-calendar-picker-indicator]:h-full 
+                    [&::-webkit-calendar-picker-indicator]:cursor-pointer
+                    text-gray-700"
                 />
               </div>
             </div>
