@@ -31,21 +31,13 @@ const navItems: NavItem[] = [
   },
   {
     icon: <BoxCubeIcon />,
-    name: "Organization",
+    name: "My Organization",
     path: "/workspaces",
-  },
-  {
-    icon: <ListIcon />,
-    name: "Global Users",
-    path: "/users",
   },
   {
     icon: <CalenderIcon />,
     name: "Events Oversight",
-    subItems: [
-      { name: "All Events", path: "/events" },
-      { name: "Categories", path: "/categories" },
-    ],
+    path: "/events",
   },
 ];
 

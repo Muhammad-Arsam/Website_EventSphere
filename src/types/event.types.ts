@@ -52,3 +52,44 @@ export interface UpdateEventRequest {
   tags?: string[];
   typeSpecificData?: string;
 }
+
+// --- NEW SUB-EVENT TYPES ---
+
+export interface SubEvent {
+  id: string;
+  eventId: string;
+  title: string;
+  description: string;
+  imageUrl?: string;
+  startTime: string;
+  endTime: string;
+  roomOrLocation?: string;
+  capacityLimit?: number;
+  rulesConfig?: string;
+  createdBy?: string;
+  createdAt?: string;
+  modifiedBy?: string;
+  modifiedAt?: string;
+}
+
+export interface AddSubEventRequest {
+  title: string;
+  description: string;
+  startTime: string;
+  endTime: string;
+  image?: File | null;
+  roomOrLocation?: string;
+  capacityLimit?: number;
+  rulesConfig?: string;
+}
+
+export interface UpdateSubEventRequest {
+  title?: string;
+  description?: string;
+  startTime?: string;
+  endTime?: string;
+  image?: File | null;
+  roomOrLocation?: string;
+  capacityLimit?: number;
+  rulesConfig?: string;
+}

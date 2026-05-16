@@ -1,6 +1,13 @@
 import axios from 'axios';
 import API from '@/api/api.config';
-import { EventResponse, CreateEventDraftRequest, UpdateEventRequest } from '@/types/event.types';
+import { 
+  EventResponse, 
+  CreateEventDraftRequest, 
+  UpdateEventRequest,
+  SubEvent,
+  AddSubEventRequest,
+  UpdateSubEventRequest
+} from '@/types/event.types';
 
 export const eventService = {
   getOrgEvents: async (organizationId: string): Promise<EventResponse[]> => {
@@ -79,6 +86,104 @@ export const eventService = {
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         const backendMessage = error.response.data?.detail || 'Failed to update event.';
+        throw new Error(backendMessage);
+      }
+      throw new Error('Network error. Please check your connection.');
+    }
+  },
+
+  // --- NEW SUB-EVENT API METHODS ---
+
+  addSubEvent: async (eventId: string, data: AddSubEventRequest): Promise<SubEvent> => {
+    try {
+      const formData = new FormData();
+      
+      formData.append('title', data.title);
+      formData.append('description', data.description);
+      formData.append('startTime', data.startTime);
+      formData.append('endTime', data.endTime);
+      
+      if (data.image) formData.append('image', data.image);
+      if (data.roomOrLocation) formData.append('roomOrLocation', data.roomOrLocation);
+      if (data.capacityLimit !== undefined) formData.append('capacityLimit', data.capacityLimit.toString());
+      if (data.rulesConfig) formData.append('rulesConfig', data.rulesConfig);
+
+      const response = await API.post<SubEvent>(`/api/event/add-sub-event/${eventId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        const backendMessage = error.response.data?.detail || 'Failed to add sub-event.';
+        throw new Error(backendMessage);
+      }
+      throw new Error('Network error. Please check your connection.');
+    }
+  },
+
+  updateSubEvent: async (eventId: string, subEventId: string, data: UpdateSubEventRequest): Promise<SubEvent> => {
+    try {
+      const formData = new FormData();
+
+      if (data.title) formData.append('title', data.title);
+      if (data.description) formData.append('description', data.description);
+      if (data.startTime) formData.append('startTime', data.startTime);
+      if (data.endTime) formData.append('endTime', data.endTime);
+      if (data.image) formData.append('image', data.image);
+      if (data.roomOrLocation) formData.append('roomOrLocation', data.roomOrLocation);
+      if (data.capacityLimit !== undefined) formData.append('capacityLimit', data.capacityLimit.toString());
+      if (data.rulesConfig) formData.append('rulesConfig', data.rulesConfig);
+
+      const response = await API.patch<SubEvent>(`/api/event/update-sub-event/${eventId}/${subEventId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        const backendMessage = error.response.data?.detail || 'Failed to update sub-event.';
+        throw new Error(backendMessage);
+      }
+      throw new Error('Network error. Please check your connection.');
+    }
+  },
+
+  getAllSubEvents: async (eventId: string): Promise<SubEvent[]> => {
+    try {
+      const response = await API.get<SubEvent[]>(`/api/event/get-sub-events/${eventId}`);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        const backendMessage = error.response.data?.detail || 'Failed to fetch sub-events.';
+        throw new Error(backendMessage);
+      }
+      throw new Error('Network error. Please check your connection.');
+    }
+  },
+
+  getSubEventById: async (subEventId: string): Promise<SubEvent> => {
+    try {
+      const response = await API.get<SubEvent>(`/api/event/get-sub-event-by-id/${subEventId}`);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        const backendMessage = error.response.data?.detail || 'Failed to fetch sub-event details.';
+        throw new Error(backendMessage);
+      }
+      throw new Error('Network error. Please check your connection.');
+    }
+  },
+
+  deleteSubEvent: async (eventId: string, subEventId: string): Promise<string> => {
+    try {
+      const response = await API.delete<string>(`/api/event/delete-sub-event/${eventId}/${subEventId}`);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        const backendMessage = error.response.data?.detail || 'Failed to delete sub-event.';
         throw new Error(backendMessage);
       }
       throw new Error('Network error. Please check your connection.');
