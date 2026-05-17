@@ -14,8 +14,8 @@ import Template3 from "@/components/templates/Template3";
 
 export const metadata: Metadata = {
   title:
-    "Next.js E-commerce Dashboard | TailAdmin - Next.js Dashboard Template",
-  description: "This is Next.js Home for TailAdmin Dashboard Template",
+    "Eventsphere Dashboard",
+  description: "This is the home page for the Eventsphere Dashboard",
 };
 
 export default function Ecommerce() {
@@ -52,7 +52,7 @@ export default function Ecommerce() {
           Best for tech conferences, concerts, and high-energy events.
         </p>
       </div>
-      
+
       <div className="col-span-12 rounded-3xl overflow-hidden border-2 border-gray-200 dark:border-gray-800 shadow-lg">
         <Template1 />
       </div>
