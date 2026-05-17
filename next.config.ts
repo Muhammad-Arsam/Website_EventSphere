@@ -18,6 +18,17 @@ const nextConfig: NextConfig = {
         },
       },
     },
+
+    images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'gcbmlhnuntiruxjqvpbh.storage.supabase.co',
+        port: '',
+        pathname: '/**',
+      },
+    ],
+  },
   
 };
 

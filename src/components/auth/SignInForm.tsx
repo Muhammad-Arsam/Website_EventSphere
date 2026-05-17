@@ -8,7 +8,7 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { authService } from "@/api/authService";
 import { organizationService } from "@/api/organizationService"; 
-import { setToken, setRefreshToken } from "@/utils/token"; 
+import { setToken, setRefreshToken, setRole } from "@/utils/token"; 
 import { useRouter } from "next/navigation";
 import Alert from "@/components/ui/alert/Alert";
 
@@ -76,6 +76,7 @@ export default function SignInForm() {
       
       setToken(response.token);
       setRefreshToken(response.refreshToken); 
+      setRole(response.role);
 
       let targetPath = "/dashboard";
       let successMessage = "Welcome back! Redirecting to dashboard...";

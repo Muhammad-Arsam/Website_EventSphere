@@ -4,6 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
+import { getRole } from "@/utils/token";
+import { organizationService } from "@/api/organizationService";
 import {
   BoxCubeIcon,
   CalenderIcon,
@@ -23,7 +25,10 @@ type NavItem = {
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
 
-const navItems: NavItem[] = [
+// =======================
+// ORGANIZER MENUS
+// =======================
+const organizerNavItems: NavItem[] = [
   {
     icon: <GridIcon />,
     name: "Dashboard",
@@ -41,7 +46,7 @@ const navItems: NavItem[] = [
   },
 ];
 
-const othersItems: NavItem[] = [
+const organizerOthersItems: NavItem[] = [
   {
     icon: <TableIcon />,
     name: "Subscriptions",
@@ -54,6 +59,30 @@ const othersItems: NavItem[] = [
       { name: "Email Settings", path: "/settings/email" },
     ],
   },
+  {
+    icon: <UserCircleIcon />,
+    name: "My Profile",
+    path: "/profile",
+  },
+];
+
+// =======================
+// ATTENDEE MENUS
+// =======================
+const attendeeNavItems: NavItem[] = [
+  {
+    icon: <CalenderIcon />,
+    name: "Browse Events",
+    path: "/attendee/events",
+  },
+  {
+    icon: <ListIcon />,
+    name: "My Tickets",
+    path: "/attendee/tickets",
+  },
+];
+
+const attendeeOthersItems: NavItem[] = [
   {
     icon: <UserCircleIcon />,
     name: "My Profile",
@@ -77,7 +106,33 @@ const AppSidebar: React.FC = () => {
   const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>({});
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // ✅ FIXED ACTIVE CHECK (VERY IMPORTANT)
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null); // ✅ Aligned with Organization type
+
+  useEffect(() => {
+    const role = getRole() || "ATTENDEE";
+    setUserRole(role);
+
+    // ✅ Fetch organization data using your service if the user is an Organizer
+    if (role === "ORGANIZER") {
+      const fetchOrganizationData = async () => {
+        try {
+          const orgData = await organizationService.getMyOrganization();
+          if (orgData?.imageUrl) {
+            setImageUrl(orgData.imageUrl);
+          }
+        } catch (error) {
+          console.error("Failed to fetch organization details:", error);
+        }
+      };
+
+      fetchOrganizationData();
+    }
+  }, []);
+
+  const currentNavItems = userRole === "ORGANIZER" ? organizerNavItems : attendeeNavItems;
+  const currentOthersItems = userRole === "ORGANIZER" ? organizerOthersItems : attendeeOthersItems;
+
   const isActive = useCallback(
     (path: string) => pathname.startsWith(path),
     [pathname]
@@ -89,15 +144,18 @@ const AppSidebar: React.FC = () => {
   useEffect(() => {
     let submenuMatched = false;
 
-    ["main", "others"].forEach((menuType) => {
-      const items = menuType === "main" ? navItems : othersItems;
+    const menuGroups = [
+      { type: "main", items: currentNavItems },
+      { type: "others", items: currentOthersItems },
+    ];
 
+    menuGroups.forEach(({ type, items }) => {
       items.forEach((nav, index) => {
         if (nav.subItems) {
           nav.subItems.forEach((subItem) => {
             if (isActive(subItem.path)) {
               setOpenSubmenu({
-                type: menuType as "main" | "others",
+                type: type as "main" | "others",
                 index,
               });
               submenuMatched = true;
@@ -108,7 +166,7 @@ const AppSidebar: React.FC = () => {
     });
 
     if (!submenuMatched) setOpenSubmenu(null);
-  }, [pathname, isActive]);
+  }, [pathname, isActive, currentNavItems, currentOthersItems]);
 
   // =======================
   // HEIGHT CALCULATION
@@ -148,11 +206,10 @@ const AppSidebar: React.FC = () => {
           {nav.subItems ? (
             <button
               onClick={() => handleSubmenuToggle(index, type)}
-              className={`menu-item group ${
-                openSubmenu?.type === type && openSubmenu?.index === index
-                  ? "menu-item-active"
-                  : "menu-item-inactive"
-              } ${!isExpanded && !isHovered ? "lg:justify-center" : ""}`}
+              className={`menu-item group ${openSubmenu?.type === type && openSubmenu?.index === index
+                ? "menu-item-active"
+                : "menu-item-inactive"
+                } ${!isExpanded && !isHovered ? "lg:justify-center" : ""}`}
             >
               <span className="menu-item-icon-size">{nav.icon}</span>
 
@@ -162,12 +219,11 @@ const AppSidebar: React.FC = () => {
 
               {(isExpanded || isHovered || isMobileOpen) && (
                 <ChevronDownIcon
-                  className={`ml-auto transition-transform ${
-                    openSubmenu?.type === type &&
+                  className={`ml-auto transition-transform ${openSubmenu?.type === type &&
                     openSubmenu?.index === index
-                      ? "rotate-180 text-brand-500"
-                      : ""
-                  }`}
+                    ? "rotate-180 text-brand-500"
+                    : ""
+                    }`}
                 />
               )}
             </button>
@@ -175,11 +231,10 @@ const AppSidebar: React.FC = () => {
             nav.path && (
               <Link
                 href={nav.path}
-                className={`menu-item ${
-                  isActive(nav.path)
-                    ? "menu-item-active"
-                    : "menu-item-inactive"
-                }`}
+                className={`menu-item ${isActive(nav.path)
+                  ? "menu-item-active"
+                  : "menu-item-inactive"
+                  }`}
               >
                 <span className="menu-item-icon-size">{nav.icon}</span>
 
@@ -200,7 +255,7 @@ const AppSidebar: React.FC = () => {
               style={{
                 height:
                   openSubmenu?.type === type &&
-                  openSubmenu?.index === index
+                    openSubmenu?.index === index
                     ? `${subMenuHeight[`${type}-${index}`]}px`
                     : "0px",
               }}
@@ -210,11 +265,10 @@ const AppSidebar: React.FC = () => {
                   <li key={subItem.path}>
                     <Link
                       href={subItem.path}
-                      className={`menu-dropdown-item ${
-                        isActive(subItem.path)
-                          ? "menu-dropdown-item-active"
-                          : "menu-dropdown-item-inactive"
-                      }`}
+                      className={`menu-dropdown-item ${isActive(subItem.path)
+                        ? "menu-dropdown-item-active"
+                        : "menu-dropdown-item-inactive"
+                        }`}
                     >
                       {subItem.name}
                     </Link>
@@ -228,26 +282,57 @@ const AppSidebar: React.FC = () => {
     </ul>
   );
 
+  // ✅ Prevent rendering until role is loaded to stop hydration mismatch / UI flashing
+  if (!userRole) return null;
+
+  const isSidebarOpen = isExpanded || isHovered || isMobileOpen;
+
   // =======================
   // UI
   // =======================
   return (
     <aside
       className={`fixed top-0 left-0 h-screen px-5 border-r transition-all duration-300 bg-white dark:bg-gray-900 
-      ${isExpanded || isMobileOpen ? "w-[290px]" : "w-[90px]"}
+      ${isSidebarOpen ? "w-[290px]" : "w-[90px]"}
       ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* LOGO */}
       <div className="py-8 flex justify-center">
-        <Link href="/dashboard">
-          {isExpanded || isHovered || isMobileOpen ? (
-            <Image src="/images/logo/eventsphere-logo.png" alt="logo" width={150} height={40} />
+        <div className="flex items-center justify-center w-full">
+          {userRole === "ORGANIZER" && imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt="Organization Logo"
+              width={isSidebarOpen ? 180 : 40}
+              height={isSidebarOpen ? 80 : 40}
+              className={`object-contain transition-all duration-300 ${!isSidebarOpen ? "rounded-md" : ""}`}
+              style={{
+                maxHeight: isSidebarOpen ? '80px' : '40px',
+                width: "auto"
+              }}
+            />
           ) : (
-            <Image src="/images/logo/eventsphere-icon.png" alt="logo" width={32} height={32} />
+            isSidebarOpen ? (
+              <Image
+                src="/images/logo/eventsphere-logo.png"
+                alt="logo"
+                width={150}
+                height={40}
+                className="object-contain"
+              />
+            ) : (
+              <Image
+                src="/images/logo/eventsphere-icon.png"
+                alt="logo"
+                width={40}
+                height={40}
+                className="object-contain"
+              />
+            )
           )}
-        </Link>
+        </div>
       </div>
 
       {/* MENU */}
@@ -256,14 +341,14 @@ const AppSidebar: React.FC = () => {
           <h2 className="text-xs text-gray-400 mb-4">
             {isExpanded || isHovered ? "Menu" : <HorizontaLDots />}
           </h2>
-          {renderMenuItems(navItems, "main")}
+          {renderMenuItems(currentNavItems, "main")}
         </div>
 
         <div>
           <h2 className="text-xs text-gray-400 mb-4">
             {isExpanded || isHovered ? "System & Settings" : <HorizontaLDots />}
           </h2>
-          {renderMenuItems(othersItems, "others")}
+          {renderMenuItems(currentOthersItems, "others")}
         </div>
       </nav>
     </aside>

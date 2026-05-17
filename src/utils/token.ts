@@ -1,6 +1,7 @@
 const TOKEN_KEY = 'token';
 const REFRESH_TOKEN_KEY = 'refreshToken';
-const ORG_ID_KEY = 'orgId'; 
+const ORG_ID_KEY = 'orgId';
+const ROLE_KEY = 'role';
 
 export const setToken = (token: string): void => {
   if (typeof window !== 'undefined') {
@@ -41,10 +42,24 @@ export const getOrgId = (): string | null => {
   return null;
 };
 
+export const setRole = (role: string): void => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(ROLE_KEY, role);
+  }
+};
+
+export const getRole = (): string | null => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem(ROLE_KEY);
+  }
+  return null;
+};
+
 export const removeToken = (): void => {
   if (typeof window !== 'undefined') {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(ORG_ID_KEY);
+    localStorage.removeItem(ROLE_KEY);
   }
 };
