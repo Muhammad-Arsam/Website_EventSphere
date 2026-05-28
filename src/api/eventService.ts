@@ -6,8 +6,11 @@ import {
   UpdateEventRequest,
   SubEvent,
   AddSubEventRequest,
-  UpdateSubEventRequest
+  UpdateSubEventRequest,
+  LandingPage,
+  ConfigureLandingPageRequest
 } from '@/types/event.types';
+import { ThemeConfigJson } from '@/types/template.types';
 
 export const eventService = {
   getOrgEvents: async (organizationId: string): Promise<EventResponse[]> => {
@@ -189,4 +192,80 @@ export const eventService = {
       throw new Error('Network error. Please check your connection.');
     }
   },
+
+  // --- PUBLISH / UNPUBLISH ---
+
+  publishEvent: async (eventId: string): Promise<string> => {
+    try {
+      const response = await API.post<string>(`/api/event/publish/${eventId}`);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        const backendMessage = error.response.data?.detail || 'Failed to publish event.';
+        throw new Error(backendMessage);
+      }
+      throw new Error('Network error. Please check your connection.');
+    }
+  },
+
+  unpublishEvent: async (eventId: string): Promise<string> => {
+    try {
+      const response = await API.post<string>(`/api/event/unpublish/${eventId}`);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        const backendMessage = error.response.data?.detail || 'Failed to unpublish event.';
+        throw new Error(backendMessage);
+      }
+      throw new Error('Network error. Please check your connection.');
+    }
+  },
+
+  // --- LANDING PAGE ---
+
+configureLandingPage: async (
+  eventId: string,
+  data: ConfigureLandingPageRequest
+): Promise<LandingPage> => {
+  try {
+    const payload = {
+      slug: data.slug,
+      themeConfigJson: JSON.stringify(data.themeConfigJson), // stringify here
+    };
+    const response = await API.patch<LandingPage>(
+      `/api/event/configure-landing-page/${eventId}`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      const backendMessage = error.response.data?.detail || 'Failed to configure landing page.';
+      throw new Error(backendMessage);
+    }
+    throw new Error('Network error. Please check your connection.');
+  }
+},
+
+  getLandingPageSettings: async (eventId: string): Promise<LandingPage> => {
+    try {
+      const response = await API.get<LandingPage>(
+        `/api/event/get-landing-page-settings/${eventId}`
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        const backendMessage = error.response.data?.detail || 'Failed to fetch landing page settings.';
+        throw new Error(backendMessage);
+      }
+      throw new Error('Network error. Please check your connection.');
+    }
+  },
+
+  parseLandingPageTheme: (landingPage: LandingPage): ThemeConfigJson | null => {
+  try {
+    return JSON.parse(landingPage.themeConfigJson) as ThemeConfigJson;
+  } catch {
+    return null;
+  }
+},
 };

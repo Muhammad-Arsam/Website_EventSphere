@@ -4,31 +4,51 @@ import React from 'react';
 import { EventTemplateData } from '@/types/template.types';
 
 interface Template3Props {
-  data?: EventTemplateData;
+  data: EventTemplateData;
 }
 
 // Dummy data tailored for a creative/structural event
-const dummyData: EventTemplateData = {
-  title: "Creative Canvas Design Fest '26",
-  description: "Immerse yourself in a three-day festival celebrating the intersection of digital art, UI/UX design, and structural architecture. \n\nConnect with industry pioneers, participate in hands-on design sprints, and discover the trends shaping the future of visual experiences. Whether you are a seasoned art director or a budding designer, there is a canvas here for you.",
-  date: "December 05-07, 2026",
-  time: "11:00 AM - 08:00 PM Daily",
-  location: "Karachi Arts Council, M.R. Kiyani Road, Karachi, Pakistan",
-  imageUrl: "https://images.unsplash.com/photo-1558442074-3c19857bc1dc?q=80&w=2070&auto=format&fit=crop",
-  organizerName: "EventSphere Creators",
-  startingPrice: 3500,
-  tags: ["Design", "Art", "Workshop"],
-  primaryColor: "#e11d48", // Rose / Vibrant Red
-  secondaryColor: "#8b5cf6", // Violet / Purple
-};
+// const dummyData: EventTemplateData = {
+//   title: "Creative Canvas Design Fest '26",
+//   description: "Immerse yourself in a three-day festival celebrating the intersection of digital art, UI/UX design, and structural architecture. \n\nConnect with industry pioneers, participate in hands-on design sprints, and discover the trends shaping the future of visual experiences. Whether you are a seasoned art director or a budding designer, there is a canvas here for you.",
+//   date: "December 05-07, 2026",
+//   time: "11:00 AM - 08:00 PM Daily",
+//   location: "Karachi Arts Council, M.R. Kiyani Road, Karachi, Pakistan",
+//   imageUrl: "https://images.unsplash.com/photo-1558442074-3c19857bc1dc?q=80&w=2070&auto=format&fit=crop",
+//   organizerName: "EventSphere Creators",
+//   startingPrice: 3500,
+//   tags: ["Design", "Art", "Workshop"],
+//   primaryColor: "#e11d48", // Rose / Vibrant Red
+//   secondaryColor: "#8b5cf6", // Violet / Purple
+// };
 
-export default function Template3({ data = dummyData }: Template3Props) {
+export default function Template3({ data }: Template3Props) {
+
+  const formatDate = (dt: string) =>
+    new Intl.DateTimeFormat('en-US', {
+      weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+    }).format(new Date(dt));
+
+  const formatTime = (dt: string) =>
+    new Intl.DateTimeFormat('en-US', {
+      hour: 'numeric', minute: '2-digit', hour12: true
+    }).format(new Date(dt));
+
+  const availableTickets = data.tickets.filter(t => !t.soldOut);
+  const startingPrice = availableTickets.length > 0
+    ? Math.min(...availableTickets.map(t => t.price))
+    : null;
+
+  const dateDisplay = formatDate(data.startDatetime);
+  const timeDisplay = `${formatTime(data.startDatetime)} - ${formatTime(data.endDatetime)}`;
+  const locationDisplay = `${data.venueName}, ${data.formattedAddress}`;
+
   return (
     <div className="min-h-screen bg-stone-100 font-sans text-stone-900 pb-24 sm:pb-12 selection:bg-rose-200">
-      
+
       {/* Container */}
       <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12">
-        
+
         {/* Header - Massive Typography */}
         <div className="mb-8 lg:mb-12">
           <div className="flex flex-wrap items-center gap-3 mb-6">
@@ -36,8 +56,8 @@ export default function Template3({ data = dummyData }: Template3Props) {
               Presented by <span style={{ color: data.primaryColor }}>{data.organizerName}</span>
             </span>
             {data.tags.map((tag, idx) => (
-              <span 
-                key={idx} 
+              <span
+                key={idx}
                 className="px-4 py-1.5 text-sm font-bold uppercase tracking-wider rounded-full text-white"
                 style={{ backgroundColor: idx % 2 === 0 ? data.primaryColor : data.secondaryColor }}
               >
@@ -45,7 +65,7 @@ export default function Template3({ data = dummyData }: Template3Props) {
               </span>
             ))}
           </div>
-          
+
           <h1 className="text-5xl sm:text-7xl lg:text-[5.5rem] font-black uppercase tracking-tighter leading-[0.9] text-stone-950">
             {data.title}
           </h1>
@@ -53,7 +73,7 @@ export default function Template3({ data = dummyData }: Template3Props) {
 
         {/* The Bento Grid */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6">
-          
+
           {/* Top Left: Main Image (Spans 8 cols) */}
           <div className="md:col-span-12 lg:col-span-8 h-[50vh] sm:h-[60vh] relative rounded-4xl sm:rounded-[3rem] overflow-hidden group">
             <img
@@ -68,25 +88,25 @@ export default function Template3({ data = dummyData }: Template3Props) {
           {/* Top Right: Ticket CTA Widget (Spans 4 cols) */}
           <div className="md:col-span-12 lg:col-span-4 bg-stone-950 text-white rounded-4xl sm:rounded-[3rem] p-8 sm:p-10 flex flex-col justify-between relative overflow-hidden">
             {/* Background Accent Graphic */}
-            <div 
+            <div
               className="absolute -top-24 -right-24 w-64 h-64 rounded-full blur-3xl opacity-30 pointer-events-none"
               style={{ backgroundColor: data.primaryColor }}
             ></div>
-            
+
             <div className="relative z-10">
               <h3 className="text-3xl font-bold mb-2">Join the Experience</h3>
               <p className="text-stone-400 font-medium mb-8">Secure your access before early bird ends.</p>
-              
+
               <div className="mb-2">
                 <span className="text-stone-400 font-semibold uppercase tracking-widest text-xs">Starting Price</span>
               </div>
               <div className="flex items-baseline gap-2 mb-10">
-                <span className="text-5xl sm:text-6xl font-black tracking-tighter">Rs.{data.startingPrice}</span>
+                <span className="text-5xl sm:text-6xl font-black tracking-tighter">Rs.{startingPrice ?? 'TBA'}</span>
               </div>
             </div>
 
             <div className="relative z-10 space-y-4">
-              <button 
+              <button
                 className="w-full text-white text-xl font-bold py-5 px-8 rounded-2xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xl flex items-center justify-center gap-2"
                 style={{ background: `linear-gradient(135deg, ${data.primaryColor}, ${data.secondaryColor})` }}
               >
@@ -116,13 +136,13 @@ export default function Template3({ data = dummyData }: Template3Props) {
 
           {/* Bottom Right: When & Where (Spans 4 cols) */}
           <div className="md:col-span-12 lg:col-span-4 flex flex-col gap-4 sm:gap-6">
-            
+
             {/* Date Box */}
-            <div 
+            <div
               className="group flex-1 rounded-4xl sm:rounded-[3rem] p-8 flex flex-col justify-center text-white relative overflow-hidden transition-all duration-500 hover:-translate-y-2 cursor-pointer"
-              style={{ 
+              style={{
                 backgroundColor: data.primaryColor,
-                boxShadow: `0 20px 40px -15px ${data.primaryColor}80` 
+                boxShadow: `0 20px 40px -15px ${data.primaryColor}80`
               }}
             >
               {/* Massive Calendar Graphic - Animates on Hover */}
@@ -134,17 +154,17 @@ export default function Template3({ data = dummyData }: Template3Props) {
 
               <div className="relative z-10">
                 <h3 className="text-sm font-bold uppercase tracking-widest mb-2 opacity-80">When</h3>
-                <p className="text-2xl font-black leading-tight mb-1">{data.date}</p>
-                <p className="text-lg font-medium opacity-90">{data.time}</p>
+                <p className="text-2xl font-black leading-tight mb-1">{dateDisplay}</p>
+                <p className="text-lg font-medium opacity-90">{timeDisplay}</p>
               </div>
             </div>
 
             {/* Location Box */}
-            <div 
+            <div
               className="group flex-1 rounded-4xl sm:rounded-[3rem] p-8 flex flex-col justify-center text-white relative overflow-hidden transition-all duration-500 hover:-translate-y-2 cursor-pointer"
-              style={{ 
-                backgroundColor: data.primaryColor,
-                boxShadow: `0 20px 40px -15px ${data.primaryColor}80`
+              style={{
+                backgroundColor: data.secondaryColor,
+                boxShadow: `0 20px 40px -15px ${data.secondaryColor}80`
               }}
             >
               {/* Massive Map Pin Graphic - Animates on Hover */}
@@ -157,10 +177,10 @@ export default function Template3({ data = dummyData }: Template3Props) {
               <div className="relative z-10">
                 <h3 className="text-sm font-bold uppercase tracking-widest mb-2 opacity-80">Where</h3>
                 <p className="text-xl font-bold leading-snug wrap-break-word mb-3">
-                  {data.location}
+                  {locationDisplay}
                 </p>
-                <a 
-                  href="#" 
+                <a
+                  href="#"
                   className="inline-flex items-center font-bold text-sm hover:underline opacity-90 hover:opacity-100 transition-opacity"
                 >
                   Open in Maps
@@ -179,9 +199,9 @@ export default function Template3({ data = dummyData }: Template3Props) {
       <div className="fixed bottom-0 left-0 w-full bg-white border-t border-stone-200 p-4 sm:hidden flex items-center justify-between z-50 shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
         <div>
           <p className="text-xs font-bold text-stone-500 uppercase tracking-widest mb-0.5">Tickets</p>
-          <p className="text-xl font-black text-stone-900">Rs.{data.startingPrice}</p>
+          <p className="text-xl font-black text-stone-900">Rs.{startingPrice ?? 'TBA'}</p>
         </div>
-        <button 
+        <button
           className="text-white font-bold py-3.5 px-8 rounded-xl shadow-lg active:scale-95 transition-transform"
           style={{ background: `linear-gradient(135deg, ${data.primaryColor}, ${data.secondaryColor})` }}
         >

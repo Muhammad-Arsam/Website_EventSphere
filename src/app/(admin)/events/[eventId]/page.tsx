@@ -13,6 +13,8 @@ import SubEventModal from '@/components/sub-events/SubEventModal';
 import TicketTierModal from '@/components/ticket/TicketTierModal';
 import TicketTierList from '@/components/ticket/TicketTiersList';
 
+import PublishingTab from '@/components/events/PublishingTab';
+
 import {
     CalendarDays,
     MapPin,
@@ -28,11 +30,12 @@ import {
     Info,
     ListTodo,
     Ticket,
-    Plus
+    Plus,
+    Rocket
 } from 'lucide-react';
 import Button from '@/components/ui/button/Button';
 
-type TabType = 'overview' | 'agenda' | 'tickets';
+type TabType = 'overview' | 'agenda' | 'tickets' | 'publishing';
 
 export default function EventDetailsPage() {
     const params = useParams();
@@ -132,6 +135,10 @@ export default function EventDetailsPage() {
         }).format(new Date(dateString));
     };
 
+    const handleStatusChange = (newStatus: string) => {
+        setEvent((prev) => prev ? { ...prev, status: newStatus } : prev);
+    };
+
     if (isLoading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center text-gray-500">
@@ -158,6 +165,7 @@ export default function EventDetailsPage() {
         { id: 'overview', label: 'Overview', icon: Info },
         { id: 'agenda', label: 'Agenda', icon: ListTodo },
         { id: 'tickets', label: 'Tickets', icon: Ticket },
+        { id: 'publishing', label: 'Publishing', icon: Rocket },
     ];
 
     return (
@@ -504,6 +512,15 @@ export default function EventDetailsPage() {
                     />
 
                 </div>
+            )}
+
+            {/* TAB CONTENT: PUBLISHING */}
+            {activeTab === 'publishing' && (
+                <PublishingTab
+                    eventId={eventId}
+                    eventStatus={event.status}
+                    onStatusChange={handleStatusChange}
+                />
             )}
 
         </div>

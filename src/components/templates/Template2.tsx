@@ -4,52 +4,72 @@ import React from 'react';
 import { EventTemplateData } from '@/types/template.types';
 
 interface Template2Props {
-  data?: EventTemplateData;
+  data: EventTemplateData;
 }
 
 // Dummy data tailored for a premium/elegant event
-const dummyData: EventTemplateData = {
-  title: "Global Leadership & Innovation Summit 2026",
-  description: "Join world-renowned thought leaders, executives, and visionaries for an exclusive two-day summit. Explore the strategies that will define the next decade of corporate innovation, sustainable growth, and global collaboration.\n\nExperience keynote speeches, intimate fireside chats, and unparalleled networking opportunities in a premium setting.",
-  date: "November 20, 2026",
-  time: "10:00 AM - 04:00 PM",
-  location: "The Grand Pearl Hotel & Conventions, Beach Avenue, Clifton, Karachi, Pakistan",
-  imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2070&auto=format&fit=crop",
-  organizerName: "EventSphere Premium",
-  startingPrice: 15000,
-  tags: ["Corporate", "Leadership", "Networking"],
-  primaryColor: "#0f172a", // Deep Slate / Navy
-  secondaryColor: "#d97706", // Elegant Amber/Gold
-};
+// const dummyData: EventTemplateData = {
+//   title: "Global Leadership & Innovation Summit 2026",
+//   description: "Join world-renowned thought leaders, executives, and visionaries for an exclusive two-day summit. Explore the strategies that will define the next decade of corporate innovation, sustainable growth, and global collaboration.\n\nExperience keynote speeches, intimate fireside chats, and unparalleled networking opportunities in a premium setting.",
+//   date: "November 20, 2026",
+//   time: "10:00 AM - 04:00 PM",
+//   location: "The Grand Pearl Hotel & Conventions, Beach Avenue, Clifton, Karachi, Pakistan",
+//   imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2070&auto=format&fit=crop",
+//   organizerName: "EventSphere Premium",
+//   startingPrice: 15000,
+//   tags: ["Corporate", "Leadership", "Networking"],
+//   primaryColor: "#0f172a", // Deep Slate / Navy
+//   secondaryColor: "#d97706", // Elegant Amber/Gold
+// };
 
-export default function Template2({ data = dummyData }: Template2Props) {
+export default function Template2({ data }: Template2Props) {
+
+  const formatDate = (dt: string) =>
+    new Intl.DateTimeFormat('en-US', {
+      weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+    }).format(new Date(dt));
+
+  const formatTime = (dt: string) =>
+    new Intl.DateTimeFormat('en-US', {
+      hour: 'numeric', minute: '2-digit', hour12: true
+    }).format(new Date(dt));
+
+  const availableTickets = data.tickets.filter(t => !t.soldOut);
+  const startingPrice = availableTickets.length > 0
+    ? Math.min(...availableTickets.map(t => t.price))
+    : null;
+
+  const dateDisplay = formatDate(data.startDatetime);
+  const timeDisplay = `${formatTime(data.startDatetime)} - ${formatTime(data.endDatetime)}`;
+  const locationDisplay = `${data.venueName}, ${data.formattedAddress}`;
+
   return (
     <div className="min-h-screen bg-[#FAFAFA] font-sans text-slate-800 pb-24 sm:pb-0 selection:bg-amber-100">
-      
+
       {/* Top Header Section - Clean & Centered */}
       <div className="max-w-5xl mx-auto px-6 sm:px-10 lg:px-12 pt-16 sm:pt-24 pb-12 text-center">
         <div className="flex flex-wrap justify-center gap-3 mb-8">
           {data.tags.map((tag, idx) => (
-            <span 
-              key={idx} 
+            <span
+              key={idx}
               className="px-4 py-1.5 text-xs font-bold uppercase tracking-widest bg-white border rounded-full shadow-sm"
-              style={{ 
-                color: data.secondaryColor, 
-                borderColor: `${data.secondaryColor}40` 
+              style={{
+                color: data.secondaryColor,
+                borderColor: `${data.secondaryColor}40`
               }}
             >
               {tag}
             </span>
           ))}
         </div>
-        
-        <h1 
+
+        <h1
           className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6 leading-[1.15]"
           style={{ color: data.primaryColor }}
         >
           {data.title}
         </h1>
-        
+
         <p className="text-lg text-slate-500 font-medium flex items-center justify-center gap-2">
           Hosted by <span className="font-bold border-b-2" style={{ borderColor: data.secondaryColor, color: data.primaryColor }}>{data.organizerName}</span>
         </p>
@@ -71,16 +91,16 @@ export default function Template2({ data = dummyData }: Template2Props) {
       {/* Main Content Area */}
       <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-12 pb-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
-          
+
           {/* Left Column: Details & Description (Spans 8 cols) */}
           <div className="lg:col-span-8 space-y-16">
-            
+
             {/* Elegant Info Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-              
+
               {/* Date & Time */}
               <div className="flex gap-5 relative group">
-                <div 
+                <div
                   className="absolute left-0 top-0 bottom-0 w-1 rounded-full transition-all duration-300 group-hover:w-1.5"
                   style={{ backgroundColor: data.secondaryColor }}
                 ></div>
@@ -91,14 +111,14 @@ export default function Template2({ data = dummyData }: Template2Props) {
                     </svg>
                     When
                   </h3>
-                  <p className="text-xl font-bold" style={{ color: data.primaryColor }}>{data.date}</p>
-                  <p className="text-slate-500 mt-1 font-medium">{data.time}</p>
+                  <p className="text-xl font-bold" style={{ color: data.primaryColor }}>{dateDisplay}</p>
+                  <p className="text-slate-500 mt-1 font-medium">{timeDisplay}</p>
                 </div>
               </div>
 
               {/* Location */}
               <div className="flex gap-5 relative group">
-                <div 
+                <div
                   className="absolute left-0 top-0 bottom-0 w-1 rounded-full transition-all duration-300 group-hover:w-1.5"
                   style={{ backgroundColor: data.secondaryColor }}
                 ></div>
@@ -111,10 +131,10 @@ export default function Template2({ data = dummyData }: Template2Props) {
                     Where
                   </h3>
                   <p className="text-xl font-bold wrap-break-word" style={{ color: data.primaryColor }}>
-                    {data.location}
+                    {locationDisplay}
                   </p>
-                  <a 
-                    href="#" 
+                  <a
+                    href="#"
                     className="inline-block mt-2 text-sm font-semibold hover:underline"
                     style={{ color: data.secondaryColor }}
                   >
@@ -144,24 +164,24 @@ export default function Template2({ data = dummyData }: Template2Props) {
             <div className="bg-white border border-slate-100 rounded-4xl p-8 sm:p-10 sticky top-8 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.05)] hidden sm:block">
               <h3 className="text-2xl font-extrabold mb-2" style={{ color: data.primaryColor }}>Reserve Your Seat</h3>
               <p className="text-slate-500 text-sm mb-8 font-medium">Limited availability for this exclusive event.</p>
-              
+
               <div className="mb-8 pb-8 border-b border-slate-100">
                 <span className="block text-slate-400 text-sm font-bold uppercase tracking-widest mb-2">Registration</span>
                 <span className="text-5xl font-extrabold tracking-tight" style={{ color: data.primaryColor }}>
-                  Rs. {data.startingPrice}
+                  Rs. {startingPrice ?? 'TBA'}
                 </span>
                 <span className="text-slate-400 font-medium ml-2">/ person</span>
               </div>
 
-              <button 
+              <button
                 className="w-full text-white text-lg font-bold py-4 px-8 rounded-2xl transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl"
-                style={{ 
+                style={{
                   backgroundColor: data.primaryColor,
                 }}
               >
                 Register Now
               </button>
-              
+
               <div className="flex flex-col items-center gap-3 mt-6">
                 <div className="flex items-center gap-2 text-slate-500 text-sm font-semibold">
                   <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -181,9 +201,9 @@ export default function Template2({ data = dummyData }: Template2Props) {
       <div className="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-xl border-t border-slate-200 p-5 sm:hidden flex items-center justify-between z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
         <div>
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Entry Pass</p>
-          <p className="text-2xl font-extrabold" style={{ color: data.primaryColor }}>Rs. {data.startingPrice}</p>
+          <p className="text-2xl font-extrabold" style={{ color: data.primaryColor }}>Rs. {startingPrice ?? 'TBA'}</p>
         </div>
-        <button 
+        <button
           className="text-white font-bold py-3.5 px-8 rounded-xl shadow-lg"
           style={{ backgroundColor: data.primaryColor }}
         >

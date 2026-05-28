@@ -44,7 +44,7 @@ export default function Ecommerce() {
       </div> */}
 
       {/* --- TEMPLATE 1 SECTION --- */}
-      <div className="col-span-12 mt-4">
+      {/* <div className="col-span-12 mt-4">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
           Template 1: Modern Dark & Neon
         </h2>
@@ -55,10 +55,10 @@ export default function Ecommerce() {
 
       <div className="col-span-12 rounded-3xl overflow-hidden border-2 border-gray-200 dark:border-gray-800 shadow-lg">
         <Template1 />
-      </div>
+      </div> */}
 
       {/* --- TEMPLATE 2 SECTION --- */}
-      <div className="col-span-12 mt-16">
+      {/* <div className="col-span-12 mt-16">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
           Template 2: Clean & Elegant Light Theme
         </h2>
@@ -69,10 +69,10 @@ export default function Ecommerce() {
 
       <div className="col-span-12 rounded-3xl overflow-hidden border-2 border-gray-200 dark:border-gray-800 shadow-lg">
         <Template2 />
-      </div>
+      </div> */}
 
       {/* --- TEMPLATE 3 SECTION --- */}
-      <div className="col-span-12 mt-16">
+      {/* <div className="col-span-12 mt-16">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
           Template 3: Structural Bento Grid
         </h2>
@@ -83,7 +83,7 @@ export default function Ecommerce() {
 
       <div className="col-span-12 rounded-3xl overflow-hidden border-2 border-gray-200 dark:border-gray-800 shadow-lg">
         <Template3 />
-      </div>
+      </div> */}
 
     </div>
   );

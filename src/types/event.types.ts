@@ -1,3 +1,5 @@
+import { ThemeConfigJson } from '@/types/template.types';
+
 export interface EventResponse {
   id: string;
   organizationId?: string; 
@@ -92,4 +94,78 @@ export interface UpdateSubEventRequest {
   roomOrLocation?: string;
   capacityLimit?: number;
   rulesConfig?: string;
+}
+
+// --- LANDING PAGE TYPES ---
+
+export interface LandingPage {
+  id: string;
+  eventId: string;
+  slug: string;
+  themeConfigJson: string; // stored as stringified JSON in DB
+  createdBy?: string;
+  createdAt?: string;
+  modifiedBy?: string;
+  modifiedAt?: string;
+}
+
+export interface ConfigureLandingPageRequest {
+  slug: string;
+  themeConfigJson: ThemeConfigJson; // typed object on frontend, stringified before sending
+}
+
+// --- PUBLIC API TYPES ---
+
+export interface PublicEventCard {
+  title: string;
+  organization: string;
+  category: string;
+  slug: string;
+  image: string;
+  start: string;
+  venue: string;
+  city: string;
+  state: string;
+  country: string;
+  tags: string[];
+}
+
+export interface PublicEventDetails {
+  title: string;
+  description: string;
+  imageUrl: string;
+  startDatetime: string;
+  endDatetime: string;
+  venueName: string;
+  formattedAddress: string;
+  searchTags: string[];
+}
+
+export interface PublicLandingPageDesign {
+  customSlug: string;
+  themeConfigJson: string; // stringified ThemeConfigJson
+}
+
+export interface PublicTicket {
+  id: string;
+  tierName: string;
+  price: number;
+  soldOut: boolean;
+}
+
+export interface PublicAgendaItem {
+  id: string;
+  title: string;
+  description: string;
+  startTime: string;
+  endTime: string;
+  roomOrLocation: string;
+  imageUrl: string;
+}
+
+export interface PublicEventPageResponse {
+  eventDetails: PublicEventDetails;
+  landingPageDesign: PublicLandingPageDesign;
+  tickets: PublicTicket[];
+  agenda: PublicAgendaItem[];
 }
