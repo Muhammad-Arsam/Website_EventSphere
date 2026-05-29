@@ -1,373 +1,500 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EventTemplateData, TabName } from '@/types/template.types';
 import {
   Calendar, MapPin, Clock, Ticket, Users, Mail, Phone,
-  Globe, MessageCircle, Share2, ChevronRight, ExternalLink, ArrowRight,
+  Globe, MessageCircle, Share2, ExternalLink, ArrowRight, Sparkles,
 } from 'lucide-react';
-import {
-    FaFacebook,
-    FaInstagram,
-    FaXTwitter,
-    FaLinkedin,
-} from "react-icons/fa6";
-interface Template3Props {
-  data: EventTemplateData;
-}
+import { FaFacebook, FaInstagram, FaLinkedin, FaXTwitter } from 'react-icons/fa6';
+
+interface Template3Props { data: EventTemplateData; }
 
 const FONT_MAP: Record<string, string> = {
-  'dm-sans': "'DM Sans', sans-serif",
-  'playfair': "'Playfair Display', serif",
-  'space-grotesk': "'Space Grotesk', sans-serif",
+  'dm-sans':         "'DM Sans', sans-serif",
+  'playfair':        "'Playfair Display', serif",
+  'space-grotesk':   "'Space Grotesk', sans-serif",
   'cabinet-grotesk': "'Cabinet Grotesk', sans-serif",
-  'syne': "'Syne', sans-serif",
+  'syne':            "'Syne', sans-serif",
 };
-
 const FONT_LINKS: Record<string, string> = {
-  'dm-sans': 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap',
-  'playfair': 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&display=swap',
-  'space-grotesk': 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap',
+  'dm-sans':         'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap',
+  'playfair':        'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&display=swap',
+  'space-grotesk':   'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap',
   'cabinet-grotesk': 'https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800&display=swap',
-  'syne': 'https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap',
+  'syne':            'https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&display=swap',
 };
-
+const TAB_ICONS: Record<TabName, React.ReactNode> = {
+  overview:  <Sparkles className="w-4 h-4" />,
+  schedule:  <Clock className="w-4 h-4" />,
+  tickets:   <Ticket className="w-4 h-4" />,
+  location:  <MapPin className="w-4 h-4" />,
+  contact:   <Users className="w-4 h-4" />,
+  social:    <Share2 className="w-4 h-4" />,
+};
 const TAB_LABELS: Record<TabName, string> = {
-  overview: 'Overview',
-  schedule: 'Schedule',
-  tickets: 'Tickets',
-  location: 'Location',
-  contact: 'Contact',
-  social: 'Social',
+  overview: 'Overview', schedule: 'Schedule', tickets: 'Tickets',
+  location: 'Location', contact: 'Contact',  social: 'Social',
 };
 
 export default function Template3({ data }: Template3Props) {
-  const enabledTabs = data.enabledTabs?.length ? data.enabledTabs : ['overview', 'schedule', 'tickets', 'location', 'contact', 'social'] as TabName[];
+  const enabledTabs = (data.enabledTabs?.length ? data.enabledTabs : ['overview','schedule','tickets','location','contact','social']) as TabName[];
   const [activeTab, setActiveTab] = useState<TabName>('overview');
+  const [tick, setTick]           = useState(0);
 
-  const fontFamily = FONT_MAP[data.fontStyle || 'syne'];
-  const fontLink = FONT_LINKS[data.fontStyle || 'syne'];
-  const bgColor = data.backgroundColor || '#f5f5f4';
+  useEffect(() => {
+    const id = setInterval(() => setTick(t => t + 1), 1000);
+    return () => clearInterval(id);
+  }, []);
 
-  const formatDate = (dt: string) => new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }).format(new Date(dt));
-  const formatTime = (dt: string) => new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date(dt));
+  const fontFamily = FONT_MAP[data.fontStyle || 'space-grotesk'];
+  const fontLink   = FONT_LINKS[data.fontStyle || 'space-grotesk'];
+  const primary    = data.primaryColor   || '#7c3aed';
+  const secondary  = data.secondaryColor || '#06b6d4';
+  const bg         = data.backgroundColor || '#0f0f1a';
 
-  const availableTickets = data.tickets.filter(t => !t.soldOut);
-  const startingPrice = availableTickets.length > 0 ? Math.min(...availableTickets.map(t => t.price)) : null;
-  const locationDisplay = `${data.venueName}, ${data.formattedAddress}`;
-  const mapQuery = encodeURIComponent(locationDisplay);
+  const fmt     = (dt: string) => new Intl.DateTimeFormat('en-US', { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' }).format(new Date(dt));
+  const fmtTime = (dt: string) => new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date(dt));
 
-  const socialEntries = Object.entries(data.socialLinks || {}).filter(([, v]) => v);
+  const avail       = data.tickets.filter(t => !t.soldOut);
+  const startPrice  = avail.length > 0 ? Math.min(...avail.map(t => t.price)) : null;
+  const locationStr = `${data.venueName}, ${data.formattedAddress}`;
+  const mapQ        = encodeURIComponent(locationStr);
+  const socialItems = Object.entries(data.socialLinks || {}).filter(([, v]) => v);
+
+  const eventMs  = new Date(data.startDatetime).getTime() - Date.now();
+  const diffDays = Math.max(0, Math.floor(eventMs / 86400000));
+  const diffHrs  = Math.max(0, Math.floor((eventMs % 86400000) / 3600000));
+  const diffMin  = Math.max(0, Math.floor((eventMs % 3600000) / 60000));
+  const diffSec  = Math.max(0, Math.floor((eventMs % 60000) / 1000));
+  const upcoming = eventMs > 0;
 
   const SOCIAL_ICONS: Record<string, React.ReactNode> = {
-    facebook: <FaFacebook className="w-5 h-5" />,
+    facebook:  <FaFacebook className="w-5 h-5" />,
     instagram: <FaInstagram className="w-5 h-5" />,
-    twitter: <FaXTwitter className="w-5 h-5" />,
-    linkedin: <FaLinkedin className="w-5 h-5" />,
-    whatsapp: <MessageCircle className="w-5 h-5" />,
-    website: <Globe className="w-5 h-5" />,
+    twitter:   <FaXTwitter className="w-5 h-5" />,
+    linkedin:  <FaLinkedin className="w-5 h-5" />,
+    whatsapp:  <MessageCircle className="w-5 h-5" />,
+    website:   <Globe className="w-5 h-5" />,
   };
-
   const SOCIAL_LABELS: Record<string, string> = {
     facebook: 'Facebook', instagram: 'Instagram', twitter: 'Twitter / X',
     linkedin: 'LinkedIn', whatsapp: 'WhatsApp', website: 'Website',
   };
 
-  const eventDate = new Date(data.startDatetime);
-  const now = new Date();
-  const diffMs = eventDate.getTime() - now.getTime();
-  const diffDays = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
-  const diffHours = Math.max(0, Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
-  const diffMins = Math.max(0, Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60)));
-  const isUpcoming = diffMs > 0;
+  /* ── Shared glass style helper ── */
+  const glass = (opacity = 0.07, border = 0.12) => ({
+    background: `rgba(255,255,255,${opacity})`,
+    border: `1px solid rgba(255,255,255,${border})`,
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
+  } as React.CSSProperties);
 
   return (
-    <div style={{ fontFamily, backgroundColor: bgColor }} className="min-h-screen text-stone-900 pb-24 sm:pb-12 selection:bg-rose-200">
+    <div
+      style={{ fontFamily, background: bg, color: '#e2e8f0' }}
+      className="min-h-screen pb-28 sm:pb-16 selection:bg-violet-500/30"
+    >
       {fontLink && <link rel="stylesheet" href={fontLink} />}
 
-      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12">
+      {/* ── Ambient orbs ── */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full opacity-20 blur-[120px]"
+          style={{ background: primary }} />
+        <div className="absolute top-1/2 -right-40 w-[500px] h-[500px] rounded-full opacity-15 blur-[100px]"
+          style={{ background: secondary }} />
+        <div className="absolute -bottom-60 left-1/3 w-[700px] h-[400px] rounded-full opacity-10 blur-[120px]"
+          style={{ background: primary }} />
+      </div>
 
-        {/* Header */}
-        <div className="mb-8 lg:mb-12">
-          <div className="flex flex-wrap items-center gap-3 mb-6">
-            <span className="px-4 py-1.5 text-sm font-bold bg-white border-2 border-stone-200 rounded-full shadow-sm text-stone-600">
-              Presented by <span style={{ color: data.primaryColor }}>{data.organizerName}</span>
-            </span>
-            {data.tags.map((tag, idx) => (
-              <span key={idx} className="px-4 py-1.5 text-sm font-bold uppercase tracking-wider rounded-full text-white"
-                style={{ backgroundColor: idx % 2 === 0 ? data.primaryColor : data.secondaryColor }}>
+      {/* ── HERO ── */}
+      <div className="relative min-h-screen flex flex-col z-10">
+
+        {/* Full-screen image with glass overlay */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src={data.imageUrl}
+            alt={data.title}
+            className="w-full h-full object-cover object-center"
+          />
+          {/* Multi-layer dark glass */}
+          <div className="absolute inset-0"
+            style={{ background: `linear-gradient(135deg, ${bg}e8 0%, ${bg}a0 40%, ${bg}60 70%, ${bg}d0 100%)` }} />
+          <div className="absolute inset-0"
+            style={{ background: `radial-gradient(ellipse at 60% 40%, ${primary}22 0%, transparent 60%)` }} />
+        </div>
+
+        {/* Top bar */}
+        <div className="relative z-10 flex items-center justify-between px-6 sm:px-12 pt-16 pb-4">
+          <div className="flex items-center gap-2.5 px-4 py-2 rounded-full" style={glass(0.05, 0.1)}>
+            <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: secondary }} />
+            <span className="text-xs font-medium text-white/60 tracking-wide">{data.organizerName}</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {data.tags.slice(0, 3).map((tag, i) => (
+              <span key={i}
+                className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                style={{
+                  background: i === 0 ? `${primary}40` : `rgba(255,255,255,0.07)`,
+                  border: `1px solid ${i === 0 ? `${primary}60` : 'rgba(255,255,255,0.12)'}`,
+                  color: i === 0 ? '#c4b5fd' : 'rgba(255,255,255,0.6)',
+                }}>
                 {tag}
               </span>
             ))}
           </div>
-          <h1 className="text-5xl sm:text-7xl lg:text-[5.5rem] font-black uppercase tracking-tighter leading-[0.9] text-stone-950">
-            {data.title}
-          </h1>
         </div>
 
-        {/* Bento Top Row */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 mb-4 sm:mb-6">
+        {/* Hero text */}
+        <div className="relative z-10 flex-1 flex flex-col justify-end px-6 sm:px-12 pb-12">
+          <div className="max-w-4xl">
+            <h1 className="text-[clamp(2.5rem,7vw,6.5rem)] font-black leading-[0.92] tracking-tighter text-white mb-6"
+              style={{ textShadow: `0 0 80px ${primary}60` }}>
+              {data.title}
+            </h1>
 
-          {/* Image */}
-          <div className="md:col-span-12 lg:col-span-8 h-[50vh] sm:h-[60vh] relative rounded-4xl sm:rounded-[3rem] overflow-hidden group">
-            <img src={data.imageUrl} alt={data.title} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
-            <div className="absolute inset-0 ring-2 ring-inset ring-black/10 rounded-4xl sm:rounded-[3rem] pointer-events-none" />
-          </div>
+            <div className="flex flex-wrap items-center gap-6 mb-10">
+              <div className="flex items-center gap-2.5 text-white/70 text-sm font-medium">
+                <Calendar className="w-4 h-4" style={{ color: secondary }} />
+                {fmt(data.startDatetime)}
+              </div>
+              <div className="w-px h-4 bg-white/20" />
+              <div className="flex items-center gap-2.5 text-white/70 text-sm font-medium">
+                <Clock className="w-4 h-4" style={{ color: secondary }} />
+                {fmtTime(data.startDatetime)}
+              </div>
+              <div className="w-px h-4 bg-white/20" />
+              <div className="flex items-center gap-2.5 text-white/70 text-sm font-medium">
+                <MapPin className="w-4 h-4" style={{ color: secondary }} />
+                {data.venueName}
+              </div>
+            </div>
 
-          {/* Ticket CTA */}
-          <div className="md:col-span-12 lg:col-span-4 bg-stone-950 text-white rounded-4xl sm:rounded-[3rem] p-8 sm:p-10 flex flex-col justify-between relative overflow-hidden">
-            <div className="absolute -top-24 -right-24 w-64 h-64 rounded-full blur-3xl opacity-30 pointer-events-none" style={{ backgroundColor: data.primaryColor }} />
-            <div className="relative z-10">
-              <h3 className="text-3xl font-bold mb-2">Join the Experience</h3>
-              <p className="text-stone-400 font-medium mb-6">Secure your access before early bird ends.</p>
-              {isUpcoming && (
-                <div className="flex gap-5 mb-8">
-                  {[{ v: diffDays, l: 'Days' }, { v: diffHours, l: 'Hrs' }, { v: diffMins, l: 'Min' }].map(({ v, l }) => (
-                    <div key={l} className="text-center">
-                      <span className="block text-3xl font-black">{String(v).padStart(2, '0')}</span>
-                      <span className="text-xs text-stone-400 font-bold uppercase tracking-wider">{l}</span>
+            {/* Countdown + CTA row */}
+            <div className="flex flex-wrap items-stretch gap-4">
+              {upcoming && (
+                <div className="flex divide-x rounded-2xl overflow-hidden" style={glass(0.06, 0.12)}>
+                  {[{ v: diffDays, l: 'D' }, { v: diffHrs, l: 'H' }, { v: diffMin, l: 'M' }, { v: diffSec, l: 'S' }].map(({ v, l }) => (
+                    <div key={l} className="flex flex-col items-center justify-center px-5 py-4 gap-0.5"
+                      style={{ borderRight: '1px solid rgba(255,255,255,0.08)' }}>
+                      <span className="text-2xl sm:text-3xl font-black tabular-nums text-white">
+                        {String(v).padStart(2, '0')}
+                      </span>
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-white/40">{l}</span>
                     </div>
                   ))}
                 </div>
               )}
-              <span className="text-stone-400 font-semibold uppercase tracking-widest text-xs">Starting Price</span>
-              <div className="flex items-baseline gap-2 mt-1">
-                <span className="text-5xl sm:text-6xl font-black tracking-tighter">
-                  {startingPrice !== null ? `Rs.${startingPrice.toLocaleString()}` : 'TBA'}
-                </span>
-              </div>
+              <button className="flex items-center gap-3 px-7 py-4 rounded-2xl font-bold text-sm text-white transition-all hover:scale-[1.03] hover:shadow-2xl active:scale-[0.98]"
+                style={{
+                  background: `linear-gradient(135deg, ${primary}, ${secondary})`,
+                  boxShadow: `0 8px 32px ${primary}50`,
+                }}>
+                {startPrice !== null ? `Get Tickets · Rs.${startPrice.toLocaleString()}` : 'Get Tickets'}
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
-            <div className="relative z-10 space-y-4 mt-8">
+          </div>
+        </div>
+      </div>
+
+      {/* ── CONTENT SECTION ── */}
+      <div className="relative z-10 max-w-6xl mx-auto px-6 sm:px-12 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8">
+
+          {/* Content area */}
+          <div className="min-w-0 space-y-6">
+
+            {/* ── Floating pill tab bar (horizontal, scrollable) ── */}
+            <div className="flex gap-1.5 p-1.5 rounded-2xl overflow-x-auto no-scrollbar w-full" style={glass(0.05, 0.1)}>
+              {enabledTabs.map(tab => {
+                const isActive = activeTab === tab;
+                return (
+                  <button key={tab} onClick={() => setActiveTab(tab)}
+                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 shrink-0"
+                    style={isActive
+                      ? { background: `linear-gradient(135deg, ${primary}, ${secondary})`, color: '#fff', boxShadow: `0 4px 20px ${primary}50` }
+                      : { color: 'rgba(255,255,255,0.45)', background: 'transparent' }}>
+                    <span style={{ opacity: isActive ? 1 : 0.7 }}>{TAB_ICONS[tab]}</span>
+                    {TAB_LABELS[tab]}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Tab panels */}
+            <div className="rounded-3xl overflow-hidden" style={glass(0.05, 0.1)}>
+
+              {/* ── OVERVIEW ── */}
+              {activeTab === 'overview' && (
+                <div className="p-8 sm:p-10 space-y-8 animate-in fade-in duration-300">
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] mb-4" style={{ color: secondary }}>About</h3>
+                    <p className="text-base leading-relaxed text-white/75 whitespace-pre-wrap font-light">{data.description}</p>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {[
+                      { icon: <Calendar className="w-4 h-4" />, label: 'Date', value: fmt(data.startDatetime) },
+                      { icon: <Clock className="w-4 h-4" />, label: 'Time', value: `${fmtTime(data.startDatetime)} — ${fmtTime(data.endDatetime)}` },
+                      { icon: <MapPin className="w-4 h-4" />, label: 'Venue', value: data.venueName },
+                      { icon: <Users className="w-4 h-4" />, label: 'Hosted by', value: data.organizerName },
+                    ].map(({ icon, label, value }) => (
+                      <div key={label} className="flex items-center gap-4 p-4 rounded-2xl" style={glass(0.05, 0.08)}>
+                        <div className="p-2.5 rounded-xl shrink-0" style={{ background: `${primary}30`, color: secondary }}>
+                          {icon}
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-white/40 mb-0.5">{label}</p>
+                          <p className="text-sm font-semibold text-white/90 leading-snug">{value}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ── SCHEDULE ── */}
+              {activeTab === 'schedule' && (
+                <div className="p-8 sm:p-10 space-y-3 animate-in fade-in duration-300">
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] mb-6" style={{ color: secondary }}>Programme</h3>
+                  {data.agenda.length === 0
+                    ? <p className="text-white/40 text-sm italic">No schedule published yet.</p>
+                    : data.agenda.map((item, idx) => (
+                      <div key={item.id}
+                        className="flex gap-5 p-5 rounded-2xl transition-all hover:bg-white/5"
+                        style={{ borderLeft: `2px solid ${idx % 2 === 0 ? primary : secondary}50` }}>
+                        <div className="shrink-0 text-center">
+                          <span className="block text-xs font-black tabular-nums" style={{ color: secondary }}>
+                            {fmtTime(item.startTime)}
+                          </span>
+                          <div className="w-px h-5 mx-auto my-1 opacity-30" style={{ background: secondary }} />
+                          <span className="block text-[10px] text-white/35">{fmtTime(item.endTime)}</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-white text-sm leading-snug">{item.title}</h4>
+                          {item.roomOrLocation && (
+                            <p className="text-xs text-white/40 mt-0.5 flex items-center gap-1">
+                              <MapPin className="w-3 h-3" />{item.roomOrLocation}
+                            </p>
+                          )}
+                          {item.description && <p className="text-xs text-white/55 mt-2 leading-relaxed">{item.description}</p>}
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              )}
+
+              {/* ── TICKETS ── */}
+              {activeTab === 'tickets' && (
+                <div className="p-8 sm:p-10 space-y-3 animate-in fade-in duration-300">
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] mb-6" style={{ color: secondary }}>Access Tiers</h3>
+                  {data.tickets.length === 0
+                    ? <p className="text-white/40 text-sm italic">No tickets available yet.</p>
+                    : data.tickets.map((ticket, idx) => (
+                      <div key={ticket.id}
+                        className={`flex items-center justify-between p-5 rounded-2xl transition-all ${ticket.soldOut ? 'opacity-40' : 'hover:bg-white/5 cursor-pointer'}`}
+                        style={{
+                          border: `1px solid ${idx === 0 ? `${primary}50` : 'rgba(255,255,255,0.07)'}`,
+                          background: idx === 0 ? `${primary}15` : 'rgba(255,255,255,0.03)',
+                        }}>
+                        <div className="flex items-center gap-4">
+                          <div className="p-3 rounded-xl" style={{ background: `${primary}25`, color: secondary }}>
+                            <Ticket className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-white text-sm">{ticket.tierName}</p>
+                            {ticket.soldOut && <p className="text-xs text-red-400 mt-0.5 font-medium">Sold Out</p>}
+                          </div>
+                        </div>
+                        <p className="text-2xl font-black tabular-nums"
+                          style={{ color: ticket.soldOut ? '#f87171' : 'white' }}>
+                          {ticket.soldOut ? '—' : `Rs.${ticket.price.toLocaleString()}`}
+                        </p>
+                      </div>
+                    ))}
+                  <div className="pt-4">
+                    <button className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 rounded-2xl font-bold text-sm text-white transition-all hover:scale-[1.02] hover:shadow-2xl"
+                      style={{ background: `linear-gradient(135deg, ${primary}, ${secondary})`, boxShadow: `0 8px 32px ${primary}40` }}>
+                      Secure Your Ticket <ArrowRight className="w-4 h-4" />
+                    </button>
+                    <p className="text-xs text-white/30 mt-3 font-medium">JazzCash · EasyPaisa accepted</p>
+                  </div>
+                </div>
+              )}
+
+              {/* ── LOCATION ── */}
+              {activeTab === 'location' && (
+                <div className="animate-in fade-in duration-300">
+                  <div className="overflow-hidden rounded-t-3xl">
+                    <iframe
+                      src={`https://maps.google.com/maps?q=${mapQ}&output=embed&z=15`}
+                      width="100%" height="380"
+                      style={{ border: 0, display: 'block', filter: 'brightness(0.85) contrast(1.1) saturate(0.9)' }}
+                      allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"
+                      title="Event Location"
+                    />
+                  </div>
+                  <div className="p-6 sm:p-8 flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                      <div className="p-2.5 rounded-xl shrink-0" style={{ background: `${primary}30`, color: secondary }}>
+                        <MapPin className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-white leading-snug">{locationStr}</p>
+                        <a href={`https://maps.google.com/maps?q=${mapQ}`} target="_blank" rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-xs font-semibold mt-2 transition-opacity hover:opacity-70"
+                          style={{ color: secondary }}>
+                          Open in Maps <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── CONTACT ── */}
+              {activeTab === 'contact' && (
+                <div className="p-8 sm:p-10 space-y-3 animate-in fade-in duration-300">
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] mb-6" style={{ color: secondary }}>Get In Touch</h3>
+                  {[
+                    { icon: <Users className="w-4 h-4" />,  label: 'Organiser', value: data.organizerName },
+                    { icon: <Mail className="w-4 h-4" />,   label: 'Email', value: data.organizerEmail, href: data.organizerEmail ? `mailto:${data.organizerEmail}` : undefined },
+                    { icon: <Phone className="w-4 h-4" />,  label: 'Phone', value: data.organizerPhone, href: data.organizerPhone ? `tel:${data.organizerPhone}` : undefined },
+                  ].filter(c => c.value).map((c) => (
+                    <div key={c.label} className="flex items-center gap-4 p-5 rounded-2xl" style={glass(0.05, 0.08)}>
+                      <div className="p-2.5 rounded-xl shrink-0" style={{ background: `${primary}30`, color: secondary }}>
+                        {c.icon}
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-white/40 mb-0.5">{c.label}</p>
+                        {c.href
+                          ? <a href={c.href} className="font-semibold text-sm transition-opacity hover:opacity-70" style={{ color: secondary }}>{c.value}</a>
+                          : <p className="font-semibold text-sm text-white">{c.value}</p>}
+                      </div>
+                    </div>
+                  ))}
+                  {!data.organizerEmail && !data.organizerPhone && (
+                    <p className="text-white/30 text-sm italic">No contact info available.</p>
+                  )}
+                </div>
+              )}
+
+              {/* ── SOCIAL ── */}
+              {activeTab === 'social' && (
+                <div className="p-8 sm:p-10 space-y-6 animate-in fade-in duration-300">
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: secondary }}>Connect</h3>
+                  {socialItems.length > 0 && (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {socialItems.map(([key, url]) => (
+                        <a key={key} href={url as string} target="_blank" rel="noopener noreferrer"
+                          className="flex flex-col items-center justify-center gap-3 p-5 rounded-2xl transition-all hover:-translate-y-1 hover:bg-white/10 group"
+                          style={glass(0.05, 0.1)}>
+                          <span className="text-2xl transition-colors group-hover:text-white" style={{ color: secondary }}>
+                            {SOCIAL_ICONS[key]}
+                          </span>
+                          <span className="text-xs font-semibold text-white/60 group-hover:text-white transition-colors">{SOCIAL_LABELS[key]}</span>
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                  <div className="p-5 rounded-2xl" style={glass(0.05, 0.1)}>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Share2 className="w-4 h-4" style={{ color: secondary }} />
+                      <p className="text-sm font-semibold text-white">Share this event</p>
+                    </div>
+                    <p className="text-white/30 text-xs break-all font-mono mb-4">
+                      {typeof window !== 'undefined' ? window.location.href : ''}
+                    </p>
+                    <button onClick={() => navigator.clipboard?.writeText(window.location.href)}
+                      className="text-xs font-bold px-5 py-2.5 rounded-xl text-white transition-all hover:scale-105"
+                      style={{ background: `${primary}60`, border: `1px solid ${primary}80` }}>
+                      Copy Link
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right — Sticky Glass Ticket Widget */}
+          <div className="lg:sticky lg:top-8 lg:self-start space-y-4">
+
+            {/* Ticket card */}
+            <div className="rounded-3xl overflow-hidden" style={glass(0.07, 0.12)}>
+              {/* Gradient header */}
+              <div className="relative p-6 overflow-hidden"
+                style={{ background: `linear-gradient(135deg, ${primary}60, ${secondary}40)` }}>
+                <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full opacity-20 blur-2xl"
+                  style={{ background: primary }} />
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/60 mb-1">Entry from</p>
+                <p className="text-4xl font-black text-white mb-0.5">
+                  {startPrice !== null ? `Rs.${startPrice.toLocaleString()}` : 'TBA'}
+                </p>
+                <p className="text-xs text-white/50 font-medium">per person</p>
+              </div>
+
+              {/* Tier list */}
               {data.tickets.length > 0 && (
-                <div className="space-y-2 mb-4">
-                  {data.tickets.slice(0, 2).map(t => (
-                    <div key={t.id} className="flex justify-between items-center px-4 py-2.5 rounded-2xl bg-stone-900 border border-stone-800">
-                      <span className="text-sm font-medium text-stone-300">{t.tierName}</span>
-                      <span className={`text-sm font-bold ${t.soldOut ? 'text-red-400' : 'text-white'}`}>
+                <div className="px-4 py-3 space-y-1">
+                  {data.tickets.slice(0, 4).map((t, i) => (
+                    <div key={t.id} className="flex items-center justify-between px-3 py-2.5 rounded-xl"
+                      style={{ background: i % 2 === 0 ? 'rgba(255,255,255,0.05)' : 'transparent' }}>
+                      <span className="text-xs font-medium text-white/70">{t.tierName}</span>
+                      <span className="text-xs font-bold" style={{ color: t.soldOut ? '#f87171' : secondary }}>
                         {t.soldOut ? 'Sold Out' : `Rs.${t.price.toLocaleString()}`}
                       </span>
                     </div>
                   ))}
                 </div>
               )}
-              <button className="w-full text-white text-xl font-bold py-5 px-8 rounded-2xl transition-all hover:scale-[1.02] active:scale-[0.98] shadow-xl flex items-center justify-center gap-2"
-                style={{ background: `linear-gradient(135deg, ${data.primaryColor}, ${data.secondaryColor})` }}>
-                Buy Tickets <ArrowRight className="w-6 h-6" />
-              </button>
-              <div className="flex justify-center gap-4 text-stone-500 text-sm font-semibold">
-                <span>JazzCash</span><span>•</span><span>EasyPaisa</span>
+
+              {/* Dashed separator */}
+              <div className="mx-6 my-2 border-t border-dashed border-white/10" />
+
+              {/* CTA */}
+              <div className="p-5">
+                <button className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm text-white transition-all hover:scale-[1.02] hover:shadow-2xl active:scale-[0.98]"
+                  style={{ background: `linear-gradient(135deg, ${primary}, ${secondary})`, boxShadow: `0 8px 24px ${primary}50` }}>
+                  Get Tickets <ArrowRight className="w-4 h-4" />
+                </button>
+                <div className="flex items-center justify-center gap-3 mt-3">
+                  <div className="w-1.5 h-1.5 rounded-full opacity-50" style={{ background: secondary }} />
+                  <span className="text-[10px] text-white/40 font-medium">JazzCash · EasyPaisa</span>
+                  <div className="w-1.5 h-1.5 rounded-full opacity-50" style={{ background: secondary }} />
+                </div>
               </div>
+            </div>
+
+            {/* Quick info glass card */}
+            <div className="rounded-3xl p-5 space-y-3" style={glass(0.05, 0.1)}>
+              {[
+                { icon: <Calendar className="w-3.5 h-3.5" />, value: fmt(data.startDatetime) },
+                { icon: <Clock className="w-3.5 h-3.5" />, value: `${fmtTime(data.startDatetime)} — ${fmtTime(data.endDatetime)}` },
+                { icon: <MapPin className="w-3.5 h-3.5" />, value: locationStr },
+              ].map(({ icon, value }) => (
+                <div key={value} className="flex items-start gap-3">
+                  <span className="shrink-0 mt-0.5" style={{ color: secondary }}>{icon}</span>
+                  <p className="text-xs text-white/60 leading-snug font-medium">{value}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-
-        {/* Tab Nav */}
-        <div className="flex gap-2 mb-6 overflow-x-auto no-scrollbar pb-1">
-          {enabledTabs.map(tab => (
-            <button key={tab} onClick={() => setActiveTab(tab)}
-              className="shrink-0 px-6 py-3 rounded-2xl text-sm font-bold uppercase tracking-wider transition-all duration-200"
-              style={activeTab === tab
-                ? { backgroundColor: data.primaryColor, color: '#fff', boxShadow: `0 8px 20px -5px ${data.primaryColor}80` }
-                : { backgroundColor: 'white', color: '#78716c', border: '2px solid #e7e5e4' }}>
-              {TAB_LABELS[tab]}
-            </button>
-          ))}
-        </div>
-
-        {/* Tab Content */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 pb-8">
-
-          {/* Tab: Overview */}
-          {activeTab === 'overview' && (
-            <>
-              <div className="md:col-span-12 lg:col-span-8 bg-white rounded-4xl sm:rounded-[3rem] p-8 sm:p-12 shadow-sm border border-stone-200 animate-in fade-in duration-300">
-                <h2 className="text-3xl font-black mb-6 uppercase tracking-tight text-stone-900 flex items-center gap-3">
-                  <span className="w-4 h-4 rounded-full" style={{ backgroundColor: data.primaryColor }} />
-                  The Details
-                </h2>
-                <p className="text-lg sm:text-xl text-stone-600 leading-relaxed font-medium whitespace-pre-wrap">{data.description}</p>
-              </div>
-              <div className="md:col-span-12 lg:col-span-4 flex flex-col gap-4 sm:gap-6">
-                <div className="flex-1 rounded-4xl sm:rounded-[3rem] p-8 flex flex-col justify-center text-white relative overflow-hidden group transition-all hover:-translate-y-2"
-                  style={{ backgroundColor: data.primaryColor, boxShadow: `0 20px 40px -15px ${data.primaryColor}80` }}>
-                  <div className="absolute -top-10 -right-10 opacity-10 group-hover:opacity-25 group-hover:scale-110 transition-all duration-700 pointer-events-none">
-                    <Calendar className="w-48 h-48" />
-                  </div>
-                  <div className="relative z-10">
-                    <h3 className="text-sm font-bold uppercase tracking-widest mb-2 opacity-80">When</h3>
-                    <p className="text-2xl font-black leading-tight mb-1">{formatDate(data.startDatetime)}</p>
-                    <p className="text-lg font-medium opacity-90">{formatTime(data.startDatetime)} — {formatTime(data.endDatetime)}</p>
-                  </div>
-                </div>
-                <div className="flex-1 rounded-4xl sm:rounded-[3rem] p-8 flex flex-col justify-center text-white relative overflow-hidden group transition-all hover:-translate-y-2"
-                  style={{ backgroundColor: data.secondaryColor, boxShadow: `0 20px 40px -15px ${data.secondaryColor}80` }}>
-                  <div className="absolute -bottom-10 -right-10 opacity-10 group-hover:opacity-25 group-hover:scale-110 transition-all duration-700 pointer-events-none">
-                    <MapPin className="w-48 h-48" />
-                  </div>
-                  <div className="relative z-10">
-                    <h3 className="text-sm font-bold uppercase tracking-widest mb-2 opacity-80">Where</h3>
-                    <p className="text-xl font-bold leading-snug mb-3">{locationDisplay}</p>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* Tab: Schedule */}
-          {activeTab === 'schedule' && (
-            <div className="md:col-span-12 bg-white rounded-4xl sm:rounded-[3rem] p-8 sm:p-12 shadow-sm border border-stone-200 animate-in fade-in duration-300">
-              <h2 className="text-3xl font-black mb-8 uppercase tracking-tight">
-                <span className="w-4 h-4 rounded-full inline-block mr-3 align-middle" style={{ backgroundColor: data.primaryColor }} />
-                Schedule
-              </h2>
-              {data.agenda.length === 0 ? <p className="text-stone-400">No schedule added yet.</p> : (
-                <div className="space-y-4">
-                  {data.agenda.map((item, idx) => (
-                    <div key={item.id} className="flex gap-6 p-6 rounded-3xl border border-stone-100 hover:border-stone-200 transition-colors">
-                      <div className="shrink-0">
-                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black text-lg" style={{ backgroundColor: idx % 2 === 0 ? data.primaryColor : data.secondaryColor }}>
-                          {idx + 1}
-                        </div>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex flex-wrap gap-3 mb-2">
-                          <span className="text-xs font-black px-3 py-1.5 rounded-full text-white uppercase tracking-wider" style={{ backgroundColor: data.primaryColor }}>
-                            {new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date(item.startTime))} — {new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date(item.endTime))}
-                          </span>
-                          {item.roomOrLocation && <span className="text-xs text-stone-400 flex items-center gap-1"><MapPin className="w-3 h-3" />{item.roomOrLocation}</span>}
-                        </div>
-                        <h4 className="font-black text-stone-900 text-lg uppercase tracking-tight">{item.title}</h4>
-                        {item.description && <p className="text-stone-500 mt-1">{item.description}</p>}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Tab: Tickets */}
-          {activeTab === 'tickets' && (
-            <div className="md:col-span-12 bg-white rounded-4xl sm:rounded-[3rem] p-8 sm:p-12 shadow-sm border border-stone-200 animate-in fade-in duration-300">
-              <h2 className="text-3xl font-black mb-8 uppercase tracking-tight">
-                <span className="w-4 h-4 rounded-full inline-block mr-3 align-middle" style={{ backgroundColor: data.primaryColor }} />
-                Tickets
-              </h2>
-              {data.tickets.length === 0 ? <p className="text-stone-400">No ticket tiers available yet.</p> : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {data.tickets.map(ticket => (
-                    <div key={ticket.id} className={`p-6 rounded-3xl border-2 transition-all ${ticket.soldOut ? 'border-stone-200 opacity-60' : 'border-stone-200 hover:border-stone-950 hover:-translate-y-1'}`}>
-                      <div className="p-3 rounded-2xl w-fit mb-4" style={{ backgroundColor: `${data.primaryColor}15` }}>
-                        <Ticket className="w-6 h-6" style={{ color: data.primaryColor }} />
-                      </div>
-                      <h4 className="font-black text-stone-900 text-lg uppercase tracking-tight mb-2">{ticket.tierName}</h4>
-                      {ticket.soldOut
-                        ? <span className="text-red-500 font-black text-lg">Sold Out</span>
-                        : <span className="text-3xl font-black text-stone-950">Rs.{ticket.price.toLocaleString()}</span>
-                      }
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Tab: Location */}
-          {activeTab === 'location' && (
-            <div className="md:col-span-12 animate-in fade-in duration-300 space-y-4">
-              <div className="rounded-4xl sm:rounded-[3rem] overflow-hidden border-2 border-stone-200 shadow-lg">
-                <iframe src={`https://maps.google.com/maps?q=${mapQuery}&output=embed&z=15`} width="100%" height="450" style={{ border: 0 }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Event Location" />
-              </div>
-              <div className="flex items-start gap-4 p-6 bg-white rounded-3xl border border-stone-200 shadow-sm">
-                <div className="p-3 rounded-2xl shrink-0" style={{ backgroundColor: `${data.primaryColor}15` }}>
-                  <MapPin className="w-5 h-5" style={{ color: data.primaryColor }} />
-                </div>
-                <div>
-                  <p className="font-bold text-stone-900">{locationDisplay}</p>
-                  <a href={`https://maps.google.com/maps?q=${mapQuery}`} target="_blank" rel="noopener noreferrer"
-                    className="text-sm font-bold mt-1 inline-flex items-center gap-1 hover:underline" style={{ color: data.primaryColor }}>
-                    Open in Google Maps <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Tab: Contact */}
-          {activeTab === 'contact' && (
-            <div className="md:col-span-12 bg-white rounded-4xl sm:rounded-[3rem] p-8 sm:p-12 shadow-sm border border-stone-200 animate-in fade-in duration-300">
-              <h2 className="text-3xl font-black mb-8 uppercase tracking-tight">
-                <span className="w-4 h-4 rounded-full inline-block mr-3 align-middle" style={{ backgroundColor: data.primaryColor }} />
-                Contact
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {[
-                  { icon: <Users className="w-6 h-6" />, label: 'Organizer', value: data.organizerName },
-                  { icon: <Mail className="w-6 h-6" />, label: 'Email', value: data.organizerEmail, href: data.organizerEmail ? `mailto:${data.organizerEmail}` : undefined },
-                  { icon: <Phone className="w-6 h-6" />, label: 'Phone', value: data.organizerPhone, href: data.organizerPhone ? `tel:${data.organizerPhone}` : undefined },
-                ].filter(c => c.value).map(c => (
-                  <div key={c.label} className="p-6 rounded-3xl border-2 border-stone-100 hover:border-stone-200 transition-colors">
-                    <div className="p-3 rounded-2xl w-fit mb-4" style={{ backgroundColor: `${data.primaryColor}15` }}>
-                      <span style={{ color: data.primaryColor }}>{c.icon}</span>
-                    </div>
-                    <p className="text-xs font-black uppercase tracking-widest text-stone-400 mb-1">{c.label}</p>
-                    {c.href
-                      ? <a href={c.href} className="font-bold text-lg hover:underline" style={{ color: data.primaryColor }}>{c.value}</a>
-                      : <p className="font-bold text-lg text-stone-900">{c.value}</p>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Tab: Social */}
-          {activeTab === 'social' && (
-            <div className="md:col-span-12 bg-white rounded-4xl sm:rounded-[3rem] p-8 sm:p-12 shadow-sm border border-stone-200 animate-in fade-in duration-300">
-              <h2 className="text-3xl font-black mb-8 uppercase tracking-tight">
-                <span className="w-4 h-4 rounded-full inline-block mr-3 align-middle" style={{ backgroundColor: data.primaryColor }} />
-                Social & Share
-              </h2>
-              {socialEntries.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
-                  {socialEntries.map(([key, url]) => (
-                    <a key={key} href={url as string} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-4 p-5 rounded-3xl border-2 border-stone-100 hover:border-stone-950 transition-all group hover:-translate-y-1">
-                      <div className="p-3 rounded-2xl shrink-0" style={{ backgroundColor: `${data.primaryColor}15`, color: data.primaryColor }}>{SOCIAL_ICONS[key]}</div>
-                      <span className="font-black text-stone-900 uppercase tracking-tight text-sm">{SOCIAL_LABELS[key]}</span>
-                      <ChevronRight className="w-4 h-4 text-stone-300 ml-auto group-hover:translate-x-1 transition-transform" />
-                    </a>
-                  ))}
-                </div>
-              )}
-              <div className="p-6 rounded-3xl border-2 border-stone-100">
-                <div className="flex items-center gap-3 mb-3">
-                  <Share2 className="w-5 h-5" style={{ color: data.primaryColor }} />
-                  <p className="font-black text-stone-900 uppercase tracking-tight">Share This Event</p>
-                </div>
-                <p className="text-stone-400 text-sm break-all font-mono">{typeof window !== 'undefined' ? window.location.href : ''}</p>
-                <button onClick={() => navigator.clipboard?.writeText(window.location.href)}
-                  className="mt-4 text-xs font-black px-5 py-2.5 rounded-xl text-white uppercase tracking-wider transition-all hover:scale-105"
-                  style={{ backgroundColor: data.primaryColor }}>
-                  Copy Link
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
       </div>
 
-      {/* Mobile Footer */}
-      <div className="fixed bottom-0 left-0 w-full bg-white border-t border-stone-200 p-4 sm:hidden flex items-center justify-between z-50 shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
-        <div>
-          <p className="text-xs font-bold text-stone-500 uppercase tracking-widest mb-0.5">Tickets</p>
-          <p className="text-xl font-black text-stone-900">
-            {startingPrice !== null ? `Rs.${startingPrice.toLocaleString()}` : 'TBA'}
-          </p>
+      {/* ── MOBILE FOOTER ── */}
+      <div className="fixed bottom-0 left-0 w-full sm:hidden z-50 p-4">
+        <div className="flex items-center justify-between p-4 rounded-2xl"
+          style={{ ...glass(0.15, 0.2), boxShadow: `0 -4px 40px ${primary}40` }}>
+          <div>
+            <p className="text-[9px] font-bold uppercase tracking-wider text-white/40 mb-0.5">Tickets from</p>
+            <p className="text-xl font-black text-white">{startPrice !== null ? `Rs.${startPrice.toLocaleString()}` : 'TBA'}</p>
+          </div>
+          <button className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white"
+            style={{ background: `linear-gradient(135deg, ${primary}, ${secondary})` }}>
+            Buy Now <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
-        <button className="text-white font-bold py-3.5 px-8 rounded-xl shadow-lg active:scale-95 transition-transform"
-          style={{ background: `linear-gradient(135deg, ${data.primaryColor}, ${data.secondaryColor})` }}>
-          Buy Now
-        </button>
       </div>
     </div>
   );

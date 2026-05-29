@@ -19,7 +19,7 @@ export default function ExploreLayout({
             className="inline-flex items-center gap-2 text-sm font-medium text-brand-500 hover:text-brand-600 transition-all -translate-y-1 hover:-translate-y-1.5"
           >
             <LayoutGrid className="w-4 h-4" />
-            Browse all events
+            More From Eventsphere
           </Link>
         </div>
       )}
