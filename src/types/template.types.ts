@@ -1,10 +1,29 @@
 export type TemplateName = 'STANDARD' | 'MINIMAL' | 'MODERN';
 
+export type FontStyle = 'dm-sans' | 'playfair' | 'space-grotesk' | 'cabinet-grotesk' | 'syne';
+
+export type TabName = 'overview' | 'schedule' | 'tickets' | 'location' | 'contact' | 'social';
+
+export interface SocialLinks {
+  facebook?: string;
+  instagram?: string;
+  twitter?: string;
+  linkedin?: string;
+  whatsapp?: string;
+  website?: string;
+}
+
 export interface ThemeConfigJson {
   templateName: TemplateName;
   primaryColor: string;
   secondaryColor: string;
+  backgroundColor?: string;
+  fontStyle?: FontStyle;
   organizerName: string;
+  organizerEmail?: string;
+  organizerPhone?: string;
+  socialLinks?: SocialLinks;
+  enabledTabs?: TabName[];
 }
 
 export interface TicketTierPublic {
@@ -37,24 +56,15 @@ export interface EventTemplateData {
   // From themeConfigJson (organizer config)
   primaryColor: string;
   secondaryColor: string;
+  backgroundColor?: string;
+  fontStyle?: FontStyle;
   templateName: TemplateName;
   organizerName: string;
+  organizerEmail?: string;
+  organizerPhone?: string;
+  socialLinks?: SocialLinks;
+  enabledTabs?: TabName[];
   // From tickets & agenda (API)
   tickets: TicketTierPublic[];
   agenda: AgendaItemPublic[];
 }
-
-// export interface EventTemplateData {
-//   title: string;
-//   description: string;
-//   date: string;
-//   time: string;
-//   location: string;
-//   imageUrl: string;
-//   organizerName: string;
-//   startingPrice: number;
-//   tags: string[];
-//   primaryColor: string;
-//   secondaryColor: string;
-//   templateName: TemplateName;
-// }

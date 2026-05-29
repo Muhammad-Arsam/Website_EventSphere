@@ -34,46 +34,50 @@ export const publicService = {
   },
 
   parseThemeConfig: (themeConfigJson: string): ThemeConfigJson | null => {
-  try {
-    return JSON.parse(themeConfigJson) as ThemeConfigJson;
-  } catch {
-    return null;
-  }
-},
+    try {
+      return JSON.parse(themeConfigJson) as ThemeConfigJson;
+    } catch {
+      return null;
+    }
+  },
 
   assembleTemplateData: (response: PublicEventPageResponse): EventTemplateData | null => {
-    // Guard: if no landing page design at all, bail early
     if (!response.landingPageDesign?.themeConfigJson) {
-        return null;
+      return null;
     }
 
     let theme: ThemeConfigJson;
     try {
-        theme = JSON.parse(response.landingPageDesign.themeConfigJson) as ThemeConfigJson;
+      theme = JSON.parse(response.landingPageDesign.themeConfigJson) as ThemeConfigJson;
     } catch {
-        return null;
+      return null;
     }
 
-    // Guard: templateName must be valid
     if (!theme.templateName) {
-        return null;
+      return null;
     }
 
     return {
-        title: response.eventDetails.title,
-        description: response.eventDetails.description,
-        imageUrl: response.eventDetails.imageUrl,
-        startDatetime: response.eventDetails.startDatetime,
-        endDatetime: response.eventDetails.endDatetime,
-        venueName: response.eventDetails.venueName,
-        formattedAddress: response.eventDetails.formattedAddress,
-        tags: response.eventDetails.searchTags ?? [],
-        primaryColor: theme.primaryColor ?? '#06b6d4',
-        secondaryColor: theme.secondaryColor ?? '#3b82f6',
-        templateName: theme.templateName,
-        organizerName: theme.organizerName ?? '',
-        tickets: response.tickets ?? [],
-        agenda: response.agenda ?? [],
+      title: response.eventDetails.title,
+      description: response.eventDetails.description,
+      imageUrl: response.eventDetails.imageUrl,
+      startDatetime: response.eventDetails.startDatetime,
+      endDatetime: response.eventDetails.endDatetime,
+      venueName: response.eventDetails.venueName,
+      formattedAddress: response.eventDetails.formattedAddress,
+      tags: response.eventDetails.searchTags ?? [],
+      primaryColor: theme.primaryColor ?? '#06b6d4',
+      secondaryColor: theme.secondaryColor ?? '#3b82f6',
+      backgroundColor: theme.backgroundColor,
+      fontStyle: theme.fontStyle,
+      templateName: theme.templateName,
+      organizerName: theme.organizerName ?? '',
+      organizerEmail: theme.organizerEmail,
+      organizerPhone: theme.organizerPhone,
+      socialLinks: theme.socialLinks,
+      enabledTabs: theme.enabledTabs,
+      tickets: response.tickets ?? [],
+      agenda: response.agenda ?? [],
     };
-},
+  },
 };
