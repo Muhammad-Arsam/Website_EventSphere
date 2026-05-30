@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { FaFacebook, FaInstagram, FaLinkedin, FaXTwitter } from 'react-icons/fa6';
 
-interface Template2Props { data: EventTemplateData; }
+interface Template2Props { data: EventTemplateData; onCheckout: () => void; }
 
 const FONT_MAP: Record<string, string> = {
   'dm-sans': "'DM Sans', sans-serif",
@@ -25,38 +25,38 @@ const FONT_LINKS: Record<string, string> = {
   'syne': 'https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap',
 };
 const TAB_META: Record<TabName, { label: string; number: string }> = {
-  overview:  { label: 'Overview',  number: '01' },
-  schedule:  { label: 'Schedule',  number: '02' },
-  tickets:   { label: 'Tickets',   number: '03' },
-  location:  { label: 'Location',  number: '04' },
-  contact:   { label: 'Contact',   number: '05' },
-  social:    { label: 'Social',    number: '06' },
+  overview: { label: 'Overview', number: '01' },
+  schedule: { label: 'Schedule', number: '02' },
+  tickets: { label: 'Tickets', number: '03' },
+  location: { label: 'Location', number: '04' },
+  contact: { label: 'Contact', number: '05' },
+  social: { label: 'Social', number: '06' },
 };
 
-export default function Template2({ data }: Template2Props) {
-  const enabledTabs = (data.enabledTabs?.length ? data.enabledTabs : ['overview','schedule','tickets','location','contact','social']) as TabName[];
+export default function Template2({ data, onCheckout }: Template2Props) {
+  const enabledTabs = (data.enabledTabs?.length ? data.enabledTabs : ['overview', 'schedule', 'tickets', 'location', 'contact', 'social']) as TabName[];
   const [activeTab, setActiveTab] = useState<TabName>('overview');
 
   const fontFamily = FONT_MAP[data.fontStyle || 'playfair'];
-  const fontLink   = FONT_LINKS[data.fontStyle || 'playfair'];
-  const primary    = data.primaryColor   || '#1a1a2e';
-  const accent     = data.secondaryColor || '#e63946';
-  const bg         = data.backgroundColor || '#f7f3ee';
+  const fontLink = FONT_LINKS[data.fontStyle || 'playfair'];
+  const primary = data.primaryColor || '#1a1a2e';
+  const accent = data.secondaryColor || '#e63946';
+  const bg = data.backgroundColor || '#f7f3ee';
 
-  const fmt     = (dt: string) => new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }).format(new Date(dt));
+  const fmt = (dt: string) => new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }).format(new Date(dt));
   const fmtTime = (dt: string) => new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date(dt));
   const fmtShort = (dt: string) => new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date(dt));
 
-  const avail        = data.tickets.filter(t => !t.soldOut);
-  const startPrice   = avail.length > 0 ? Math.min(...avail.map(t => t.price)) : null;
-  const locationStr  = `${data.venueName}, ${data.formattedAddress}`;
-  const mapQ         = encodeURIComponent(locationStr);
-  const socialItems  = Object.entries(data.socialLinks || {}).filter(([, v]) => v);
+  const avail = data.tickets.filter(t => !t.soldOut);
+  const startPrice = avail.length > 0 ? Math.min(...avail.map(t => t.price)) : null;
+  const locationStr = `${data.venueName}, ${data.formattedAddress}`;
+  const mapQ = encodeURIComponent(locationStr);
+  const socialItems = Object.entries(data.socialLinks || {}).filter(([, v]) => v);
 
-  const eventMs  = new Date(data.startDatetime).getTime() - Date.now();
+  const eventMs = new Date(data.startDatetime).getTime() - Date.now();
   const diffDays = Math.max(0, Math.floor(eventMs / 86400000));
-  const diffHrs  = Math.max(0, Math.floor((eventMs % 86400000) / 3600000));
-  const diffMin  = Math.max(0, Math.floor((eventMs % 3600000) / 60000));
+  const diffHrs = Math.max(0, Math.floor((eventMs % 86400000) / 3600000));
+  const diffMin = Math.max(0, Math.floor((eventMs % 3600000) / 60000));
   const upcoming = eventMs > 0;
 
   const SOCIAL_ICONS: Record<string, React.ReactNode> = {
@@ -94,7 +94,7 @@ export default function Template2({ data }: Template2Props) {
       </header> */}
 
       {/* ── COVER ── Full-bleed editorial split */}
-      <section className="max-w-screen-xl mx-auto px-0 sm:px-10 pt-0 sm:pt-8">
+      <section className="max-w-7xl mx-auto px-0 sm:px-10 pt-0 sm:pt-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[85vh]">
 
           {/* Left — text column */}
@@ -148,7 +148,7 @@ export default function Template2({ data }: Template2Props) {
                       <span className="block text-[9px] font-bold uppercase tracking-[0.2em] text-stone-400 mt-1">{l}</span>
                     </div>
                   ))}
-                  <div className="flex-1 py-5 flex flex-col items-center justify-center gap-2" style={{ background: primary }}>
+                  {/* <div className="flex-1 py-5 flex flex-col items-center justify-center gap-2" style={{ background: primary }}>
                     <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/60">From</span>
                     <span className="text-2xl font-black text-white">
                       {startPrice !== null ? `Rs.${startPrice.toLocaleString()}` : 'TBA'}
@@ -157,7 +157,7 @@ export default function Template2({ data }: Template2Props) {
                       style={{ background: accent, color: '#fff' }}>
                       Get Tickets
                     </button>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             )}
@@ -192,7 +192,7 @@ export default function Template2({ data }: Template2Props) {
       </section>
 
       {/* ── BODY ── Sidebar nav + content */}
-      <section className="max-w-screen-xl mx-auto px-6 sm:px-10 py-16 sm:py-24">
+      <section className="max-w-7xl mx-auto px-6 sm:px-10 py-16 sm:py-24">
         <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-12 lg:gap-20">
 
           {/* Sidebar — vertical numbered nav */}
@@ -246,7 +246,9 @@ export default function Template2({ data }: Template2Props) {
                 </div>
               ))}
               <div className="p-4">
-                <button className="w-full py-3 text-sm font-black uppercase tracking-[0.15em] text-white transition-opacity hover:opacity-90"
+                <button
+                  onClick={onCheckout}
+                  className="w-full py-3 text-sm font-black uppercase tracking-[0.15em] text-white transition-opacity hover:opacity-90"
                   style={{ background: accent }}>
                   Buy Now <ArrowUpRight className="w-4 h-4 inline ml-1" />
                 </button>
@@ -363,13 +365,13 @@ export default function Template2({ data }: Template2Props) {
                       </div>
                     </div>
                   ))}
-                <div className="pt-4">
+                {/* <div className="pt-4">
                   <button className="flex items-center gap-2 px-8 py-4 font-black uppercase tracking-[0.15em] text-sm text-white transition-opacity hover:opacity-90"
                     style={{ background: primary }}>
                     Register Now <ArrowUpRight className="w-4 h-4" />
                   </button>
                   <p className="text-xs text-stone-400 mt-3">Supports JazzCash · EasyPaisa</p>
-                </div>
+                </div> */}
               </div>
             )}
 
@@ -470,7 +472,9 @@ export default function Template2({ data }: Template2Props) {
             <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/50 mb-0.5">Entry from</p>
             <p className="text-xl font-black text-white">{startPrice !== null ? `Rs.${startPrice.toLocaleString()}` : 'TBA'}</p>
           </div>
-          <button className="font-black py-3.5 px-8 text-sm uppercase tracking-[0.15em] transition-opacity hover:opacity-90"
+          <button
+            onClick={onCheckout}
+            className="font-black py-3.5 px-8 text-sm uppercase tracking-[0.15em] transition-opacity hover:opacity-90"
             style={{ background: accent, color: '#fff' }}>
             Buy Now
           </button>

@@ -8,39 +8,39 @@ import {
 } from 'lucide-react';
 import { FaFacebook, FaInstagram, FaLinkedin, FaXTwitter } from 'react-icons/fa6';
 
-interface Template3Props { data: EventTemplateData; }
+interface Template3Props { data: EventTemplateData; onCheckout: () => void; }
 
 const FONT_MAP: Record<string, string> = {
-  'dm-sans':         "'DM Sans', sans-serif",
-  'playfair':        "'Playfair Display', serif",
-  'space-grotesk':   "'Space Grotesk', sans-serif",
+  'dm-sans': "'DM Sans', sans-serif",
+  'playfair': "'Playfair Display', serif",
+  'space-grotesk': "'Space Grotesk', sans-serif",
   'cabinet-grotesk': "'Cabinet Grotesk', sans-serif",
-  'syne':            "'Syne', sans-serif",
+  'syne': "'Syne', sans-serif",
 };
 const FONT_LINKS: Record<string, string> = {
-  'dm-sans':         'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap',
-  'playfair':        'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&display=swap',
-  'space-grotesk':   'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap',
+  'dm-sans': 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap',
+  'playfair': 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&display=swap',
+  'space-grotesk': 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap',
   'cabinet-grotesk': 'https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800&display=swap',
-  'syne':            'https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&display=swap',
+  'syne': 'https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&display=swap',
 };
 const TAB_ICONS: Record<TabName, React.ReactNode> = {
-  overview:  <Sparkles className="w-4 h-4" />,
-  schedule:  <Clock className="w-4 h-4" />,
-  tickets:   <Ticket className="w-4 h-4" />,
-  location:  <MapPin className="w-4 h-4" />,
-  contact:   <Users className="w-4 h-4" />,
-  social:    <Share2 className="w-4 h-4" />,
+  overview: <Sparkles className="w-4 h-4" />,
+  schedule: <Clock className="w-4 h-4" />,
+  tickets: <Ticket className="w-4 h-4" />,
+  location: <MapPin className="w-4 h-4" />,
+  contact: <Users className="w-4 h-4" />,
+  social: <Share2 className="w-4 h-4" />,
 };
 const TAB_LABELS: Record<TabName, string> = {
   overview: 'Overview', schedule: 'Schedule', tickets: 'Tickets',
-  location: 'Location', contact: 'Contact',  social: 'Social',
+  location: 'Location', contact: 'Contact', social: 'Social',
 };
 
-export default function Template3({ data }: Template3Props) {
-  const enabledTabs = (data.enabledTabs?.length ? data.enabledTabs : ['overview','schedule','tickets','location','contact','social']) as TabName[];
+export default function Template3({ data, onCheckout }: Template3Props) {
+  const enabledTabs = (data.enabledTabs?.length ? data.enabledTabs : ['overview', 'schedule', 'tickets', 'location', 'contact', 'social']) as TabName[];
   const [activeTab, setActiveTab] = useState<TabName>('overview');
-  const [tick, setTick]           = useState(0);
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     const id = setInterval(() => setTick(t => t + 1), 1000);
@@ -48,34 +48,34 @@ export default function Template3({ data }: Template3Props) {
   }, []);
 
   const fontFamily = FONT_MAP[data.fontStyle || 'space-grotesk'];
-  const fontLink   = FONT_LINKS[data.fontStyle || 'space-grotesk'];
-  const primary    = data.primaryColor   || '#7c3aed';
-  const secondary  = data.secondaryColor || '#06b6d4';
-  const bg         = data.backgroundColor || '#0f0f1a';
+  const fontLink = FONT_LINKS[data.fontStyle || 'space-grotesk'];
+  const primary = data.primaryColor || '#7c3aed';
+  const secondary = data.secondaryColor || '#06b6d4';
+  const bg = data.backgroundColor || '#0f0f1a';
 
-  const fmt     = (dt: string) => new Intl.DateTimeFormat('en-US', { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' }).format(new Date(dt));
+  const fmt = (dt: string) => new Intl.DateTimeFormat('en-US', { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' }).format(new Date(dt));
   const fmtTime = (dt: string) => new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date(dt));
 
-  const avail       = data.tickets.filter(t => !t.soldOut);
-  const startPrice  = avail.length > 0 ? Math.min(...avail.map(t => t.price)) : null;
+  const avail = data.tickets.filter(t => !t.soldOut);
+  const startPrice = avail.length > 0 ? Math.min(...avail.map(t => t.price)) : null;
   const locationStr = `${data.venueName}, ${data.formattedAddress}`;
-  const mapQ        = encodeURIComponent(locationStr);
+  const mapQ = encodeURIComponent(locationStr);
   const socialItems = Object.entries(data.socialLinks || {}).filter(([, v]) => v);
 
-  const eventMs  = new Date(data.startDatetime).getTime() - Date.now();
+  const eventMs = new Date(data.startDatetime).getTime() - Date.now();
   const diffDays = Math.max(0, Math.floor(eventMs / 86400000));
-  const diffHrs  = Math.max(0, Math.floor((eventMs % 86400000) / 3600000));
-  const diffMin  = Math.max(0, Math.floor((eventMs % 3600000) / 60000));
-  const diffSec  = Math.max(0, Math.floor((eventMs % 60000) / 1000));
+  const diffHrs = Math.max(0, Math.floor((eventMs % 86400000) / 3600000));
+  const diffMin = Math.max(0, Math.floor((eventMs % 3600000) / 60000));
+  const diffSec = Math.max(0, Math.floor((eventMs % 60000) / 1000));
   const upcoming = eventMs > 0;
 
   const SOCIAL_ICONS: Record<string, React.ReactNode> = {
-    facebook:  <FaFacebook className="w-5 h-5" />,
+    facebook: <FaFacebook className="w-5 h-5" />,
     instagram: <FaInstagram className="w-5 h-5" />,
-    twitter:   <FaXTwitter className="w-5 h-5" />,
-    linkedin:  <FaLinkedin className="w-5 h-5" />,
-    whatsapp:  <MessageCircle className="w-5 h-5" />,
-    website:   <Globe className="w-5 h-5" />,
+    twitter: <FaXTwitter className="w-5 h-5" />,
+    linkedin: <FaLinkedin className="w-5 h-5" />,
+    whatsapp: <MessageCircle className="w-5 h-5" />,
+    website: <Globe className="w-5 h-5" />,
   };
   const SOCIAL_LABELS: Record<string, string> = {
     facebook: 'Facebook', instagram: 'Instagram', twitter: 'Twitter / X',
@@ -185,14 +185,14 @@ export default function Template3({ data }: Template3Props) {
                   ))}
                 </div>
               )}
-              <button className="flex items-center gap-3 px-7 py-4 rounded-2xl font-bold text-sm text-white transition-all hover:scale-[1.03] hover:shadow-2xl active:scale-[0.98]"
+              {/* <button className="flex items-center gap-3 px-7 py-4 rounded-2xl font-bold text-sm text-white transition-all hover:scale-[1.03] hover:shadow-2xl active:scale-[0.98]"
                 style={{
                   background: `linear-gradient(135deg, ${primary}, ${secondary})`,
                   boxShadow: `0 8px 32px ${primary}50`,
                 }}>
                 {startPrice !== null ? `Get Tickets · Rs.${startPrice.toLocaleString()}` : 'Get Tickets'}
                 <ArrowRight className="w-4 h-4" />
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
@@ -312,13 +312,13 @@ export default function Template3({ data }: Template3Props) {
                         </p>
                       </div>
                     ))}
-                  <div className="pt-4">
+                  {/* <div className="pt-4">
                     <button className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 rounded-2xl font-bold text-sm text-white transition-all hover:scale-[1.02] hover:shadow-2xl"
                       style={{ background: `linear-gradient(135deg, ${primary}, ${secondary})`, boxShadow: `0 8px 32px ${primary}40` }}>
                       Secure Your Ticket <ArrowRight className="w-4 h-4" />
                     </button>
                     <p className="text-xs text-white/30 mt-3 font-medium">JazzCash · EasyPaisa accepted</p>
-                  </div>
+                  </div> */}
                 </div>
               )}
 
@@ -357,9 +357,9 @@ export default function Template3({ data }: Template3Props) {
                 <div className="p-8 sm:p-10 space-y-3 animate-in fade-in duration-300">
                   <h3 className="text-xs font-bold uppercase tracking-[0.2em] mb-6" style={{ color: secondary }}>Get In Touch</h3>
                   {[
-                    { icon: <Users className="w-4 h-4" />,  label: 'Organiser', value: data.organizerName },
-                    { icon: <Mail className="w-4 h-4" />,   label: 'Email', value: data.organizerEmail, href: data.organizerEmail ? `mailto:${data.organizerEmail}` : undefined },
-                    { icon: <Phone className="w-4 h-4" />,  label: 'Phone', value: data.organizerPhone, href: data.organizerPhone ? `tel:${data.organizerPhone}` : undefined },
+                    { icon: <Users className="w-4 h-4" />, label: 'Organiser', value: data.organizerName },
+                    { icon: <Mail className="w-4 h-4" />, label: 'Email', value: data.organizerEmail, href: data.organizerEmail ? `mailto:${data.organizerEmail}` : undefined },
+                    { icon: <Phone className="w-4 h-4" />, label: 'Phone', value: data.organizerPhone, href: data.organizerPhone ? `tel:${data.organizerPhone}` : undefined },
                   ].filter(c => c.value).map((c) => (
                     <div key={c.label} className="flex items-center gap-4 p-5 rounded-2xl" style={glass(0.05, 0.08)}>
                       <div className="p-2.5 rounded-xl shrink-0" style={{ background: `${primary}30`, color: secondary }}>
@@ -453,7 +453,9 @@ export default function Template3({ data }: Template3Props) {
 
               {/* CTA */}
               <div className="p-5">
-                <button className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm text-white transition-all hover:scale-[1.02] hover:shadow-2xl active:scale-[0.98]"
+                <button
+                  onClick={onCheckout}
+                  className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm text-white transition-all hover:scale-[1.02] hover:shadow-2xl active:scale-[0.98]"
                   style={{ background: `linear-gradient(135deg, ${primary}, ${secondary})`, boxShadow: `0 8px 24px ${primary}50` }}>
                   Get Tickets <ArrowRight className="w-4 h-4" />
                 </button>
@@ -490,7 +492,9 @@ export default function Template3({ data }: Template3Props) {
             <p className="text-[9px] font-bold uppercase tracking-wider text-white/40 mb-0.5">Tickets from</p>
             <p className="text-xl font-black text-white">{startPrice !== null ? `Rs.${startPrice.toLocaleString()}` : 'TBA'}</p>
           </div>
-          <button className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white"
+          <button
+            onClick={onCheckout}
+            className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white"
             style={{ background: `linear-gradient(135deg, ${primary}, ${secondary})` }}>
             Buy Now <ArrowRight className="w-4 h-4" />
           </button>

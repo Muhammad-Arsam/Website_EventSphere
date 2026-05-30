@@ -254,7 +254,7 @@ export default function PublicEventsPage() {
 
                                             {event.category && (
                                                 <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-50 border border-brand-100 text-brand-700 text-xs font-semibold">
-                                                    <Tag className="w-3.5 h-3.5" />
+                                                    <Sparkles className="w-3.5 h-3.5" />
                                                     {event.category}
                                                 </div>
                                             )}

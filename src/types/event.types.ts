@@ -131,6 +131,7 @@ export interface PublicEventCard {
 }
 
 export interface PublicEventDetails {
+  id: string;
   title: string;
   description: string;
   imageUrl: string;
@@ -168,4 +169,27 @@ export interface PublicEventPageResponse {
   landingPageDesign: PublicLandingPageDesign;
   tickets: PublicTicket[];
   agenda: PublicAgendaItem[];
+}
+
+// --- CHECKOUT TYPES ---
+ 
+export interface TicketSelection {
+  tierId: string;
+  quantity: number;
+}
+ 
+export interface CheckoutRequest {
+  buyerName: string;
+  buyerEmail: string;
+  buyerPhone: string;
+  buyerCnic: string;
+  ticketSelections: TicketSelection[];
+  selectedSubEventIds?: string[];
+  promoCode?: string;
+}
+ 
+export interface CheckoutResponse {
+  // The Swagger shows response as "string" (likely an order ID or confirmation code)
+  // Adjust this if your backend returns a richer object
+  orderId: string;
 }

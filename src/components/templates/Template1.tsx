@@ -12,6 +12,7 @@ import {
 
 interface Template1Props {
   data: EventTemplateData;
+  onCheckout: () => void;
 }
 
 const FONT_MAP: Record<string, string> = {
@@ -33,7 +34,7 @@ const TAB_LABELS: Record<TabName, string> = {
   location: 'Location', contact: 'Contact', social: 'Social',
 };
 
-export default function Template1({ data }: Template1Props) {
+export default function Template1({ data, onCheckout }: Template1Props) {
   const enabledTabs = data.enabledTabs?.length
     ? data.enabledTabs
     : (['overview', 'schedule', 'tickets', 'location', 'contact', 'social'] as TabName[]);
@@ -436,7 +437,9 @@ export default function Template1({ data }: Template1Props) {
                 </div>
               )}
 
-              <button className="w-full py-4 text-black font-black text-sm uppercase tracking-widest transition-all hover:opacity-90 hover:-translate-y-0.5 relative overflow-hidden"
+              <button
+                onClick={onCheckout}
+                className="w-full py-4 text-black font-black text-sm uppercase tracking-widest transition-all hover:opacity-90 hover:-translate-y-0.5 relative overflow-hidden"
                 style={{ background: `linear-gradient(135deg, ${accent}, ${accent2})` }}>
                 <span className="relative z-10">Get Access</span>
               </button>
@@ -461,7 +464,9 @@ export default function Template1({ data }: Template1Props) {
             {startPrice !== null ? `Rs.${startPrice.toLocaleString()}` : 'TBA'}
           </p>
         </div>
-        <button className="font-black py-3.5 px-8 text-black text-sm uppercase tracking-widest"
+        <button
+          onClick={onCheckout}
+          className="font-black py-3.5 px-8 text-black text-sm uppercase tracking-widest"
           style={{ background: `linear-gradient(135deg, ${accent}, ${accent2})` }}>
           Get Access
         </button>

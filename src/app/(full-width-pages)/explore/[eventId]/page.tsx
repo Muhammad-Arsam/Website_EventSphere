@@ -4,117 +4,119 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { publicService } from '@/api/publicService';
 import { EventTemplateData } from '@/types/template.types';
+import { PublicEventPageResponse } from '@/types/event.types';
 
 import Template1 from '@/components/templates/Template1';
 import Template2 from '@/components/templates/Template2';
 import Template3 from '@/components/templates/Template3';
+import CheckoutModal from '@/components/checkout/CheckoutModal';
 
-import {
-    Loader2,
-    Ticket,
-    AlertTriangle,
-    ArrowRight,
-} from 'lucide-react';
+import { Loader2, Ticket, AlertTriangle, ArrowRight } from 'lucide-react';
 
 export default function PublicEventPage() {
-    const params = useParams();
-    const slug = params.eventId as string;
+  const params = useParams();
+  const slug   = params.eventId as string;
 
-    const [templateData, setTemplateData] = useState<EventTemplateData | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+  const [templateData, setTemplateData]   = useState<EventTemplateData | null>(null);
+  const [rawResponse, setRawResponse]     = useState<PublicEventPageResponse | null>(null);
+  const [isLoading, setIsLoading]         = useState(true);
+  const [error, setError]                 = useState<string | null>(null);
+  const [checkoutOpen, setCheckoutOpen]   = useState(false);
 
-    useEffect(() => {
-        const fetchEvent = async () => {
-            if (!slug) return;
+  useEffect(() => {
+    const fetchEvent = async () => {
+      if (!slug) return;
+      try {
+        setIsLoading(true);
+        const response  = await publicService.getEventBySlug(slug);
+        const assembled = publicService.assembleTemplateData(response);
 
-            try {
-                setIsLoading(true);
+        if (!assembled) {
+          setError('This event page has not been configured yet.');
+          return;
+        }
 
-                const response = await publicService.getEventBySlug(slug);
+        setRawResponse(response);
+        setTemplateData(assembled);
+      } catch (err: any) {
+        setError(err.message || 'Event not found.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchEvent();
+  }, [slug]);
 
-                console.log('API Response:', JSON.stringify(response, null, 2));
+  // Loading State
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center px-6">
+        <div className="flex flex-col items-center text-center">
+          <div className="w-20 h-20 rounded-3xl bg-brand-50 border border-brand-100 flex items-center justify-center shadow-sm mb-6">
+            <Loader2 className="w-10 h-10 text-brand-500 animate-spin" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Loading Event</h2>
+          <p className="text-gray-500 text-sm max-w-sm">
+            Please wait while we prepare the landing page for you.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-                const assembled = publicService.assembleTemplateData(response);
+  // Error State
+  if (error || !templateData || !rawResponse) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center px-6">
+        <div className="w-full max-w-md text-center">
+          <div className="mx-auto w-24 h-24 rounded-[28px] bg-red-50 border border-red-100 flex items-center justify-center shadow-sm mb-8">
+            <AlertTriangle className="w-12 h-12 text-red-500" />
+          </div>
+          <h1 className="text-3xl font-black tracking-tight text-gray-900 mb-3">Event Not Found</h1>
+          <p className="text-gray-500 leading-relaxed mb-8">
+            {error || "We couldn't find the event you're looking for."}
+          </p>
+          <a
+            href="/explore"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-brand-500 hover:bg-brand-600 text-white font-semibold shadow-lg shadow-brand-500/20 transition-all hover:-translate-y-0.5"
+          >
+            <Ticket className="w-5 h-5" />
+            Browse Events
+            <ArrowRight className="w-4 h-4" />
+          </a>
+        </div>
+      </div>
+    );
+  }
 
-                console.log('Assembled:', assembled);
+  const sharedCheckoutProps = {
+    onCheckout: () => setCheckoutOpen(true),
+  };
 
-                if (!assembled) {
-                    setError('This event page has not been configured yet.');
-                    return;
-                }
+  return (
+    <>
+      {/* Render the correct template */}
+      {templateData.templateName === 'MINIMAL' && (
+        <Template2 data={templateData} {...sharedCheckoutProps} />
+      )}
+      {templateData.templateName === 'MODERN' && (
+        <Template3 data={templateData} {...sharedCheckoutProps} />
+      )}
+      {templateData.templateName !== 'MINIMAL' && templateData.templateName !== 'MODERN' && (
+        <Template1 data={templateData} {...sharedCheckoutProps} />
+      )}
 
-                setTemplateData(assembled);
-            } catch (err: any) {
-                setError(err.message || 'Event not found.');
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchEvent();
-    }, [slug]);
-
-    // Loading State
-    if (isLoading) {
-        return (
-            <div className="min-h-screen bg-white flex items-center justify-center px-6">
-                <div className="flex flex-col items-center text-center">
-                    <div className="w-20 h-20 rounded-3xl bg-brand-50 border border-brand-100 flex items-center justify-center shadow-sm mb-6">
-                        <Loader2 className="w-10 h-10 text-brand-500 animate-spin" />
-                    </div>
-
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                        Loading Event
-                    </h2>
-
-                    <p className="text-gray-500 text-sm max-w-sm">
-                        Please wait while we prepare the Landing page for you.
-                    </p>
-                </div>
-            </div>
-        );
-    }
-
-    // Error State
-    if (error || !templateData) {
-        return (
-            <div className="min-h-screen bg-white flex items-center justify-center px-6">
-                <div className="w-full max-w-md text-center">
-                    <div className="mx-auto w-24 h-24 rounded-[28px] bg-red-50 border border-red-100 flex items-center justify-center shadow-sm mb-8">
-                        <AlertTriangle className="w-12 h-12 text-red-500" />
-                    </div>
-
-                    <h1 className="text-3xl font-black tracking-tight text-gray-900 mb-3">
-                        Event Not Found
-                    </h1>
-
-                    <p className="text-gray-500 leading-relaxed mb-8">
-                        {error || "We couldn't find the event you're looking for."}
-                    </p>
-
-                    <a
-                        href="/explore"
-                        className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-brand-500 hover:bg-brand-600 text-white font-semibold shadow-lg shadow-brand-500/20 transition-all hover:-translate-y-0.5"
-                    >
-                        <Ticket className="w-5 h-5" />
-                        Browse Events
-                        <ArrowRight className="w-4 h-4" />
-                    </a>
-                </div>
-            </div>
-        );
-    }
-
-    // Render Templates
-    if (templateData.templateName === 'MINIMAL') {
-        return <Template2 data={templateData} />;
-    }
-
-    if (templateData.templateName === 'MODERN') {
-        return <Template3 data={templateData} />;
-    }
-
-    // Default: STANDARD
-    return <Template1 data={templateData} />;
+      {/* Checkout Modal — mounted once here, shared by all templates */}
+      <CheckoutModal
+        isOpen={checkoutOpen}
+        onClose={() => setCheckoutOpen(false)}
+        eventId={rawResponse.eventDetails.id}
+        eventTitle={templateData.title}
+        tickets={rawResponse.tickets}
+        agenda={rawResponse.agenda}
+        primaryColor={templateData.primaryColor}
+        secondaryColor={templateData.secondaryColor ?? templateData.primaryColor}
+      />
+    </>
+  );
 }

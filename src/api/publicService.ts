@@ -3,6 +3,8 @@ import API from '@/api/api.config';
 import {
   PublicEventCard,
   PublicEventPageResponse,
+  CheckoutRequest,
+  CheckoutResponse,
 } from '@/types/event.types';
 import { EventTemplateData, ThemeConfigJson } from '@/types/template.types';
 
@@ -27,6 +29,25 @@ export const publicService = {
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         const backendMessage = error.response.data?.detail || 'Failed to fetch event page.';
+        throw new Error(backendMessage);
+      }
+      throw new Error('Network error. Please check your connection.');
+    }
+  },
+
+    checkout: async (eventId: string, payload: CheckoutRequest): Promise<CheckoutResponse> => {
+    try {
+      const response = await API.post<CheckoutResponse>(
+        `/api/public/checkout/${eventId}`,
+        payload,
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        const backendMessage =
+          error.response.data?.detail ||
+          error.response.data?.message ||
+          'Checkout failed. Please try again.';
         throw new Error(backendMessage);
       }
       throw new Error('Network error. Please check your connection.');
