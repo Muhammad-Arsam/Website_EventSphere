@@ -14,6 +14,8 @@ import TicketTierModal from '@/components/ticket/TicketTierModal';
 import TicketTierList from '@/components/ticket/TicketTiersList';
 
 import PublishingTab from '@/components/events/PublishingTab';
+import DiscountTab from '@/components/events/DiscountTab';
+import SponsorTab from '@/components/events/SponsorTab';
 
 import {
     CalendarDays,
@@ -31,11 +33,12 @@ import {
     ListTodo,
     Ticket,
     Plus,
-    Rocket
+    Rocket,
+    Handshake,
 } from 'lucide-react';
 import Button from '@/components/ui/button/Button';
 
-type TabType = 'overview' | 'agenda' | 'tickets' | 'publishing';
+type TabType = 'overview' | 'agenda' | 'tickets' | 'discounts' | 'sponsors' | 'publishing';
 
 export default function EventDetailsPage() {
     const params = useParams();
@@ -165,6 +168,8 @@ export default function EventDetailsPage() {
         { id: 'overview', label: 'Overview', icon: Info },
         { id: 'agenda', label: 'Agenda', icon: ListTodo },
         { id: 'tickets', label: 'Tickets', icon: Ticket },
+        { id: 'discounts', label: 'Discounts', icon: Tag },
+        { id: 'sponsors',   label: 'Sponsors',   icon: Handshake  },
         { id: 'publishing', label: 'Publishing', icon: Rocket },
     ];
 
@@ -512,6 +517,16 @@ export default function EventDetailsPage() {
                     />
 
                 </div>
+            )}
+
+            {/* TAB CONTENT: DISCOUNTS */}
+            {activeTab === 'discounts' && (
+                <DiscountTab eventId={eventId} />
+            )}
+
+            {/* TAB CONTENT: SPONSORS */}
+            {activeTab === 'sponsors' && (
+                <SponsorTab eventId={eventId} />
             )}
 
             {/* TAB CONTENT: PUBLISHING */}

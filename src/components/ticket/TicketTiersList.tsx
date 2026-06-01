@@ -65,58 +65,221 @@ export default function TicketTierList({ eventId, ticketTiers, onEdit, onRefresh
 
     return (
         <>
-            <div className="space-y-4">
-                {sortedTiers.map((ticketTier) => (
-                    <div
-                        key={ticketTier.id}
-                        onClick={() => setViewingTicketTierId(ticketTier.id)}
-                        className="group bg-white border border-gray-200 rounded-2xl p-4 flex items-center gap-6 hover:shadow-md transition-all cursor-pointer"
-                    >
-                        {/* Icon Thumbnail */}
-                        <div className="w-16 h-16 shrink-0 rounded-xl bg-brand-50 border border-brand-100/60 flex items-center justify-center">
-                            <Ticket className="w-8 h-8 text-brand-400" />
-                        </div>
+            <div className="space-y-5">
+                {sortedTiers.map((ticketTier) => {
+                    const soldPercentage =
+                        ticketTier.totalCapacity > 0
+                            ? (ticketTier.quantitySold / ticketTier.totalCapacity) * 100
+                            : 0;
 
-                        {/* Content */}
-                        <div className="grow space-y-1.5">
-                            <h4 className="text-base font-bold text-gray-900 group-hover:text-brand-600 transition-colors">
-                                {ticketTier.tierName}
-                            </h4>
-                            <div className="flex flex-wrap items-center gap-4 text-sm font-semibold text-gray-500">
-                                <div className="flex items-center gap-1.5 text-green-600">
-                                    <DollarSign className="w-4 h-4" />
-                                    {ticketTier.price.toFixed(2)}
+                    const remainingTickets =
+                        ticketTier.totalCapacity - ticketTier.quantitySold;
+
+                    const isSoldOut =
+                        ticketTier.quantitySold >= ticketTier.totalCapacity;
+
+                    return (
+                        <div
+                            key={ticketTier.id}
+                            onClick={() => setViewingTicketTierId(ticketTier.id)}
+                            className="
+                    relative overflow-hidden
+                    rounded-3xl
+                    border border-gray-100
+                    bg-white
+                    p-5
+                    shadow-sm
+                    hover:shadow-xl
+                    hover:-translate-y-1
+                    transition-all duration-300
+                    cursor-pointer
+                    group
+                "
+                        >
+                            {/* Accent Line */}
+                            <div className="absolute left-0 top-0 h-full w-1.5 bg-linear-to-b from-brand-500 to-brand-300" />
+
+                            {/* Ticket Cutouts */}
+                            <div className="absolute -left-3 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-gray-50 border border-gray-100" />
+                            <div className="absolute -right-3 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-gray-50 border border-gray-100" />
+
+                            <div className="flex items-start gap-5">
+                                {/* Icon */}
+                                <div className="shrink-0">
+                                    <div
+                                        className="
+                                w-16 h-16
+                                rounded-2xl
+                                bg-linear-to-br
+                                from-brand-50
+                                to-brand-100
+                                border border-brand-100
+                                shadow-sm
+                                flex items-center justify-center
+                            "
+                                    >
+                                        <Ticket className="w-8 h-8 text-brand-500" />
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-1.5 text-blue-600">
-                                    <Users className="w-4 h-4" />
-                                    {ticketTier.totalCapacity} Total
+
+                                {/* Content */}
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex flex-wrap items-start justify-between gap-4">
+                                        <div>
+                                            <div className="flex items-center gap-3 flex-wrap">
+                                                <h4
+                                                    className="
+                                            text-lg
+                                            font-bold
+                                            text-gray-900
+                                            group-hover:text-brand-600
+                                            transition-colors
+                                        "
+                                                >
+                                                    {ticketTier.tierName}
+                                                </h4>
+
+                                                {isSoldOut && (
+                                                    <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-red-50 text-red-600 border border-red-100">
+                                                        SOLD OUT
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            {/* <p className="text-sm text-gray-400 mt-1">
+                                                Event Ticket Tier
+                                            </p> */}
+                                        </div>
+
+                                        <div className="px-4 py-2 rounded-2xl bg-green-50 border border-green-100">
+                                            <div className="flex items-center gap-1 text-green-700">
+                                                {/* <DollarSign className="w-4 h-4" /> */}
+                                                <span className="font-bold text-lg">
+                                                   Rs. {ticketTier.price.toFixed(2)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Stats */}
+                                    <div className="grid grid-cols-3 gap-3 mt-5">
+                                        <div className="rounded-2xl bg-blue-50 border border-blue-100 px-4 py-3">
+                                            <div className="flex items-center gap-2 text-blue-600 mb-1">
+                                                <Users className="w-4 h-4" />
+                                                <span className="text-xs font-semibold uppercase">
+                                                    Capacity
+                                                </span>
+                                            </div>
+
+                                            <div className="font-bold text-lg text-gray-900">
+                                                {ticketTier.totalCapacity}
+                                            </div>
+                                        </div>
+
+                                        <div className="rounded-2xl bg-amber-50 border border-amber-100 px-4 py-3">
+                                            <div className="flex items-center gap-2 text-amber-600 mb-1">
+                                                <ShoppingCart className="w-4 h-4" />
+                                                <span className="text-xs font-semibold uppercase">
+                                                    Sold
+                                                </span>
+                                            </div>
+
+                                            <div className="font-bold text-lg text-gray-900">
+                                                {ticketTier.quantitySold}
+                                            </div>
+                                        </div>
+
+                                        <div className="rounded-2xl bg-emerald-50 border border-emerald-100 px-4 py-3">
+                                            <div className="flex items-center gap-2 text-emerald-600 mb-1">
+                                                <Ticket className="w-4 h-4" />
+                                                <span className="text-xs font-semibold uppercase">
+                                                    Left
+                                                </span>
+                                            </div>
+
+                                            <div className="font-bold text-lg text-gray-900">
+                                                {remainingTickets}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Progress */}
+                                    <div className="mt-5">
+                                        <div className="flex justify-between text-xs text-gray-500 mb-2">
+                                            <span>Sales Progress</span>
+                                            <span>{Math.round(soldPercentage)}%</span>
+                                        </div>
+
+                                        <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                                            <div
+                                                className="
+                                        h-full
+                                        rounded-full
+                                        bg-linear-to-r
+                                        from-brand-500
+                                        to-brand-400
+                                        transition-all duration-500
+                                    "
+                                                style={{
+                                                    width: `${Math.min(
+                                                        soldPercentage,
+                                                        100
+                                                    )}%`,
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-1.5 text-amber-600">
-                                    <ShoppingCart className="w-4 h-4" />
-                                    {ticketTier.quantitySold} Sold
+
+                                {/* Actions */}
+                                <div
+                                    className="
+                            flex flex-col gap-2
+                            opacity-0
+                            group-hover:opacity-100
+                            transition-all duration-200
+                        "
+                                >
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onEdit(ticketTier);
+                                        }}
+                                        className="
+                                p-3
+                                rounded-2xl
+                                bg-blue-50
+                                text-blue-600
+                                hover:bg-blue-100
+                                hover:scale-105
+                                transition-all
+                            "
+                                    >
+                                        <Edit2 className="w-4 h-4" />
+                                    </button>
+
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setTicketTierToDelete(ticketTier);
+                                        }}
+                                        className="
+                                p-3
+                                rounded-2xl
+                                bg-red-50
+                                text-red-500
+                                hover:bg-red-100
+                                hover:scale-105
+                                transition-all
+                            "
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
                                 </div>
                             </div>
                         </div>
-
-                        {/* Actions */}
-                        <div className="shrink-0 flex items-center gap-2 border-l border-gray-100 pl-4 ml-2">
-                            <button
-                                onClick={(e) => { e.stopPropagation(); onEdit(ticketTier); }}
-                                className="p-2.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
-                                title="Edit"
-                            >
-                                <Edit2 className="w-5 h-5" />
-                            </button>
-                            <button
-                                onClick={(e) => { e.stopPropagation(); setTicketTierToDelete(ticketTier); }}
-                                className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
-                                title="Delete"
-                            >
-                                <Trash2 className="w-5 h-5" />
-                            </button>
-                        </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             {/* Detail View Modal */}

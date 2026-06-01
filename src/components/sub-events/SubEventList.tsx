@@ -24,7 +24,7 @@ export default function SubEventList({ eventId, subEvents, onEdit, onRefresh }: 
     // State for managing the delete modal
     const [subEventToDelete, setSubEventToDelete] = useState<SubEvent | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
-    
+
     // State for managing the toast alert
     const [toast, setToast] = useState<AlertConfig | null>(null);
 
@@ -33,22 +33,22 @@ export default function SubEventList({ eventId, subEvents, onEdit, onRefresh }: 
 
     const confirmDelete = async () => {
         if (!subEventToDelete) return;
-        
+
         setIsDeleting(true);
         try {
             await eventService.deleteSubEvent(eventId, subEventToDelete.id);
             onRefresh();
-            setSubEventToDelete(null); 
-            
+            setSubEventToDelete(null);
+
             setToast({
                 variant: 'success',
                 title: 'Deleted Successfully',
                 message: 'The agenda item has been removed.',
-                id: Date.now() 
+                id: Date.now()
             });
         } catch (error) {
-            setSubEventToDelete(null); 
-            
+            setSubEventToDelete(null);
+
             setToast({
                 variant: 'error',
                 title: 'Deletion Failed',
@@ -81,94 +81,221 @@ export default function SubEventList({ eventId, subEvents, onEdit, onRefresh }: 
 
     return (
         <>
-            <div className="space-y-4">
+            <div className="space-y-5">
                 {sortedEvents.map((subEvent) => (
-                    <div 
-                        key={subEvent.id} 
+                    <div
+                        key={subEvent.id}
                         onClick={() => setViewingSubEventId(subEvent.id)}
-                        className="group bg-white border border-gray-200 rounded-2xl p-4 flex items-center gap-6 hover:shadow-md transition-all cursor-pointer"
+                        className="
+            relative overflow-hidden
+            rounded-3xl
+            border border-gray-100
+            bg-white
+            p-5
+            shadow-sm
+            hover:shadow-xl
+            hover:-translate-y-1
+            transition-all duration-300
+            cursor-pointer
+            group
+        "
                     >
-                        
-                        {/* Thumbnail */}
-                        <div className="w-24 h-24 shrink-0 rounded-xl bg-gray-100 overflow-hidden border border-gray-200/60 flex items-center justify-center relative">
-                            {subEvent.imageUrl ? (
-                                <img src={subEvent.imageUrl} alt={subEvent.title} className="w-full h-full object-cover" />
-                            ) : (
-                                <ImageIcon className="w-8 h-8 text-gray-300" />
-                            )}
-                        </div>
+                        {/* Accent Line */}
+                        <div className="absolute left-0 top-0 h-full w-1.5 bg-linear-to-b from-emerald-500 to-emerald-300" />
 
-                        {/* Content */}
-                        <div className="grow space-y-2">
-                            <h4 className="text-lg font-bold text-gray-900 group-hover:text-emerald-600 transition-colors">
-                                {subEvent.title}
-                            </h4>
-                            
-                            <div className="flex flex-wrap items-center gap-4 text-sm font-semibold text-gray-500">
-                                <div className="flex items-center gap-1.5">
-                                    <Clock className="w-4 h-4 text-emerald-500" />
-                                    {formatTimeRange(subEvent.startTime, subEvent.endTime)}
+                        <div className="flex gap-5">
+
+                            {/* Image */}
+                            <div className="shrink-0">
+                                <div
+                                    className="
+                        w-24 h-24
+                        rounded-2xl
+                        overflow-hidden
+                        border border-gray-100
+                        bg-gray-50
+                        shadow-sm
+                    "
+                                >
+                                    {subEvent.imageUrl ? (
+                                        <img
+                                            src={subEvent.imageUrl}
+                                            alt={subEvent.title}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center">
+                                            <ImageIcon className="w-8 h-8 text-gray-300" />
+                                        </div>
+                                    )}
                                 </div>
-                                
-                                {subEvent.roomOrLocation && (
-                                    <div className="flex items-center gap-1.5">
-                                        <MapPin className="w-4 h-4 text-emerald-500" />
-                                        {subEvent.roomOrLocation}
+                            </div>
+
+                            {/* Content */}
+                            <div className="flex-1 min-w-0">
+
+                                {/* Header */}
+                                <div className="flex flex-wrap justify-between gap-4">
+                                    <div>
+                                        <h4
+                                            className="
+                                text-lg
+                                font-bold
+                                text-gray-900
+                                group-hover:text-emerald-600
+                                transition-colors
+                            "
+                                        >
+                                            {subEvent.title}
+                                        </h4>
+
+                                        {/* <p className="text-sm text-gray-400 mt-1">
+                                            Agenda Item
+                                        </p> */}
                                     </div>
-                                )}
-                                
-                                {subEvent.capacityLimit && (
-                                    <div className="flex items-center gap-1.5">
-                                        <Users className="w-4 h-4 text-blue-500" />
-                                        {subEvent.capacityLimit} max
+
+                                    {/* Time Badge */}
+                                    <div
+                                        className="
+                            px-4 py-2
+                            rounded-2xl
+                            bg-emerald-50
+                            border border-emerald-100
+                            text-emerald-700
+                            font-semibold
+                            text-sm
+                            flex items-center gap-2
+                            h-fit
+                        "
+                                    >
+                                        <Clock className="w-4 h-4" />
+                                        {formatTimeRange(
+                                            subEvent.startTime,
+                                            subEvent.endTime
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Metadata */}
+                                <div className="grid grid-cols-2 gap-3 mt-5">
+
+                                    {subEvent.roomOrLocation && (
+                                        <div
+                                            className="
+                                rounded-2xl
+                                bg-blue-50
+                                border border-blue-100
+                                px-4 py-3
+                            "
+                                        >
+                                            <div className="flex items-center gap-2 text-blue-600 mb-1">
+                                                <MapPin className="w-4 h-4" />
+                                                <span className="text-xs font-semibold uppercase tracking-wide">
+                                                    Location
+                                                </span>
+                                            </div>
+
+                                            <div className="font-semibold text-gray-900 truncate">
+                                                {subEvent.roomOrLocation}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {subEvent.capacityLimit && (
+                                        <div
+                                            className="
+                                rounded-2xl
+                                bg-purple-50
+                                border border-purple-100
+                                px-4 py-3
+                            "
+                                        >
+                                            <div className="flex items-center gap-2 text-purple-600 mb-1">
+                                                <Users className="w-4 h-4" />
+                                                <span className="text-xs font-semibold uppercase tracking-wide">
+                                                    Capacity
+                                                </span>
+                                            </div>
+
+                                            <div className="font-semibold text-gray-900">
+                                                {subEvent.capacityLimit} Attendees
+                                            </div>
+                                        </div>
+                                    )}
+
+                                </div>
+
+                                {/* Description */}
+                                {subEvent.description && (
+                                    <div className="mt-4">
+                                        <p className="text-sm text-gray-600 leading-relaxed line-clamp-2">
+                                            {subEvent.description}
+                                        </p>
                                     </div>
                                 )}
                             </div>
 
-                            {subEvent.description && (
-                                <p className="text-gray-600 text-sm line-clamp-2 leading-relaxed">
-                                    {subEvent.description}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Actions */}
-                        <div className="shrink-0 flex items-center gap-2 border-l border-gray-100 pl-4 ml-2">
-                            <button 
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    onEdit(subEvent);
-                                }}
-                                className="p-2.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
-                                title="Edit"
+                            {/* Actions */}
+                            <div
+                                className="
+                    flex flex-col gap-2
+                    opacity-0
+                    group-hover:opacity-100
+                    transition-all duration-200
+                "
                             >
-                                <Edit2 className="w-5 h-5" />
-                            </button>
-                            <button 
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSubEventToDelete(subEvent);
-                                }}
-                                className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
-                                title="Delete"
-                            >
-                                <Trash2 className="w-5 h-5" />
-                            </button>
-                        </div>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onEdit(subEvent);
+                                    }}
+                                    className="
+                        p-3
+                        rounded-2xl
+                        bg-blue-50
+                        text-blue-600
+                        hover:bg-blue-100
+                        hover:scale-105
+                        transition-all
+                    "
+                                    title="Edit Sub Event"
+                                >
+                                    <Edit2 className="w-4 h-4" />
+                                </button>
 
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSubEventToDelete(subEvent);
+                                    }}
+                                    className="
+                        p-3
+                        rounded-2xl
+                        bg-red-50
+                        text-red-500
+                        hover:bg-red-100
+                        hover:scale-105
+                        transition-all
+                    "
+                                    title="Delete Sub Event"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 ))}
             </div>
 
             {/* Render the Details Modal */}
-            <SubEventCard 
-                isOpen={!!viewingSubEventId} 
-                onClose={() => setViewingSubEventId(null)} 
-                subEventId={viewingSubEventId} 
+            <SubEventCard
+                isOpen={!!viewingSubEventId}
+                onClose={() => setViewingSubEventId(null)}
+                subEventId={viewingSubEventId}
             />
 
             {/* Render the Delete Confirmation Modal */}
-            <DeleteSubEventModal 
+            <DeleteSubEventModal
                 isOpen={!!subEventToDelete}
                 onClose={() => !isDeleting && setSubEventToDelete(null)}
                 onConfirm={confirmDelete}
