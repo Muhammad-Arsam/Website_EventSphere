@@ -8,7 +8,8 @@ import {
   AddSubEventRequest,
   UpdateSubEventRequest,
   LandingPage,
-  ConfigureLandingPageRequest
+  ConfigureLandingPageRequest,
+  EventOrder
 } from '@/types/event.types';
 import { ThemeConfigJson } from '@/types/template.types';
 
@@ -262,10 +263,25 @@ configureLandingPage: async (
   },
 
   parseLandingPageTheme: (landingPage: LandingPage): ThemeConfigJson | null => {
-  try {
-    return JSON.parse(landingPage.themeConfigJson) as ThemeConfigJson;
-  } catch {
-    return null;
-  }
-},
+    try {
+      return JSON.parse(landingPage.themeConfigJson) as ThemeConfigJson;
+    } catch {
+      return null;
+    }
+  },
+
+  // Get Orders Api
+
+  getEventOrders: async (eventId: string): Promise<EventOrder[]> => {
+    try {
+      const response = await API.get<EventOrder[]>(`/api/event/orders/${eventId}`);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        const backendMessage = error.response.data?.detail || 'Failed to fetch event orders.';
+        throw new Error(backendMessage);
+      }
+      throw new Error('Network error. Please check your connection.');
+    }
+  },
 };

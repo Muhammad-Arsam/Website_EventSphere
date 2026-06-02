@@ -44,6 +44,11 @@ const organizerNavItems: NavItem[] = [
     name: "Events Oversight",
     path: "/events",
   },
+  {
+    icon: <ListIcon />,
+    name: "Orders",
+    path: "/orders",
+  },
 ];
 
 const organizerOthersItems: NavItem[] = [

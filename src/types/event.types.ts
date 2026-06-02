@@ -193,3 +193,17 @@ export interface CheckoutResponse {
   // Adjust this if your backend returns a richer object
   orderId: string;
 }
+
+// --- ORDER TYPES ---
+
+export interface EventOrder {
+  orderId: string;
+  orderReference: string;
+  buyerName: string;
+  buyerEmail: string;
+  buyerCnic: string;
+  buyerPhone: string;
+  totalAmount: number;
+  paymentStatus: string;
+  createdAt: string;
+}

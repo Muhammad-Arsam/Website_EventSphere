@@ -4,6 +4,7 @@ import {
   Organization,
   CreateOrganizationData,
   UpdateOrganizationData,
+  OrganizationWallet,
 } from '../types/organization.types';
 
 export const organizationService = {
@@ -65,6 +66,23 @@ export const organizationService = {
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         const backendMessage = error.response.data?.detail || 'Failed to update organization.';
+        throw new Error(backendMessage);
+      }
+      throw new Error('Network error. Please check your connection.');
+    }
+  },
+
+  // Get organization wallet api
+
+  getWallet: async (organizationId: string): Promise<OrganizationWallet> => {
+    try {
+      const response = await API.get<OrganizationWallet>(
+        `/api/organization/wallet/${organizationId}`
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        const backendMessage = error.response.data?.detail || 'Failed to fetch wallet data.';
         throw new Error(backendMessage);
       }
       throw new Error('Network error. Please check your connection.');

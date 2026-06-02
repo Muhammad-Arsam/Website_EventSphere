@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { organizationService } from '@/api/organizationService';
 import { Organization } from '@/types/organization.types';
 import WorkspaceInfoCard from '@/components/workspaces/WorkspaceInfoCard';
+import WalletCard from '@/components/workspaces/WalletCard';
 
 export default function WorkspacesPage() {
   const router = useRouter();
@@ -16,7 +17,7 @@ export default function WorkspacesPage() {
     const fetchOrganization = async () => {
       try {
         const orgData = await organizationService.getMyOrganization();
-        
+
         if (!orgData) {
           router.push('/create-organization');
           return;
@@ -55,12 +56,14 @@ export default function WorkspacesPage() {
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
           Organization
         </h1>
-        {/* <p className="text-sm text-gray-500 dark:text-gray-400">
-          Manage your organization details and settings.
-        </p> */}
       </div>
 
-      {organization && <WorkspaceInfoCard organization={organization} />}
+      {organization && (
+        <>
+          <WorkspaceInfoCard organization={organization} />
+          <WalletCard organizationId={organization.id} />
+        </>
+      )}
     </div>
   );
 }

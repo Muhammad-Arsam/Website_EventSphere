@@ -7,18 +7,18 @@ import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
 import React, { useState } from "react";
 import { authService } from "@/api/authService";
-import { organizationService } from "@/api/organizationService"; 
-import { setToken, setRefreshToken, setRole } from "@/utils/token"; 
+import { organizationService } from "@/api/organizationService";
+import { setToken, setRefreshToken, setRole, setOrgId } from "@/utils/token";
 import { useRouter } from "next/navigation";
 import Alert from "@/components/ui/alert/Alert";
 
 export default function SignInForm() {
   const router = useRouter();
-  
+
   // --- VIEW & STEP MANAGEMENT ---
   const [view, setView] = useState<"signin" | "forgotPassword">("signin");
   const [step, setStep] = useState(1); // 1: Initiate, 2: Verify, 3: Reset
-  
+
   // --- SHARED STATE ---
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState<{
@@ -65,7 +65,7 @@ export default function SignInForm() {
     });
   };
 
-// --- HANDLERS ---
+  // --- HANDLERS ---
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setAlert(null);
@@ -73,9 +73,9 @@ export default function SignInForm() {
 
     try {
       const response = await authService.login({ username, password });
-      
+
       setToken(response.token);
-      setRefreshToken(response.refreshToken); 
+      setRefreshToken(response.refreshToken);
       setRole(response.role);
 
       let targetPath = "/dashboard";
@@ -83,15 +83,17 @@ export default function SignInForm() {
 
       const userRole = response?.role || "";
 
-      console.log("Login Response Role:", userRole); 
+      console.log("Login Response Role:", userRole);
 
       if (userRole.toLowerCase() === "organizer") {
         try {
           const orgData = await organizationService.getMyOrganization();
-          
+
           if (!orgData) {
             targetPath = "/create-organization";
             successMessage = "Login successful! Let's set up your workspace...";
+          } else {
+            setOrgId(orgData.id);  // ← save org ID right after login
           }
         } catch (orgError: any) {
           if (orgError?.response?.status === 404) {
@@ -102,7 +104,7 @@ export default function SignInForm() {
           }
         }
       }
-      
+
       setAlert({
         variant: "success",
         title: "Login Successful",
@@ -150,7 +152,7 @@ export default function SignInForm() {
     try {
       const token = await authService.forgotPasswordVerify({ email, otp });
       setToken(token);
-      
+
       setAlert({
         variant: "success",
         title: "Verified",
@@ -183,7 +185,7 @@ export default function SignInForm() {
 
     try {
       await authService.resetPassword({ newPassword, confirmPassword });
-      
+
       setAlert({
         variant: "success",
         title: "Password Reset",
@@ -209,11 +211,11 @@ export default function SignInForm() {
   return (
     <div className="flex flex-col flex-1 w-full lg:w-1/2">
       {alert && (
-        <Alert 
-          key={alert.key} 
-          variant={alert.variant} 
-          title={alert.title} 
-          message={alert.message} 
+        <Alert
+          key={alert.key}
+          variant={alert.variant}
+          title={alert.title}
+          message={alert.message}
         />
       )}
 
@@ -232,7 +234,7 @@ export default function SignInForm() {
           </button>
         )}
       </div>
-      
+
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
         <div>
           {/* --- SIGN IN VIEW --- */}
@@ -251,15 +253,15 @@ export default function SignInForm() {
                 <div className="space-y-6">
                   <div>
                     <Label>Username <span className="text-error-500">*</span></Label>
-                    <Input 
-                      placeholder="Enter your username" 
-                      type="text" 
+                    <Input
+                      placeholder="Enter your username"
+                      type="text"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       required
                     />
                   </div>
-                  
+
                   <div>
                     <Label>Password <span className="text-error-500">*</span></Label>
                     <div className="relative">
@@ -330,9 +332,9 @@ export default function SignInForm() {
                   <div className="space-y-6">
                     <div>
                       <Label>Email <span className="text-error-500">*</span></Label>
-                      <Input 
-                        placeholder="Enter your email" 
-                        type="email" 
+                      <Input
+                        placeholder="Enter your email"
+                        type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
@@ -350,9 +352,9 @@ export default function SignInForm() {
                   <div className="space-y-6">
                     <div>
                       <Label>OTP Code <span className="text-error-500">*</span></Label>
-                      <Input 
-                        placeholder="Enter the OTP" 
-                        type="text" 
+                      <Input
+                        placeholder="Enter the OTP"
+                        type="text"
                         value={otp}
                         onChange={(e) => setOtp(e.target.value)}
                         required
@@ -389,7 +391,7 @@ export default function SignInForm() {
                         Password must be at least 8 characters and max 15 characters.
                       </p>
                     </div>
-                    
+
                     <div>
                       <Label>Confirm Password <span className="text-error-500">*</span></Label>
                       <div className="relative">

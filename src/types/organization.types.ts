@@ -25,3 +25,18 @@ export interface UpdateOrganizationData {
   email?: string;
   image?: File;
 }
+
+// --- WALLET TYPES ---
+
+export interface WalletTransaction {
+  transactionId: string;
+  amount: number;
+  transactionType: string;
+  description: string;
+  createdAt: string;
+}
+
+export interface OrganizationWallet {
+  availableBalance: number;
+  recentTransactions: WalletTransaction[];
+}
