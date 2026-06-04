@@ -5,6 +5,7 @@ import {
   PublicEventPageResponse,
   CheckoutRequest,
   CheckoutResponse,
+  ValidatePromoCodeResponse,
 } from '@/types/event.types';
 import { EventTemplateData, ThemeConfigJson } from '@/types/template.types';
 
@@ -53,6 +54,22 @@ export const publicService = {
       throw new Error('Network error. Please check your connection.');
     }
   },
+
+  validatePromoCode: async (eventId: string, code: string): Promise<ValidatePromoCodeResponse> => {
+  try {
+    const response = await API.get<ValidatePromoCodeResponse>(
+      `/api/public/discount-code/validate/${eventId}`,
+      { params: { code } }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      const backendMessage = error.response.data?.detail || 'Failed to validate promo code.';
+      throw new Error(backendMessage);
+    }
+    throw new Error('Network error. Please check your connection.');
+  }
+},
 
   parseThemeConfig: (themeConfigJson: string): ThemeConfigJson | null => {
     try {

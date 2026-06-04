@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
-import { PublicAgendaItem, PublicTicket, CheckoutRequest, TicketSelection } from '@/types/event.types';
+import { PublicAgendaItem, PublicTicket, CheckoutRequest, TicketSelection, CheckoutResponse } from '@/types/event.types';
 import { publicService } from '@/api/publicService';
 import StepTickets from './StepTickets';
 import StepSubEvents from './StepSubEvents';
@@ -26,11 +26,11 @@ interface CheckoutModalProps {
 
 const STEPS: CheckoutStep[] = ['tickets', 'subevents', 'buyer', 'review', 'success'];
 const STEP_LABELS: Record<CheckoutStep, string> = {
-  tickets:   'Tickets',
+  tickets: 'Tickets',
   subevents: 'Sessions',
-  buyer:     'Your Info',
-  review:    'Review',
-  success:   'Done',
+  buyer: 'Your Info',
+  review: 'Review',
+  success: 'Done',
 };
 
 export default function CheckoutModal({
@@ -39,16 +39,20 @@ export default function CheckoutModal({
   tickets, agenda,
   primaryColor, secondaryColor,
 }: CheckoutModalProps) {
-  const [step, setStep]                         = useState<CheckoutStep>('tickets');
-  const [selections, setSelections]             = useState<Record<string, number>>({});
+  const [step, setStep] = useState<CheckoutStep>('tickets');
+  const [selections, setSelections] = useState<Record<string, number>>({});
   const [selectedSubEvents, setSelectedSubEvents] = useState<string[]>([]);
-  const [buyerName, setBuyerName]               = useState('');
-  const [buyerEmail, setBuyerEmail]             = useState('');
-  const [buyerPhone, setBuyerPhone]             = useState('');
-  const [buyerCnic, setBuyerCnic]               = useState('');
-  const [promoCode, setPromoCode]               = useState('');
-  const [isSubmitting, setIsSubmitting]         = useState(false);
-  const [alert, setAlert]                       = useState<{ variant: 'success' | 'error'; title: string; message: string } | null>(null);
+  const [buyerName, setBuyerName] = useState('');
+  const [buyerEmail, setBuyerEmail] = useState('');
+  const [buyerPhone, setBuyerPhone] = useState('');
+  const [buyerCnic, setBuyerCnic] = useState('');
+  const [promoCode, setPromoCode] = useState('');
+  const [discount, setDiscount] = useState(0);
+  const [promoApplied, setPromoApplied] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [alert, setAlert] = useState<{ variant: 'success' | 'error'; title: string; message: string } | null>(null);
+  const [checkoutResponse, setCheckoutResponse] = useState<CheckoutResponse | null>(null);
+
 
   // Reset state when modal opens
   useEffect(() => {
@@ -69,6 +73,8 @@ export default function CheckoutModal({
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      setDiscount(0);
+      setPromoApplied(false);
     } else {
       document.body.style.overflow = '';
     }
@@ -77,13 +83,17 @@ export default function CheckoutModal({
 
   if (!isOpen) return null;
 
-  const stepIndex    = STEPS.indexOf(step);
+  const stepIndex = STEPS.indexOf(step);
   const visibleSteps = STEPS.filter(s => s !== 'success');
 
-  const totalAmount = tickets.reduce((sum, t) => {
+  const rawTotal = tickets.reduce((sum, t) => {
     const qty = selections[t.id] || 0;
     return sum + (t.price * qty);
   }, 0);
+
+  const totalAmount = promoApplied && discount > 0
+    ? Math.round(rawTotal * (1 - discount / 100))
+    : rawTotal;
 
   const ticketSelections: TicketSelection[] = Object.entries(selections)
     .filter(([, qty]) => qty > 0)
@@ -94,20 +104,29 @@ export default function CheckoutModal({
   const handleSubmit = async () => {
     setIsSubmitting(true);
     setAlert(null);
+
     try {
       const payload: CheckoutRequest = {
-        buyerName:          buyerName.trim(),
-        buyerEmail:         buyerEmail.trim(),
-        buyerPhone:         buyerPhone.trim(),
-        buyerCnic:          buyerCnic.trim(),
+        buyerName: buyerName.trim(),
+        buyerEmail: buyerEmail.trim(),
+        buyerPhone: buyerPhone.trim(),
+        buyerCnic: buyerCnic.trim(),
         ticketSelections,
         selectedSubEventIds: selectedSubEvents.length > 0 ? selectedSubEvents : undefined,
-        promoCode:           promoCode.trim() || undefined,
+        promoCode: promoCode.trim() || undefined,
       };
-      await publicService.checkout(eventId, payload);
+
+      const response = await publicService.checkout(eventId, payload);
+
+      setCheckoutResponse(response);
+
       setStep('success');
     } catch (err: any) {
-      setAlert({ variant: 'error', title: 'Checkout Failed', message: err.message || 'Something went wrong. Please try again.' });
+      setAlert({
+        variant: 'error',
+        title: 'Checkout Failed',
+        message: err.message || 'Something went wrong. Please try again.',
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -223,10 +242,10 @@ export default function CheckoutModal({
             )}
             {step === 'buyer' && (
               <StepBuyerDetails
-                buyerName={buyerName}       setBuyerName={setBuyerName}
-                buyerEmail={buyerEmail}     setBuyerEmail={setBuyerEmail}
-                buyerPhone={buyerPhone}     setBuyerPhone={setBuyerPhone}
-                buyerCnic={buyerCnic}       setBuyerCnic={setBuyerCnic}
+                buyerName={buyerName} setBuyerName={setBuyerName}
+                buyerEmail={buyerEmail} setBuyerEmail={setBuyerEmail}
+                buyerPhone={buyerPhone} setBuyerPhone={setBuyerPhone}
+                buyerCnic={buyerCnic} setBuyerCnic={setBuyerCnic}
                 primaryColor={primaryColor}
                 secondaryColor={secondaryColor}
                 onBack={() => setStep(agenda.length > 0 ? 'subevents' : 'tickets')}
@@ -251,15 +270,37 @@ export default function CheckoutModal({
                 isSubmitting={isSubmitting}
                 onBack={() => setStep('buyer')}
                 onSubmit={handleSubmit}
+                rawTotal={rawTotal}
+                discount={discount}
+                promoApplied={promoApplied}
+                onApplyPromo={async (code) => {
+                  try {
+                    const result = await publicService.validatePromoCode(eventId, code);
+                    if (result.isValid) {
+                      setDiscount(result.percentage);
+                      setPromoApplied(true);
+                    } else {
+                      setDiscount(0);
+                      setPromoApplied(false);
+                    }
+                    return result;
+                  } catch {
+                    setDiscount(0);
+                    setPromoApplied(false);
+                    return { isValid: false, percentage: 0 };
+                  }
+                }}
               />
             )}
             {step === 'success' && (
               <StepSuccess
                 buyerName={buyerName}
                 buyerEmail={buyerEmail}
-                totalAmount={totalAmount}
+                totalAmount={checkoutResponse?.totalPaid ?? totalAmount}
+                totalTickets={checkoutResponse?.totalTickets ?? 0}
                 primaryColor={primaryColor}
                 secondaryColor={secondaryColor}
+                backendMessage={checkoutResponse?.message ?? ''}
                 onClose={onClose}
               />
             )}

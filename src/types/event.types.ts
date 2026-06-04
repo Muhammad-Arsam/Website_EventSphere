@@ -189,9 +189,12 @@ export interface CheckoutRequest {
 }
  
 export interface CheckoutResponse {
-  // The Swagger shows response as "string" (likely an order ID or confirmation code)
-  // Adjust this if your backend returns a richer object
-  orderId: string;
+  success: boolean;
+  message: string;
+  orderReference: string;
+  totalPaid: number;
+  totalTickets: number;
+  receiptEmail: string;
 }
 
 // --- ORDER TYPES ---
@@ -206,4 +209,11 @@ export interface EventOrder {
   totalAmount: number;
   paymentStatus: string;
   createdAt: string;
+}
+
+// --- PROMO CODE TYPES ---
+
+export interface ValidatePromoCodeResponse {
+  isValid: boolean;
+  percentage: number;
 }
