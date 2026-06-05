@@ -85,15 +85,17 @@ export default function SignInForm() {
 
       console.log("Login Response Role:", userRole);
 
-      if (userRole.toLowerCase() === "organizer") {
+      if (userRole.toLowerCase() === "attendee") {
+        targetPath = "/attendee/explore";
+        successMessage = "Welcome back! Redirecting to events...";
+      } else if (userRole.toLowerCase() === "organizer") {
         try {
           const orgData = await organizationService.getMyOrganization();
-
           if (!orgData) {
             targetPath = "/create-organization";
             successMessage = "Login successful! Let's set up your workspace...";
           } else {
-            setOrgId(orgData.id);  // ← save org ID right after login
+            setOrgId(orgData.id);
           }
         } catch (orgError: any) {
           if (orgError?.response?.status === 404) {
@@ -104,6 +106,7 @@ export default function SignInForm() {
           }
         }
       }
+      // For any other role (if exists), default to dashboard (or you can add a fallback)
 
       setAlert({
         variant: "success",

@@ -217,3 +217,23 @@ export interface ValidatePromoCodeResponse {
   isValid: boolean;
   percentage: number;
 }
+
+// TICKET TYPES
+
+export interface AttendeeTicket {
+  ticketId: string;
+  ticketReference: string;
+  orderReference: string;
+  eventName: string;
+  eventDate: string;
+  ticketStatus: string;
+  assignedName: string;
+  assignedEmail: string;
+  assignedPhone: string;
+  assignedCnic: string;
+  tierName: string;
+  checkedInTime: string | null;
+  checkedOutTime: boolean;
+}
+
+export type GetAllTicketsResponse = AttendeeTicket[];

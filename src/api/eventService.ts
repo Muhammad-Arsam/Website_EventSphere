@@ -9,7 +9,8 @@ import {
   UpdateSubEventRequest,
   LandingPage,
   ConfigureLandingPageRequest,
-  EventOrder
+  EventOrder,
+  AttendeeTicket,
 } from '@/types/event.types';
 import { ThemeConfigJson } from '@/types/template.types';
 
@@ -284,4 +285,19 @@ configureLandingPage: async (
       throw new Error('Network error. Please check your connection.');
     }
   },
+
+    // Get Tickets Api
+
+  getAllTickets: async (eventId: string): Promise<AttendeeTicket[]> => {
+  try {
+    const response = await API.get<AttendeeTicket[]>(`/api/event/get-all-tickets/${eventId}`);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      const backendMessage = error.response.data?.detail || 'Failed to fetch tickets.';
+      throw new Error(backendMessage);
+    }
+    throw new Error('Network error. Please check your connection.');
+  }
+},
 };

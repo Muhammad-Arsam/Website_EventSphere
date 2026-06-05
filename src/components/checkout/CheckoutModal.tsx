@@ -138,12 +138,13 @@ export default function CheckoutModal({
     <>
       {/* Alert toast */}
       {alert && (
+        <div className="fixed top-6 right-6 z-99999 w-full max-w-sm drop-shadow-xl animate-in fade-in slide-in-from-top-4 duration-300">
         <Alert
-          key={Date.now()}
           variant={alert.variant}
           title={alert.title}
           message={alert.message}
         />
+        </div>
       )}
 
       {/* Backdrop */}
