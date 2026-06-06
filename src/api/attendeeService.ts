@@ -4,6 +4,7 @@ import {
   AttendeeTicketsResponse,
   AttendeeOrdersResponse,
   AttendeeEventsResponse,
+  TransferTicketRequest,
 } from '@/types/attendee.types';
 
 export const attendeeService = {
@@ -40,6 +41,22 @@ export const attendeeService = {
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         const backendMessage = error.response.data?.detail || 'Failed to fetch your events.';
+        throw new Error(backendMessage);
+      }
+      throw new Error('Network error. Please check your connection.');
+    }
+  },
+
+  transferTicket: async (ticketId: string, data: TransferTicketRequest): Promise<string> => {
+    try {
+      const response = await API.post<string>(
+        `/api/attendee/tickets/transfer-ticket/${ticketId}`,
+        data
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        const backendMessage = error.response.data?.detail || 'Failed to transfer ticket.';
         throw new Error(backendMessage);
       }
       throw new Error('Network error. Please check your connection.');

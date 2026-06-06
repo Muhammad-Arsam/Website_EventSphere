@@ -41,3 +41,10 @@ export interface AttendeeEvent {
 }
 
 export type AttendeeEventsResponse = AttendeeEvent[];
+
+export interface TransferTicketRequest {
+  newName: string;
+  newEmail: string;
+  newCnic: string;
+  newPhone: string;
+}

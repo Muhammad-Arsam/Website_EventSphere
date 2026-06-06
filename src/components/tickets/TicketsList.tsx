@@ -178,23 +178,19 @@ export default function TicketsList() {
                     
                     <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                       <Mail className="h-3.5 w-3.5" />
-                      <span className="truncate">{ticket.assignedEmail}</span>
+                      <span className="truncate">{ticket.assignedEmail || 'Not provided'}</span>
                     </div>
                     
                     <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                       <Phone className="h-3.5 w-3.5" />
-                      <span>{ticket.assignedPhone}</span>
+                      <span>{ticket.assignedPhone || 'Not provided'}</span>
                     </div>
 
-                    {/* ✅ CNIC field */}
-                    {ticket.assignedCnic && (
-                      <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                        <IdCard className="h-3.5 w-3.5" />
-                        <span>{ticket.assignedCnic}</span>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                      <IdCard className="h-3.5 w-3.5" />
+                      <span>{ticket.assignedCnic || 'Not provided'}</span>
+                    </div>
 
-                    {/* ✅ Ticket tier name */}
                     <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                       <Tag className="h-3.5 w-3.5" />
                       <span>{ticket.tierName}</span>
@@ -202,7 +198,6 @@ export default function TicketsList() {
                   </div>
 
                   <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
-                    {/* ✅ Order Reference */}
                     <div className="flex items-center justify-between text-xs text-gray-400 mb-2">
                       <div className="flex items-center gap-1">
                         <CreditCard className="h-3 w-3" />

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { EventTemplateData, TabName } from '@/types/template.types';
 import {
   Calendar, MapPin, Clock, Ticket, Users, Mail, Phone,
@@ -106,62 +107,78 @@ export default function Template1({ data, onCheckout }: Template1Props) {
         backgroundSize: '60px 60px',
       }} />
 
-      {/* Hero */}
+      {/* ============= HEADER with centered tabs ============= */}
+      <header className="sticky top-0 z-30 w-full border-b backdrop-blur-xl" style={{ background: `${bgColor}cc`, borderColor: `${accent}30` }}>
+        <div className="max-w-7xl mx-auto px-6 sm:px-12">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <div className="flex items-center gap-2">
+              <Image
+                src="/images/logo/eventsphere-logo.png"
+                alt="Eventsphere"
+                width={120}
+                height={32}
+                className="h-8 w-auto"
+              />
+            </div>
+
+            {/* Centered Tabs */}
+            <div className="hidden md:flex items-center gap-0 border rounded-full overflow-hidden" style={{ borderColor: `${accent}30`, background: `${accent}05` }}>
+              {enabledTabs.map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className="px-5 py-2 text-xs font-mono uppercase tracking-widest transition-all duration-200 whitespace-nowrap"
+                  style={{
+                    background: activeTab === tab ? `${accent}20` : 'transparent',
+                    color: activeTab === tab ? accent : '#94a3b8',
+                    boxShadow: activeTab === tab ? `inset 0 -1px 0 ${accent}` : 'none',
+                  }}
+                >
+                  {TAB_LABELS[tab]}
+                </button>
+              ))}
+            </div>
+
+            {/* Mobile menu placeholder (optional) */}
+            <div className="md:hidden w-8"></div>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero section (unchanged) */}
       <div className="relative min-h-screen flex flex-col justify-end overflow-hidden">
         {/* BG image */}
         <div className="absolute inset-0">
-          {/* Background Image */}
           <img
             src={data.imageUrl}
             alt={data.title}
             className="w-full h-full object-contain sm:object-cover object-center opacity-45 scale-105"
           />
-
-          {/* Soft glow overlays */}
           <div
             className="absolute inset-0"
             style={{
               background: `
-        radial-gradient(circle at top left, ${accent}22 0%, transparent 35%),
-        radial-gradient(circle at bottom right, ${accent2}20 0%, transparent 35%)
-      `,
+                radial-gradient(circle at top left, ${accent}22 0%, transparent 35%),
+                radial-gradient(circle at bottom right, ${accent2}20 0%, transparent 35%)
+              `,
             }}
           />
-
-          {/* Dark readable overlay */}
           <div
             className="absolute inset-0"
             style={{
               background: `
-        linear-gradient(
-          to bottom,
-          rgba(3, 7, 18, 0.45) 0%,
-          rgba(3, 7, 18, 0.55) 45%,
-          rgba(3, 7, 18, 0.92) 100%
-        )
-      `,
+                linear-gradient(
+                  to bottom,
+                  rgba(3, 7, 18, 0.45) 0%,
+                  rgba(3, 7, 18, 0.55) 45%,
+                  rgba(3, 7, 18, 0.92) 100%
+                )
+              `,
             }}
           />
-
-          {/* Scan effect */}
-          <div
-            style={scanStyle}
-            className="absolute inset-0 opacity-20 pointer-events-none"
-          />
+          <div style={scanStyle} className="absolute inset-0 opacity-20 pointer-events-none" />
         </div>
-
-        {/* Corner brackets */}
-        {/* <div className="absolute top-8 left-8 w-12 h-12 border-t-2 border-l-2 pointer-events-none" style={{ borderColor: accent }} />
-        <div className="absolute top-8 right-8 w-12 h-12 border-t-2 border-r-2 pointer-events-none" style={{ borderColor: accent }} />
-        <div className="absolute bottom-8 left-8 w-12 h-12 border-b-2 border-l-2 pointer-events-none" style={{ borderColor: accent2 }} />
-        <div className="absolute bottom-8 right-8 w-12 h-12 border-b-2 border-r-2 pointer-events-none" style={{ borderColor: accent2 }} /> */}
-
-        {/* Status bar */}
-        {/* <div className="absolute top-8 left-1/2 -translate-x-1/2 flex items-center gap-3 px-5 py-2 border text-xs font-mono uppercase tracking-widest"
-          style={{ borderColor: `${accent}40`, color: accent, background: `${accent}08` }}>
-          <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: accent }} />
-          Live Event
-        </div> */}
 
         {/* Hero content */}
         <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-12 pb-16 w-full">
@@ -174,7 +191,6 @@ export default function Template1({ data, onCheckout }: Template1Props) {
             ))}
           </div>
 
-          {/* Glitchy title */}
           <h1 className="text-5xl sm:text-7xl lg:text-[6rem] font-black uppercase leading-[0.9] tracking-tighter mb-6 relative">
             <span className="relative inline-block text-white" style={{ textShadow: `2px 0 0 ${accent}60, -2px 0 0 ${accent2}60` }}>
               {data.title}
@@ -207,14 +223,14 @@ export default function Template1({ data, onCheckout }: Template1Props) {
         </div>
       </div>
 
-      {/* Main body */}
+      {/* Main body (tabs content only – nav removed) */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-12 py-16 pb-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
 
-          {/* Left — Tabs */}
+          {/* Left — Content panels */}
           <div className="lg:col-span-8 space-y-8">
 
-            {/* Quick info strip */}
+            {/* Quick info strip (unchanged) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
                 { icon: <Calendar className="w-4 h-4" />, label: 'DATE & TIME', val: `${fmt(data.startDatetime)} · ${fmtTime(data.startDatetime)} — ${fmtTime(data.endDatetime)}`, color: accent },
@@ -230,25 +246,8 @@ export default function Template1({ data, onCheckout }: Template1Props) {
               ))}
             </div>
 
-            {/* Tab nav */}
-            <div className="flex gap-0 border overflow-x-auto no-scrollbar" style={{ borderColor: `${accent}20` }}>
-              {enabledTabs.map(tab => (
-                <button key={tab} onClick={() => setActiveTab(tab)}
-                  className="flex-1 min-w-fit px-4 py-3 text-xs font-mono uppercase tracking-widest transition-all duration-200 whitespace-nowrap border-r last:border-r-0"
-                  style={{
-                    borderColor: `${accent}20`,
-                    background: activeTab === tab ? `${accent}15` : 'transparent',
-                    color: activeTab === tab ? accent : '#64748b',
-                    boxShadow: activeTab === tab ? `inset 0 -2px 0 ${accent}` : 'none',
-                  }}>
-                  {TAB_LABELS[tab]}
-                </button>
-              ))}
-            </div>
-
-            {/* Tab content panels */}
+            {/* Tab content panels (same as before) */}
             <div className="min-h-[300px]">
-
               {activeTab === 'overview' && (
                 <div className="space-y-4 animate-in fade-in duration-300">
                   <h2 className="text-xs font-mono uppercase tracking-widest mb-6" style={{ color: accent }}>
@@ -402,10 +401,9 @@ export default function Template1({ data, onCheckout }: Template1Props) {
             </div>
           </div>
 
-          {/* Right — Ticket widget */}
+          {/* Right — Ticket widget (unchanged) */}
           <div className="lg:col-span-4">
             <div className="sticky top-8 p-8 border hidden sm:block space-y-6" style={{ ...glowBox(accent), background: '#030712' }}>
-              {/* Corner accents */}
               <div className="absolute top-3 left-3 w-4 h-4 border-t border-l" style={{ borderColor: accent }} />
               <div className="absolute top-3 right-3 w-4 h-4 border-t border-r" style={{ borderColor: accent }} />
               <div className="absolute bottom-3 left-3 w-4 h-4 border-b border-l" style={{ borderColor: accent2 }} />
@@ -455,7 +453,25 @@ export default function Template1({ data, onCheckout }: Template1Props) {
         </div>
       </div>
 
-      {/* Mobile footer */}
+      {/* ============= FOOTER ============= */}
+      <footer className="relative z-10 border-t py-8 mt-12" style={{ borderColor: `${accent}20`, background: `${bgColor}cc` }}>
+        <div className="max-w-7xl mx-auto px-6 sm:px-12">
+          <div className="flex flex-col items-center justify-center gap-3 text-center">
+            <Image
+              src="/images/logo/eventsphere-logo.png"
+              alt="Eventsphere"
+              width={140}
+              height={36}
+              className="h-9 w-auto opacity-80 hover:opacity-100 transition-opacity"
+            />
+            <p className="text-xs font-mono uppercase tracking-widest text-slate-500">
+              Powered by Eventsphere
+            </p>
+          </div>
+        </div>
+      </footer>
+
+      {/* Mobile footer (unchanged) */}
       <div className="fixed bottom-0 left-0 w-full border-t sm:hidden flex items-center justify-between p-5 z-50"
         style={{ background: '#030712', borderColor: `${accent}30`, boxShadow: `0 -10px 40px ${accent}10` }}>
         <div>
