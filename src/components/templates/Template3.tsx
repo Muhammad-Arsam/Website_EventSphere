@@ -198,7 +198,7 @@ export default function Template3({ data, onCheckout }: Template3Props) {
                 {/* Bottom indicator */}
                 {activeTab === tab && (
                   <span
-                    className="absolute bottom-0 left-0 right-0 h-[2px]"
+                    className="absolute bottom-0 left-0 right-0 h-0.5"
                     style={{ background: primary }}
                   />
                 )}

@@ -178,8 +178,8 @@ export default function PublishingTab({ eventId, eventStatus, onStatusChange }: 
         }
     };
 
-    const landingPageUrl = slug ? `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/explore/${slug}` : null;
-    // const landingPageUrl = slug ? `${process.env.NEXT_PUBLIC_SITE_URL || 'https://web-eventsphere.vercel.app'}/explore/${slug}` : null;
+    // const landingPageUrl = slug ? `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/explore/${slug}` : null;
+    const landingPageUrl = slug ? `${process.env.NEXT_PUBLIC_SITE_URL || 'https://web-eventsphere.vercel.app'}/explore/${slug}` : null;
 
 
     return (
