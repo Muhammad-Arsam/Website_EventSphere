@@ -171,6 +171,16 @@ export interface PublicEventPageResponse {
   agenda: PublicAgendaItem[];
 }
 
+// --- RECOVER TICKETS ---
+
+export interface RecoverTicketsRequest {
+  email: string;
+}
+
+export interface RecoverTicketsResponse {
+  message: string;
+}
+
 // --- CHECKOUT TYPES ---
  
 export interface TicketSelection {

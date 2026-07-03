@@ -167,7 +167,7 @@ export default function EmailBroadcast() {
             {alert && (
                 <div className="fixed top-6 right-6 z-99999 w-full max-w-sm drop-shadow-xl animate-in fade-in slide-in-from-top-4 duration-300">
                     <Alert
-                        key={alertKey} // 👈 NEW: forces a fresh instance each time
+                        key={alertKey}
                         variant={alert.variant}
                         title={alert.title}
                         message={alert.message}
@@ -182,7 +182,7 @@ export default function EmailBroadcast() {
                     <div>
                         <p className="text-sm font-medium text-white/70">Email Campaigns</p>
                         <h2 className="mt-2 text-3xl font-bold lg:text-4xl">{selectedEvent?.title}</h2>
-                        <p className="mt-3 max-w-2xl text-white/80">Send broadcast emails to all attendees or custom emails to specific people.</p>
+                        <p className="mt-3 max-w-2xl text-white/80">Send broadcast announcements to all attendees or custom announcements to specific people.</p>
                     </div>
                     <div className="relative w-full lg:w-auto lg:min-w-[320px]">
                         <select
@@ -230,7 +230,7 @@ export default function EmailBroadcast() {
                                 }`}
                         >
                             <Plus className="h-4 w-4" />
-                            Custom Emails
+                            Custom Announcements
                         </button>
                     </div>
 
@@ -294,7 +294,7 @@ export default function EmailBroadcast() {
                         className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 disabled:opacity-50"
                     >
                         {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                        {isSending ? 'Sending...' : 'Send Email'}
+                        {isSending ? 'Sending...' : 'Send Announcement'}
                     </button>
                 </div>
             </div>
@@ -304,7 +304,7 @@ export default function EmailBroadcast() {
                 <div className="border-b border-gray-200 p-5 dark:border-gray-800">
                     <div className="flex items-center gap-2">
                         <History className="h-5 w-5 text-brand-500" />
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Broadcast History</h3>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Announcement History</h3>
                     </div>
                 </div>
                 <div className="p-5">

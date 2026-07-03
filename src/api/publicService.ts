@@ -6,6 +6,7 @@ import {
   CheckoutRequest,
   CheckoutResponse,
   ValidatePromoCodeResponse,
+  RecoverTicketsResponse,
 } from '@/types/event.types';
 import { EventTemplateData, ThemeConfigJson } from '@/types/template.types';
 
@@ -96,6 +97,7 @@ export const publicService = {
     }
 
     return {
+      eventId: response.eventDetails.id,
       title: response.eventDetails.title,
       description: response.eventDetails.description,
       imageUrl: response.eventDetails.imageUrl,
@@ -118,4 +120,20 @@ export const publicService = {
       agenda: response.agenda ?? [],
     };
   },
+
+  recoverTickets: async (eventId: string, email: string): Promise<RecoverTicketsResponse> => {
+  try {
+    const response = await API.post<RecoverTicketsResponse>(
+      `/api/public/tickets/recover/${eventId}`,
+      { email }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      const backendMessage = error.response.data?.detail || 'Failed to recover tickets.';
+      throw new Error(backendMessage);
+    }
+    throw new Error('Network error. Please check your connection.');
+  }
+},
 };

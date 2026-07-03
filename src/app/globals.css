@@ -763,3 +763,22 @@ span.flatpickr-weekday,
     animation-fill-mode: forwards;
   }
 }
+
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-33.333%); }
+}
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(800%); }
+}
+.animate-marquee { animation: marquee linear infinite; }
+.animate-shimmer { animation: shimmer ease-in-out infinite; }
+
+@keyframes slideDown {
+  0% { opacity: 0; transform: translateY(-100%); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-down {
+  animation: slideDown 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

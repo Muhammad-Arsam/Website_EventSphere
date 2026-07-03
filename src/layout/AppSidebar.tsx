@@ -36,7 +36,7 @@ const organizerNavItems: NavItem[] = [
 ];
 
 const organizerOthersItems: NavItem[] = [
-  { icon: <Mail />, name: "Email", path: "/email" },
+  { icon: <Mail />, name: "Announcement", path: "/email" },
   { icon: <UserCircleIcon />, name: "My Profile", path: "/profile" },
 ];
 

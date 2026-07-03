@@ -3,8 +3,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { publicService } from '@/api/publicService';
+import { sponsorService } from '@/api/sponsorService'; // ✅ imported sponsorService
 import { EventTemplateData } from '@/types/template.types';
 import { PublicEventPageResponse } from '@/types/event.types';
+import { Sponsor } from '@/types/sponsor.types'; // ✅ imported Sponsor type
 
 import Template1 from '@/components/templates/Template1';
 import Template2 from '@/components/templates/Template2';
@@ -15,20 +17,23 @@ import { Loader2, Ticket, AlertTriangle, ArrowRight } from 'lucide-react';
 
 export default function PublicEventPage() {
   const params = useParams();
-  const slug   = params.eventId as string;
+  const slug = params.eventId as string;
 
-  const [templateData, setTemplateData]   = useState<EventTemplateData | null>(null);
-  const [rawResponse, setRawResponse]     = useState<PublicEventPageResponse | null>(null);
-  const [isLoading, setIsLoading]         = useState(true);
-  const [error, setError]                 = useState<string | null>(null);
-  const [checkoutOpen, setCheckoutOpen]   = useState(false);
+  // ✅ Extend state to include sponsors
+  const [templateData, setTemplateData] = useState<(EventTemplateData & { sponsors?: Sponsor[] }) | null>(null);
+  const [rawResponse, setRawResponse] = useState<PublicEventPageResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   useEffect(() => {
     const fetchEvent = async () => {
       if (!slug) return;
       try {
         setIsLoading(true);
-        const response  = await publicService.getEventBySlug(slug);
+
+        // 1. Fetch public event data
+        const response = await publicService.getEventBySlug(slug);
         const assembled = publicService.assembleTemplateData(response);
 
         if (!assembled) {
@@ -36,8 +41,18 @@ export default function PublicEventPage() {
           return;
         }
 
+        // 2. Fetch sponsors using the event ID
+        const eventId = response.eventDetails.id;
+        const sponsors = await sponsorService.getSponsors(eventId);
+
+        // 3. Merge sponsors into the data
+        const fullData: EventTemplateData & { sponsors?: Sponsor[] } = {
+          ...assembled,
+          sponsors,
+        };
+
         setRawResponse(response);
-        setTemplateData(assembled);
+        setTemplateData(fullData);
       } catch (err: any) {
         setError(err.message || 'Event not found.');
       } finally {
@@ -47,7 +62,7 @@ export default function PublicEventPage() {
     fetchEvent();
   }, [slug]);
 
-  // Loading State
+  // ─── Loading / Error states ────────────────────────────────────────────────
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center px-6">
@@ -64,7 +79,6 @@ export default function PublicEventPage() {
     );
   }
 
-  // Error State
   if (error || !templateData || !rawResponse) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center px-6">
@@ -106,7 +120,7 @@ export default function PublicEventPage() {
         <Template1 data={templateData} {...sharedCheckoutProps} />
       )}
 
-      {/* Checkout Modal — mounted once here, shared by all templates */}
+      {/* Checkout Modal */}
       <CheckoutModal
         isOpen={checkoutOpen}
         onClose={() => setCheckoutOpen(false)}

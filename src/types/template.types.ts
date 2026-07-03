@@ -1,8 +1,10 @@
+import { Sponsor } from '@/types/sponsor.types';
+
 export type TemplateName = 'STANDARD' | 'MINIMAL' | 'MODERN';
 
 export type FontStyle = 'dm-sans' | 'playfair' | 'space-grotesk' | 'cabinet-grotesk' | 'syne';
 
-export type TabName = 'overview' | 'schedule' | 'tickets' | 'location' | 'contact' | 'social';
+export type TabName = 'overview' | 'schedule' | 'tickets' | 'location' | 'contact' | 'social' | 'sponsors' | 'recover';
 
 export interface SocialLinks {
   facebook?: string;
@@ -45,6 +47,7 @@ export interface AgendaItemPublic {
 
 export interface EventTemplateData {
   // From eventDetails (API)
+  eventId: string;
   title: string;
   description: string;
   imageUrl: string;
@@ -67,4 +70,5 @@ export interface EventTemplateData {
   // From tickets & agenda (API)
   tickets: TicketTierPublic[];
   agenda: AgendaItemPublic[];
+  sponsors?: Sponsor[];
 }

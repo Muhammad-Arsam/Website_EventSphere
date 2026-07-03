@@ -37,6 +37,7 @@ const FONT_OPTIONS: { value: FontStyle; label: string; preview: string }[] = [
     { value: 'syne', label: 'Syne', preview: 'Artistic & Unique' },
 ];
 
+// ─── Updated TAB_OPTIONS with Sponsors ────────────────────────────────
 const TAB_OPTIONS: { value: TabName; label: string; description: string }[] = [
     { value: 'overview', label: 'Overview', description: 'Description, date & location info' },
     { value: 'schedule', label: 'Schedule', description: 'Agenda & timeline of sessions' },
@@ -44,6 +45,8 @@ const TAB_OPTIONS: { value: TabName; label: string; description: string }[] = [
     { value: 'location', label: 'Location', description: 'Interactive map embed' },
     { value: 'contact', label: 'Contact', description: 'Organizer contact details' },
     { value: 'social', label: 'Social', description: 'Social links & share buttons' },
+    { value: 'sponsors', label: 'Sponsors', description: 'Display sponsor logos & tiers' },
+    { value: 'recover', label: 'Recover Tickets', description: 'Allow attendees to recover their tickets by email' },
 ];
 
 const SOCIAL_FIELDS: { key: keyof SocialLinks; label: string; icon: React.ReactNode; placeholder: string }[] = [
@@ -79,7 +82,9 @@ export default function PublishingTab({ eventId, eventStatus, onStatusChange }: 
     const [organizerEmail, setOrganizerEmail] = useState('');
     const [organizerPhone, setOrganizerPhone] = useState('');
     const [socialLinks, setSocialLinks] = useState<SocialLinks>({});
-    const [enabledTabs, setEnabledTabs] = useState<TabName[]>(['overview', 'schedule', 'tickets', 'location', 'contact', 'social']);
+    const [enabledTabs, setEnabledTabs] = useState<TabName[]>([
+        'overview', 'schedule', 'tickets', 'location', 'contact', 'social', 'sponsors', 'recover'
+    ]);
 
     const isPublished = eventStatus === 'PUBLISHED' || eventStatus === 'PB';
 
@@ -100,7 +105,8 @@ export default function PublishingTab({ eventId, eventStatus, onStatusChange }: 
                 setOrganizerEmail(parsed.organizerEmail || '');
                 setOrganizerPhone(parsed.organizerPhone || '');
                 setSocialLinks(parsed.socialLinks || {});
-                setEnabledTabs(parsed.enabledTabs || ['overview', 'schedule', 'tickets', 'location', 'contact', 'social']);
+                const tabs = parsed.enabledTabs || ['overview', 'schedule', 'tickets', 'location', 'contact', 'social', 'sponsors', 'recover'];
+                setEnabledTabs(tabs);
             }
         } catch {
             setLandingPage(null);
@@ -297,7 +303,7 @@ export default function PublishingTab({ eventId, eventStatus, onStatusChange }: 
 
                         {/* ── Template Selector ── */}
                         <div className="space-y-3">
-                            <label className="flex text-sm font-semibold text-gray-700 block items-center gap-2">
+                            <label className="flex text-sm font-semibold text-gray-700 items-center gap-2">
                                 <LayoutTemplate className="w-4 h-4 text-gray-400" /> Page Template
                             </label>
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -316,7 +322,7 @@ export default function PublishingTab({ eventId, eventStatus, onStatusChange }: 
 
                         {/* ── Font Selector ── */}
                         <div className="space-y-3">
-                            <label className="flex text-sm font-semibold text-gray-700 block items-center gap-2">
+                            <label className="flex text-sm font-semibold text-gray-700 items-center gap-2">
                                 <Type className="w-4 h-4 text-gray-400" /> Font Style
                             </label>
                             <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
@@ -332,7 +338,7 @@ export default function PublishingTab({ eventId, eventStatus, onStatusChange }: 
 
                         {/* ── Colors ── */}
                         <div className="space-y-3">
-                            <label className="flex text-sm font-semibold text-gray-700 block items-center gap-2">
+                            <label className="flex text-sm font-semibold text-gray-700 items-center gap-2">
                                 <Palette className="w-4 h-4 text-gray-400" /> Brand Colors
                             </label>
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -358,7 +364,7 @@ export default function PublishingTab({ eventId, eventStatus, onStatusChange }: 
 
                         {/* ── Tabs Configuration ── */}
                         <div className="space-y-3">
-                            <label className="block text-sm font-semibold text-gray-700 flex items-center gap-2">
+                            <label className="flex text-sm font-semibold text-gray-700 items-center gap-2">
                                 <PanelsTopLeft className="w-4 h-4 text-gray-400" /> Page Tabs
                             </label>
                             <p className="text-xs text-gray-400">Select which tabs appear on your public landing page. Overview is always shown.</p>
@@ -367,10 +373,23 @@ export default function PublishingTab({ eventId, eventStatus, onStatusChange }: 
                                     const isEnabled = enabledTabs.includes(tab.value);
                                     const isLocked = tab.value === 'overview';
                                     return (
-                                        <button key={tab.value} type="button" onClick={() => handleTabToggle(tab.value)} disabled={isLocked}
-                                            className={`p-4 rounded-2xl border-2 text-left transition-all duration-200 ${isEnabled ? 'border-brand-500 bg-brand-50/50' : 'border-gray-200 bg-white'} ${isLocked ? 'opacity-70 cursor-not-allowed' : 'hover:border-gray-300 cursor-pointer'}`}>
+                                        <button
+                                            key={tab.value}
+                                            type="button"
+                                            onClick={() => handleTabToggle(tab.value)}
+                                            disabled={isLocked}
+                                            className={`p-4 rounded-2xl border-2 text-left transition-all duration-200 ${isEnabled
+                                                ? 'border-brand-500 bg-brand-50/50'
+                                                : 'border-gray-200 bg-white'
+                                                } ${isLocked
+                                                    ? 'opacity-70 cursor-not-allowed'
+                                                    : 'hover:border-gray-300 cursor-pointer'
+                                                }`}
+                                        >
                                             <div className="flex items-center justify-between mb-1">
-                                                <span className={`font-bold text-sm ${isEnabled ? 'text-brand-700' : 'text-gray-800'}`}>{tab.label}</span>
+                                                <span className={`font-bold text-sm ${isEnabled ? 'text-brand-700' : 'text-gray-800'}`}>
+                                                    {tab.label}
+                                                </span>
                                                 {isEnabled && <CheckCircle2 className="w-4 h-4 text-brand-600" />}
                                                 {isLocked && <span className="text-xs text-gray-400 font-medium">Always on</span>}
                                             </div>
@@ -383,7 +402,7 @@ export default function PublishingTab({ eventId, eventStatus, onStatusChange }: 
 
                         {/* ── Social Links ── */}
                         <div className="space-y-3">
-                            <label className="block text-sm font-semibold text-gray-700 flex items-center gap-2">
+                            <label className="flex text-sm font-semibold text-gray-700 items-center gap-2">
                                 <Globe2 className="w-4 h-4 text-gray-400" /> Social Links
                             </label>
                             <p className="text-xs text-gray-400">These appear on the Social tab of your landing page.</p>
