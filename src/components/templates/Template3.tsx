@@ -607,10 +607,10 @@ export default function Template3({ data, onCheckout }: Template3Props) {
                   <p className="text-sm italic mt-8" style={{ color: mutedText }}>No sponsors listed yet.</p>
                 ) : (
                   <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {data.sponsors.map(s => {
+                    {data.sponsors.map((s, i) => {
                       const tc = TIER_COLORS[s.sponsorTier] || TIER_COLORS.BRONZE;
                       return (
-                        <div key={s.id}
+                        <div key={s.id || i}
                           className="flex flex-col items-center gap-4 p-5 transition-all hover:-translate-y-1 group"
                           style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderTop: `2px solid ${tc}` }}>
                           {s.logoUrl && (

@@ -105,8 +105,8 @@ export default function EventOrdersTable({ eventId }: EventOrdersTableProps) {
     return (
         <div className="space-y-5">
 
-            {/* Summary strip */}
-            <div className="grid grid-cols-3 gap-4">
+            {/* Summary strip - FIXED RESPONSIVENESS */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {[
                     { label: 'Total Orders', value: orders.length, color: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-50 dark:bg-violet-500/10', icon: <ShoppingBag className="w-5 h-5" /> },
                     { label: 'Total Revenue', value: `Rs.${totalRevenue.toLocaleString()}`, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-500/10', icon: <DollarSign className="w-5 h-5" /> },
@@ -127,14 +127,11 @@ export default function EventOrdersTable({ eventId }: EventOrdersTableProps) {
 
                 {/* Header + search */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 px-6 py-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-t-xl">
-
-                    {/* Left Side: Modern Title & Badge */}
                     <div className="flex flex-col justify-center shrink-0">
                         <div className="flex items-center gap-3">
                             <h3 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
                                 Order Records
                             </h3>
-                            {/* Modern Pill Badge for the count */}
                             <span className="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-xs font-semibold border border-emerald-100 dark:border-emerald-800/50">
                                 {filtered.length} of {orders.length}
                             </span>
@@ -144,7 +141,6 @@ export default function EventOrdersTable({ eventId }: EventOrdersTableProps) {
                         </p>
                     </div>
 
-                    {/* Right Side: Search Bar */}
                     <div className="flex items-center w-full md:max-w-[320px] shrink-0 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-1.5 shadow-sm transition-all focus-within:border-emerald-400 focus-within:ring-4 focus-within:ring-emerald-50 dark:focus-within:ring-emerald-900/20">
                         <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 shrink-0 pointer-events-none">
                             <Search className="w-4 h-4" />
@@ -157,81 +153,82 @@ export default function EventOrdersTable({ eventId }: EventOrdersTableProps) {
                             className="flex-1 w-full bg-transparent border-none outline-none focus:ring-0 px-3 py-1 text-sm text-gray-900 dark:text-white placeholder:text-gray-400"
                         />
                     </div>
-
                 </div>
 
-                {/* Table — fixed layout, widths on th directly (no colgroup to avoid hydration error) */}
-                <table className="w-full text-sm table-fixed">
-                    <thead>
-                        <tr className="bg-gray-50/80 dark:bg-white/2">
-                            <th className="w-[22%] px-5 py-3.5 text-left text-[11px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                                <span className="flex items-center gap-1.5"><Hash className="w-3.5 h-3.5" />Reference</span>
-                            </th>
-                            <th className="w-[26%] px-5 py-3.5 text-left text-[11px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                                <span className="flex items-center gap-1.5"><User className="w-3.5 h-3.5" />Buyer</span>
-                            </th>
-                            <th className="w-[20%] px-5 py-3.5 text-left text-[11px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                                <span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" />Phone / CNIC</span>
-                            </th>
-                            <th className="w-[12%] px-5 py-3.5 text-left text-[11px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                                <span className="flex items-center gap-1.5"><DollarSign className="w-3.5 h-3.5" />Amount</span>
-                            </th>
-                            <th className="w-[10%] px-5 py-3.5 text-left text-[11px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                                <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" />Status</span>
-                            </th>
-                            <th className="w-[10%] px-5 py-3.5 text-left text-[11px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                                <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" />Date</span>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50 dark:divide-gray-800/50">
-                        {filtered.length === 0 ? (
-                            <tr>
-                                <td colSpan={6} className="px-5 py-12 text-center text-sm text-gray-400">
-                                    No orders match your search.
-                                </td>
+                {/* Table - FIXED RESPONSIVENESS */}
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm table-fixed min-w-[900px]">
+                        <thead>
+                            <tr className="bg-gray-50/80 dark:bg-white/2">
+                                <th className="w-[22%] px-5 py-3.5 text-left text-[11px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                                    <span className="flex items-center gap-1.5"><Hash className="w-3.5 h-3.5" />Reference</span>
+                                </th>
+                                <th className="w-[26%] px-5 py-3.5 text-left text-[11px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                                    <span className="flex items-center gap-1.5"><User className="w-3.5 h-3.5" />Buyer</span>
+                                </th>
+                                <th className="w-[20%] px-5 py-3.5 text-left text-[11px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                                    <span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" />Phone / CNIC</span>
+                                </th>
+                                <th className="w-[12%] px-5 py-3.5 text-left text-[11px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                                    <span className="flex items-center gap-1.5"><DollarSign className="w-3.5 h-3.5" />Amount</span>
+                                </th>
+                                <th className="w-[10%] px-5 py-3.5 text-left text-[11px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                                    <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" />Status</span>
+                                </th>
+                                <th className="w-[10%] px-5 py-3.5 text-left text-[11px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                                    <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" />Date</span>
+                                </th>
                             </tr>
-                        ) : filtered.map((order, idx) => {
-                            const s = statusStyle(order.paymentStatus);
-                            return (
-                                <tr key={order.orderId ?? idx} className="hover:bg-gray-50/50 dark:hover:bg-white/1 transition-colors">
-                                    <td className="px-5 py-4">
-                                        <span className="font-mono text-xs font-bold text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/10 px-2.5 py-1 rounded-lg block truncate">
-                                            {order.orderReference ?? '—'}
-                                        </span>
-                                    </td>
-                                    <td className="px-5 py-4">
-                                        <p className="font-semibold text-gray-900 dark:text-white leading-snug truncate">{order.buyerName}</p>
-                                        <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
-                                            <Mail className="w-3 h-3 shrink-0" />
-                                            <span className="truncate">{order.buyerEmail}</span>
-                                        </p>
-                                    </td>
-                                    <td className="px-5 py-4">
-                                        <p className="text-gray-700 dark:text-gray-300 font-medium text-xs">{order.buyerPhone ?? '—'}</p>
-                                        <p className="font-mono text-[11px] text-gray-400 mt-0.5 truncate">{order.buyerCnic ?? '—'}</p>
-                                    </td>
-                                    <td className="px-5 py-4">
-                                        <span className="font-black text-gray-900 dark:text-white tabular-nums text-sm">
-                                            Rs.{(order.totalAmount ?? 0).toLocaleString()}
-                                        </span>
-                                    </td>
-                                    <td className="px-5 py-4">
-                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold ${s.bg} ${s.text}`}>
-                                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${s.dot}`} />
-                                            {order.paymentStatus ?? 'Unknown'}
-                                        </span>
-                                    </td>
-                                    <td className="px-5 py-4">
-                                        <span className="text-xs text-gray-400 font-medium">
-                                            {order.createdAt ? formatDate(order.createdAt) : '—'}
-                                        </span>
+                        </thead>
+                        <tbody className="divide-y divide-gray-50 dark:divide-gray-800/50">
+                            {filtered.length === 0 ? (
+                                <tr>
+                                    <td colSpan={6} className="px-5 py-12 text-center text-sm text-gray-400">
+                                        No orders match your search.
                                     </td>
                                 </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
+                            ) : filtered.map((order, idx) => {
+                                const s = statusStyle(order.paymentStatus);
+                                return (
+                                    <tr key={order.orderId ?? idx} className="hover:bg-gray-50/50 dark:hover:bg-white/1 transition-colors">
+                                        <td className="px-5 py-4">
+                                            <span className="font-mono text-xs font-bold text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/10 px-2.5 py-1 rounded-lg block truncate">
+                                                {order.orderReference ?? '—'}
+                                            </span>
+                                        </td>
+                                        <td className="px-5 py-4">
+                                            <p className="font-semibold text-gray-900 dark:text-white leading-snug truncate">{order.buyerName}</p>
+                                            <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
+                                                <Mail className="w-3 h-3 shrink-0" />
+                                                <span className="truncate">{order.buyerEmail}</span>
+                                            </p>
+                                        </td>
+                                        <td className="px-5 py-4">
+                                            <p className="text-gray-700 dark:text-gray-300 font-medium text-xs">{order.buyerPhone ?? '—'}</p>
+                                            <p className="font-mono text-[11px] text-gray-400 mt-0.5 truncate">{order.buyerCnic ?? '—'}</p>
+                                        </td>
+                                        <td className="px-5 py-4">
+                                            <span className="font-black text-gray-900 dark:text-white tabular-nums text-sm">
+                                                Rs.{(order.totalAmount ?? 0).toLocaleString()}
+                                            </span>
+                                        </td>
+                                        <td className="px-5 py-4">
+                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold ${s.bg} ${s.text}`}>
+                                                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${s.dot}`} />
+                                                {order.paymentStatus ?? 'Unknown'}
+                                            </span>
+                                        </td>
+                                        <td className="px-5 py-4">
+                                            <span className="text-xs text-gray-400 font-medium">
+                                                {order.createdAt ? formatDate(order.createdAt) : '—'}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     );

@@ -169,7 +169,7 @@ export default function EventDetailsPage() {
         { id: 'agenda', label: 'Agenda', icon: ListTodo },
         { id: 'tickets', label: 'Tickets', icon: Ticket },
         { id: 'discounts', label: 'Discounts', icon: Tag },
-        { id: 'sponsors',   label: 'Sponsors',   icon: Handshake  },
+        { id: 'sponsors', label: 'Sponsors', icon: Handshake },
         { id: 'publishing', label: 'Publishing', icon: Rocket },
     ];
 
@@ -215,8 +215,8 @@ export default function EventDetailsPage() {
             </div>
 
             {/* Tab Navigation */}
-            <div className="border-b border-gray-200">
-                <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+            <div className="border-b border-gray-200 w-full">
+                <nav className="-mb-px flex space-x-8 overflow-x-auto scrollbar-hide" aria-label="Tabs">
                     {tabs.map((tab) => {
                         const Icon = tab.icon;
                         const isActive = activeTab === tab.id;
@@ -225,14 +225,14 @@ export default function EventDetailsPage() {
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`
-                                    group inline-flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors
+                                    group inline-flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap shrink-0
                                     ${isActive
                                         ? 'border-brand-500 text-brand-600'
                                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                     }
                                 `}
                             >
-                                <Icon className={`w-5 h-5 ${isActive ? 'text-brand-500' : 'text-gray-400 group-hover:text-gray-500'}`} />
+                                <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-brand-500' : 'text-gray-400 group-hover:text-gray-500'}`} />
                                 {tab.label}
                             </button>
                         );
@@ -379,27 +379,29 @@ export default function EventDetailsPage() {
 
             {/* TAB CONTENT: AGENDA */}
             {activeTab === 'agenda' && (
-                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-4 sm:space-y-6">
 
                     {/* ✅ Loading → Empty → Content */}
                     {isSubEventsLoading ? (
-                        <div className="flex items-center justify-center min-h-[400px]">
+                        <div className="flex items-center justify-center min-h-[300px] sm:min-h-[400px]">
                             <Loader2 className="w-8 h-8 animate-spin text-brand-500" />
                         </div>
 
                     ) : subEvents.length === 0 ? (
-                        <div className="bg-white rounded-3xl border border-gray-200 p-12 text-center flex flex-col items-center justify-center min-h-[400px] shadow-sm">
-                            <div className="w-16 h-16 bg-brand-50 text-brand-600 rounded-full flex items-center justify-center mb-6">
-                                <ListTodo className="w-8 h-8" />
+                        <div className="bg-white rounded-2xl sm:rounded-3xl border border-gray-200 p-6 sm:p-12 text-center flex flex-col items-center justify-center min-h-[300px] sm:min-h-[400px] shadow-sm">
+                            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-brand-50 text-brand-600 rounded-full flex items-center justify-center mb-4 sm:mb-6">
+                                <ListTodo className="w-6 h-6 sm:w-8 sm:h-8" />
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">No agenda items yet</h3>
-                            <p className="text-gray-500 max-w-md mb-8">Start building your event schedule by adding sessions, workshops, or breaks.</p>
+                            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">No agenda items yet</h3>
+                            <p className="text-sm sm:text-base text-gray-500 max-w-md mb-6 sm:mb-8">
+                                Start building your event schedule by adding sessions, workshops, or breaks.
+                            </p>
                             <Button
                                 onClick={() => {
                                     setEditingSubEvent(null);
                                     setIsSubEventModalOpen(true);
                                 }}
-                                className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700"
+                                className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 w-full sm:w-auto"
                             >
                                 <Plus className="w-5 h-5" /> Add Sub-Event
                             </Button>
@@ -407,9 +409,9 @@ export default function EventDetailsPage() {
 
                     ) : (
                         <>
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-200 shadow-sm">
                                 <div>
-                                    <h3 className="text-xl font-bold text-gray-900">Event Agenda</h3>
+                                    <h3 className="text-lg sm:text-xl font-bold text-gray-900">Event Agenda</h3>
                                     <p className="text-sm text-gray-500 mt-1">Manage the schedule and activities.</p>
                                 </div>
                                 <Button
@@ -417,12 +419,14 @@ export default function EventDetailsPage() {
                                         setEditingSubEvent(null);
                                         setIsSubEventModalOpen(true);
                                     }}
-                                    className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700"
+                                    className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 w-full sm:w-auto"
                                 >
                                     <Plus className="w-5 h-5" /> Add Sub-Event
                                 </Button>
                             </div>
-                            <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm min-h-[300px]">
+
+                            {/* Reduced padding on mobile so the sub-event cards have more room */}
+                            <div className="bg-white p-3 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-200 shadow-sm min-h-[300px]">
                                 <SubEventList
                                     eventId={eventId}
                                     subEvents={subEvents}
@@ -432,7 +436,6 @@ export default function EventDetailsPage() {
                             </div>
                         </>
                     )}
-
                     <SubEventModal
                         isOpen={isSubEventModalOpen}
                         onClose={() => {
@@ -444,100 +447,114 @@ export default function EventDetailsPage() {
                         onSuccess={fetchSubEventsList}
                     />
                 </div>
-            )}
+            )
+            }
 
             {/* TAB CONTENT: TICKETS */}
-            {activeTab === 'tickets' && (
-                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
+            {
+                activeTab === 'tickets' && (
+                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-4 sm:space-y-6 w-full max-w-full">
 
-                    {/* ✅ Loading → Empty → Content */}
-                    {isTicketsLoading ? (
-                        <div className="flex items-center justify-center min-h-[400px]">
-                            <Loader2 className="w-8 h-8 animate-spin text-brand-500" />
-                        </div>
-
-                    ) : ticketTiers.length === 0 ? (
-                        <div className="bg-white rounded-3xl border border-gray-200 p-12 text-center flex flex-col items-center justify-center min-h-[400px] shadow-sm">
-                            <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-6">
-                                <Ticket className="w-8 h-8" />
+                        {/* ✅ Loading → Empty → Content */}
+                        {isTicketsLoading ? (
+                            <div className="flex items-center justify-center min-h-[300px] sm:min-h-[400px]">
+                                <Loader2 className="w-8 h-8 animate-spin text-brand-500" />
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">No ticket tiers yet</h3>
-                            <p className="text-gray-500 max-w-md mb-8">Create and manage ticket pricing, capacity, and availability for your attendees.</p>
-                            <Button
-                                onClick={() => {
-                                    setEditingTicketTier(null);
-                                    setIsTicketModalOpen(true);
-                                }}
-                                className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700"
-                            >
-                                <Plus className="w-5 h-5" /> Add Ticket Tier
-                            </Button>
-                        </div>
 
-                    ) : (
-                        <>
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
-                                <div>
-                                    <h3 className="text-xl font-bold text-gray-900">Ticket Tiers</h3>
-                                    <p className="text-sm text-gray-500 mt-1">Manage pricing and capacities.</p>
+                        ) : ticketTiers.length === 0 ? (
+                            <div className="bg-white rounded-2xl sm:rounded-3xl border border-gray-200 p-6 sm:p-12 text-center flex flex-col items-center justify-center min-h-[300px] sm:min-h-[400px] shadow-sm w-full mx-auto">
+                                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-4 sm:mb-6">
+                                    <Ticket className="w-6 h-6 sm:w-8 sm:h-8" />
                                 </div>
+                                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">No ticket tiers yet</h3>
+                                <p className="text-sm sm:text-base text-gray-500 max-w-md mb-6 sm:mb-8">
+                                    Create and manage ticket pricing, capacity, and availability for your attendees.
+                                </p>
                                 <Button
                                     onClick={() => {
                                         setEditingTicketTier(null);
                                         setIsTicketModalOpen(true);
                                     }}
-                                    className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700"
+                                    className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 w-full sm:w-auto"
                                 >
                                     <Plus className="w-5 h-5" /> Add Ticket Tier
                                 </Button>
                             </div>
-                            <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm min-h-[300px]">
-                                <TicketTierList
-                                    eventId={eventId}
-                                    ticketTiers={ticketTiers}
-                                    onEdit={(ticket: TicketTier) => {
-                                        setEditingTicketTier(ticket);
-                                        setIsTicketModalOpen(true);
-                                    }}
-                                    onRefresh={fetchTicketTiersList}
-                                />
-                            </div>
-                        </>
-                    )}
 
-                    <TicketTierModal
-                        isOpen={isTicketModalOpen}
-                        onClose={() => {
-                            setIsTicketModalOpen(false);
-                            setEditingTicketTier(null);
-                        }}
-                        eventId={eventId}
-                        existingTicketTier={editingTicketTier}
-                        onSuccess={fetchTicketTiersList}
-                    />
+                        ) : (
+                            <>
+                                {/* Header Section */}
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-200 shadow-sm w-full">
+                                    <div>
+                                        <h3 className="text-lg sm:text-xl font-bold text-gray-900">Ticket Tiers</h3>
+                                        <p className="text-xs sm:text-sm text-gray-500 mt-1">Manage pricing and capacities.</p>
+                                    </div>
+                                    <Button
+                                        onClick={() => {
+                                            setEditingTicketTier(null);
+                                            setIsTicketModalOpen(true);
+                                        }}
+                                        className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 w-full sm:w-auto"
+                                    >
+                                        <Plus className="w-5 h-5" /> Add Ticket Tier
+                                    </Button>
+                                </div>
 
-                </div>
-            )}
+                                {/* List Container Section */}
+                                <div className="bg-white p-3 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-200 shadow-sm min-h-[300px] w-full overflow-x-hidden">
+                                    <TicketTierList
+                                        eventId={eventId}
+                                        ticketTiers={ticketTiers}
+                                        onEdit={(ticket: TicketTier) => {
+                                            setEditingTicketTier(ticket);
+                                            setIsTicketModalOpen(true);
+                                        }}
+                                        onRefresh={fetchTicketTiersList}
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        <TicketTierModal
+                            isOpen={isTicketModalOpen}
+                            onClose={() => {
+                                setIsTicketModalOpen(false);
+                                setEditingTicketTier(null);
+                            }}
+                            eventId={eventId}
+                            existingTicketTier={editingTicketTier}
+                            onSuccess={fetchTicketTiersList}
+                        />
+
+                    </div>
+                )
+            }
 
             {/* TAB CONTENT: DISCOUNTS */}
-            {activeTab === 'discounts' && (
-                <DiscountTab eventId={eventId} />
-            )}
+            {
+                activeTab === 'discounts' && (
+                    <DiscountTab eventId={eventId} />
+                )
+            }
 
             {/* TAB CONTENT: SPONSORS */}
-            {activeTab === 'sponsors' && (
-                <SponsorTab eventId={eventId} />
-            )}
+            {
+                activeTab === 'sponsors' && (
+                    <SponsorTab eventId={eventId} />
+                )
+            }
 
             {/* TAB CONTENT: PUBLISHING */}
-            {activeTab === 'publishing' && (
-                <PublishingTab
-                    eventId={eventId}
-                    eventStatus={event.status}
-                    onStatusChange={handleStatusChange}
-                />
-            )}
+            {
+                activeTab === 'publishing' && (
+                    <PublishingTab
+                        eventId={eventId}
+                        eventStatus={event.status}
+                        onStatusChange={handleStatusChange}
+                    />
+                )
+            }
 
-        </div>
+        </div >
     );
 }

@@ -58,7 +58,7 @@ const attendeeOthersItems: NavItem[] = [
 // COMPONENT
 // =======================
 const AppSidebar: React.FC = () => {
-  const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
+  const { isExpanded, isMobileOpen, isHovered, setIsHovered, toggleMobileSidebar } = useSidebar();
   const pathname = usePathname();
 
   const [openSubmenu, setOpenSubmenu] = useState<{
@@ -245,67 +245,82 @@ const AppSidebar: React.FC = () => {
   const isSidebarOpen = isExpanded || isHovered || isMobileOpen;
 
   return (
-    <aside
-      className={`fixed top-0 left-0 h-screen px-5 border-r transition-all duration-300 bg-white dark:bg-gray-900 
+    <>
+      {/* Backdrop overlay – only on mobile when sidebar is open */}
+      {isMobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={toggleMobileSidebar}
+        />
+      )}
+
+      <aside
+        className={`fixed top-0 left-0 h-screen px-5 border-r transition-all duration-300 bg-white dark:bg-gray-900 z-50
       ${isSidebarOpen ? "w-[290px]" : "w-[90px]"}
       ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
-      onMouseEnter={() => !isExpanded && setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* LOGO */}
-      <div className="py-8 flex justify-center">
-        <div className="flex items-center justify-center w-full">
-          {userRole === "ORGANIZER" && logoLoading ? (
-            <Loader2
-              className={`animate-spin text-brand-500 transition-all duration-300 ${isSidebarOpen ? "h-10 w-10" : "h-6 w-6"
-                }`}
-            />
-          ) : userRole === "ORGANIZER" && imageUrl ? (
-            <Image
-              src={imageUrl}
-              alt="Organization Logo"
-              width={isSidebarOpen ? 180 : 40}
-              height={isSidebarOpen ? 80 : 40}
-              className={`object-contain transition-all duration-300 ${!isSidebarOpen ? "rounded-md" : ""
-                }`}
-              style={{ maxHeight: isSidebarOpen ? "80px" : "40px", width: "auto" }}
-            />
-          ) : isSidebarOpen ? (
-            <Image
-              src="/images/logo/eventsphere-logo.png"
-              alt="logo"
-              width={150}
-              height={40}
-              className="object-contain"
-            />
-          ) : (
-            <Image
-              src="/images/logo/eventsphere-icon.png"
-              alt="logo"
-              width={40}
-              height={40}
-              className="object-contain"
-            />
-          )}
+        onMouseEnter={() => !isExpanded && setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {/* LOGO */}
+        <div className="pt-40 pb-8 md:py-8 flex justify-center">
+          <div className="flex items-center justify-center w-full overflow-hidden">
+            {userRole === "ORGANIZER" && logoLoading ? (
+              <Loader2
+                className={`animate-spin text-brand-500 transition-all duration-300 ${isSidebarOpen || isMobileOpen ? "h-10 w-10" : "h-6 w-6"
+                  }`}
+              />
+            ) : userRole === "ORGANIZER" && imageUrl ? (
+              <img
+                src={imageUrl}
+                alt="Organization Logo"
+                className={`object-contain transition-all duration-300 ${isSidebarOpen || isMobileOpen
+                  ? "max-h-[80px] w-auto"
+                  : "max-h-[40px] w-[40px] rounded-full"
+                  }`}
+                style={{
+                  maxWidth: isSidebarOpen || isMobileOpen ? "180px" : "40px",
+                  height: "auto",
+                }}
+              />
+            ) : isSidebarOpen || isMobileOpen ? (
+              <Image
+                src="/images/logo/eventsphere-logo.png"
+                alt="Eventsphere"
+                width={160}
+                height={40}
+                className="object-contain h-auto w-auto max-h-10"
+                priority
+              />
+            ) : (
+              <Image
+                src="/images/logo/eventsphere-icon.png"
+                alt="Eventsphere Icon"
+                width={40}
+                height={40}
+                className="object-contain"
+                priority
+              />
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* MENU */}
-      <nav className="space-y-6">
-        <div>
-          <h2 className="text-xs text-gray-400 mb-4">
-            {isExpanded || isHovered ? "Menu" : <HorizontaLDots />}
-          </h2>
-          {renderMenuItems(currentNavItems, "main")}
-        </div>
-        <div>
-          <h2 className="text-xs text-gray-400 mb-4">
-            {isExpanded || isHovered ? "System & Settings" : <HorizontaLDots />}
-          </h2>
-          {renderMenuItems(currentOthersItems, "others")}
-        </div>
-      </nav>
-    </aside>
+        {/* MENU */}
+        <nav className="space-y-6">
+          <div>
+            <h2 className="text-xs text-gray-400 mb-4">
+              {isExpanded || isHovered || isMobileOpen ? "Menu" : <HorizontaLDots />}
+            </h2>
+            {renderMenuItems(currentNavItems, "main")}
+          </div>
+          <div>
+            <h2 className="text-xs text-gray-400 mb-4">
+              {isExpanded || isHovered || isMobileOpen ? "System & Settings" : <HorizontaLDots />}
+            </h2>
+            {renderMenuItems(currentOthersItems, "others")}
+          </div>
+        </nav>
+      </aside>
+    </>
   );
 };
 

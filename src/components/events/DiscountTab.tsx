@@ -73,7 +73,7 @@ export default function DiscountTab({ eventId }: DiscountTabProps) {
   const totalUsed    = discounts.reduce((sum, d) => sum + d.timesUsed, 0);
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-4 sm:space-y-6">
 
       {/* Alert toast */}
       {alert && (
@@ -95,12 +95,12 @@ export default function DiscountTab({ eventId }: DiscountTabProps) {
 
       ) : discounts.length === 0 ? (
         /* Empty state */
-        <div className="bg-white rounded-3xl border border-gray-200 p-12 text-center flex flex-col items-center justify-center min-h-[400px] shadow-sm">
-          <div className="w-16 h-16 bg-violet-50 text-violet-500 rounded-full flex items-center justify-center mb-6">
-            <Tag className="w-8 h-8" />
+        <div className="bg-white rounded-2xl sm:rounded-3xl border border-gray-200 p-6 sm:p-12 text-center flex flex-col items-center justify-center min-h-[300px] sm:min-h-[400px] shadow-sm">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-violet-50 text-violet-500 rounded-full flex items-center justify-center mb-4 sm:mb-6">
+            <Tag className="w-6 h-6 sm:w-8 sm:h-8" />
           </div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">No discount codes yet</h3>
-          <p className="text-gray-500 max-w-md mb-8">
+          <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">No discount codes yet</h3>
+          <p className="text-sm sm:text-base text-gray-500 max-w-md mb-6 sm:mb-8">
             Create promo codes to offer discounts to your attendees. Set expiry dates and usage limits.
           </p>
           <Button
@@ -108,7 +108,7 @@ export default function DiscountTab({ eventId }: DiscountTabProps) {
               setEditingDiscount(null);
               setIsModalOpen(true);
             }}
-            className="flex items-center gap-2 bg-brand-500 hover:bg-brand-600"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600"
           >
             <Plus className="w-5 h-5" /> Add Discount Code
           </Button>
@@ -117,38 +117,38 @@ export default function DiscountTab({ eventId }: DiscountTabProps) {
       ) : (
         <>
           {/* Header row */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-200 shadow-sm">
             <div>
-              <h3 className="text-xl font-bold text-gray-900">Discount Codes</h3>
-              <p className="text-sm text-gray-500 mt-1">Manage promo codes and their limits.</p>
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900">Discount Codes</h3>
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">Manage promo codes and their limits.</p>
             </div>
             <Button
               onClick={() => {
                 setEditingDiscount(null);
                 setIsModalOpen(true);
               }}
-              className="flex items-center gap-2 bg-brand-500 hover:bg-brand-600"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600"
             >
               <Plus className="w-5 h-5" /> Add Discount Code
             </Button>
           </div>
 
           {/* Stats strip */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-2 sm:gap-4">
             {[
               { label: 'Total Codes', value: discounts.length, color: 'text-violet-600', bg: 'bg-violet-50 border-violet-100' },
               { label: 'Active',      value: activeCount,      color: 'text-green-600',  bg: 'bg-green-50 border-green-100' },
               { label: 'Total Used',  value: totalUsed,        color: 'text-blue-600',   bg: 'bg-blue-50 border-blue-100' },
             ].map(({ label, value, color, bg }) => (
-              <div key={label} className={`p-4 rounded-2xl border ${bg} text-center`}>
-                <p className={`text-2xl font-black tabular-nums ${color}`}>{value}</p>
-                <p className="text-xs font-semibold text-gray-500 mt-0.5">{label}</p>
+              <div key={label} className={`p-2 sm:p-4 rounded-xl sm:rounded-2xl border ${bg} text-center flex flex-col justify-center`}>
+                <p className={`text-xl sm:text-2xl font-black tabular-nums truncate ${color}`}>{value}</p>
+                <p className="text-[10px] sm:text-xs font-semibold text-gray-500 mt-0.5 sm:mt-1 truncate">{label}</p>
               </div>
             ))}
           </div>
 
           {/* List */}
-          <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm min-h-[300px]">
+          <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-200 shadow-sm min-h-[300px]">
             <DiscountCodeList
               eventId={eventId}
               discounts={discounts}
