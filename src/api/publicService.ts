@@ -118,6 +118,7 @@ export const publicService = {
       enabledTabs: theme.enabledTabs,
       tickets: response.tickets ?? [],
       agenda: response.agenda ?? [],
+      sponsors: response.sponsors ?? [],
     };
   },
 

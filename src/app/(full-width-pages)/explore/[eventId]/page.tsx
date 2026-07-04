@@ -3,10 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { publicService } from '@/api/publicService';
-import { sponsorService } from '@/api/sponsorService'; // ✅ imported sponsorService
 import { EventTemplateData } from '@/types/template.types';
 import { PublicEventPageResponse } from '@/types/event.types';
-import { Sponsor } from '@/types/sponsor.types'; // ✅ imported Sponsor type
 
 import Template1 from '@/components/templates/Template1';
 import Template2 from '@/components/templates/Template2';
@@ -19,8 +17,7 @@ export default function PublicEventPage() {
   const params = useParams();
   const slug = params.eventId as string;
 
-  // ✅ Extend state to include sponsors
-  const [templateData, setTemplateData] = useState<(EventTemplateData & { sponsors?: Sponsor[] }) | null>(null);
+  const [templateData, setTemplateData] = useState<EventTemplateData | null>(null);
   const [rawResponse, setRawResponse] = useState<PublicEventPageResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +29,6 @@ export default function PublicEventPage() {
       try {
         setIsLoading(true);
 
-        // 1. Fetch public event data
         const response = await publicService.getEventBySlug(slug);
         const assembled = publicService.assembleTemplateData(response);
 
@@ -41,18 +37,8 @@ export default function PublicEventPage() {
           return;
         }
 
-        // 2. Fetch sponsors using the event ID
-        const eventId = response.eventDetails.id;
-        const sponsors = await sponsorService.getSponsors(eventId);
-
-        // 3. Merge sponsors into the data
-        const fullData: EventTemplateData & { sponsors?: Sponsor[] } = {
-          ...assembled,
-          sponsors,
-        };
-
         setRawResponse(response);
-        setTemplateData(fullData);
+        setTemplateData(assembled);
       } catch (err: any) {
         setError(err.message || 'Event not found.');
       } finally {

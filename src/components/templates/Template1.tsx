@@ -6,8 +6,8 @@ import { EventTemplateData, TabName } from '@/types/template.types';
 import { publicService } from '@/api/publicService';
 import { Sponsor } from '@/types/sponsor.types';
 import {
-  Calendar, MapPin, Clock, Ticket, Users, Mail, Phone, CheckCircle, Shield, Loader2,
-  Globe, MessageCircle, Share2, ChevronRight, ExternalLink, Zap, LayoutGrid, Terminal,
+  Calendar, MapPin, Clock, Ticket, Users, Mail, Phone, CheckCircle, Shield, Loader2, FileText,
+  Globe, MessageCircle, Share2, ChevronRight, ExternalLink, Zap, LayoutGrid, Terminal, Star,
 } from 'lucide-react';
 import { FaFacebook, FaInstagram, FaLinkedin, FaXTwitter } from 'react-icons/fa6';
 
@@ -180,71 +180,160 @@ export default function Template1({ data, onCheckout }: Template1Props) {
           FIXED HEADER — pill nav
       ══════════════════════════════════════════ */}
       <header
-        className="fixed top-0 left-0 right-0 z-50 h-16 border-b backdrop-blur-xl animate-slide-down"
+        className="fixed top-0 left-0 right-0 z-50 h-16 border-b backdrop-blur-xl"
         style={{ background: `${bgColor}d0`, borderColor: `${primary}28` }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-12 h-full flex items-center justify-between gap-4">
-          {/* Logo mark */}
-          <div className="hidden sm:flex items-center gap-2 shrink-0 group">
-            <Terminal
-              className="w-4 h-4 transition-transform duration-300 group-hover:rotate-[-8deg] group-hover:scale-110"
-              style={{ color: primary }}
-            />
-            <span
-              className="text-xs font-mono uppercase tracking-[0.2em] truncate max-w-40 transition-colors duration-300 group-hover:brightness-125"
-              style={{ color: primary }}
+        {/* Animated gradient scan line at very top */}
+        <div
+          className="absolute top-0 inset-x-0 h-0.5 animate-pulse"
+          style={{ background: `linear-gradient(90deg, transparent, ${primary}, ${secondary}, transparent)` }}
+        />
+
+        {/* Subtle moving grid overlay */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-20"
+          style={{
+            backgroundImage: `linear-gradient(${primary}15 1px, transparent 1px), linear-gradient(90deg, ${primary}15 1px, transparent 1px)`,
+            backgroundSize: '24px 24px',
+          }}
+        />
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-12 h-full flex items-center justify-between gap-4">
+
+          {/* ── Logo mark ── */}
+          <div className="hidden sm:flex items-center gap-2.5 shrink-0 group">
+            {/* Pulsing bracket */}
+            <div className="relative flex items-center justify-center w-7 h-7 border"
+              style={{ borderColor: `${primary}50`, background: `${primary}10` }}
             >
-              {data.title}
-            </span>
+              <span className="absolute inset-0 animate-ping rounded-none opacity-20"
+                style={{ background: primary, animationDuration: '2.5s' }} />
+              <Terminal className="w-3.5 h-3.5 relative z-10" style={{ color: primary }} />
+            </div>
+            <div className="flex flex-col">
+              <span
+                className="text-[11px] font-mono uppercase tracking-[0.22em] truncate max-w-40 leading-tight transition-all group-hover:tracking-[0.28em] duration-300"
+                style={{ color: primary }}
+              >
+                {data.title}
+              </span>
+              <span className="text-[8px] font-mono uppercase tracking-widest" style={{ color: mutedText }}>
+                {fmtShort(data.startDatetime)}
+              </span>
+            </div>
           </div>
 
-          {/* Pill nav — center */}
+          {/* ── Pill nav ── */}
           <div
             className="flex items-center rounded-full overflow-hidden overflow-x-auto no-scrollbar border relative"
             style={{ borderColor: `${primary}28`, background: `${primary}06` }}
           >
+            {/* Inner glow on the pill */}
+            <div className="absolute inset-0 rounded-full pointer-events-none"
+              style={{ boxShadow: `inset 0 0 20px ${primary}08` }} />
+
             {enabledTabs.map(tab => (
               <button
                 key={tab}
                 onClick={() => scrollTo(tab)}
-                className="px-4 sm:px-5 py-2 text-[11px] font-mono uppercase tracking-widest whitespace-nowrap shrink-0 relative transition-all duration-300 ease-out hover:scale-105"
+                className="relative px-4 sm:px-5 py-2 text-[11px] font-mono uppercase tracking-widest transition-all duration-200 whitespace-nowrap shrink-0 group"
                 style={{
+                  background: activeTab === tab ? `${primary}22` : 'transparent',
                   color: activeTab === tab ? primary : mutedText,
                 }}
               >
-                {TAB_LABELS[tab]}
-
-                {/* Active underline indicator – slides smoothly */}
+                {/* Active indicator — glowing bottom line */}
                 {activeTab === tab && (
                   <span
-                    className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-all duration-300 ease-in-out"
-                    style={{ background: primary }}
+                    className="absolute bottom-0 left-3 right-3 h-0.5"
+                    style={{ background: `linear-gradient(to right, transparent, ${primary}, transparent)`, boxShadow: `0 0 8px ${primary}` }}
                   />
                 )}
-
-                {/* Hover glow background */}
+                {/* Hover top dot */}
                 <span
-                  className="absolute inset-0 -z-10 rounded-full transition-opacity duration-300 opacity-0 hover:opacity-100"
-                  style={{ background: `${primary}18` }}
+                  className="absolute top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  style={{ background: secondary }}
                 />
+                {TAB_LABELS[tab]}
               </button>
             ))}
           </div>
 
-          {/* CTA */}
+          {/* ── CTA button ── */}
           <button
             onClick={onCheckout}
-            className="hidden sm:flex items-center gap-1.5 px-4 py-2 text-xs font-mono uppercase tracking-widest shrink-0 transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95 relative overflow-hidden group"
-            style={{
-              background: `linear-gradient(135deg, ${primary}, ${secondary})`,
-              color: '#000',
-            }}
+            className="hidden sm:flex items-center gap-2 shrink-0 relative group"
+            style={{ padding: '2px' }}
           >
-            {/* Shine sweep on hover */}
-            <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out bg-linear-to-r from-transparent via-white/30 to-transparent skew-x-12" />
-            <Zap className="w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-12" /> Get Access
+            {/* Animated gradient border — rotates on hover */}
+            <span
+              className="absolute inset-0 pointer-events-none transition-all duration-500"
+              style={{
+                background: `linear-gradient(135deg, ${primary}, ${secondary}, ${primary})`,
+                backgroundSize: '200% 200%',
+                opacity: 0.8,
+                boxShadow: `0 0 0px ${primary}00`,
+              }}
+            />
+            {/* Glow halo that expands on hover */}
+            <span
+              className="absolute -inset-1 pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-500 blur-sm"
+              style={{ background: `linear-gradient(135deg, ${primary}60, ${secondary}60)` }}
+            />
+
+            {/* Inner surface */}
+            <span
+              className="relative flex items-center gap-2 px-5 py-2.5 text-xs font-mono uppercase tracking-widest overflow-hidden transition-all duration-300 group-hover:-translate-y-0.5 group-active:scale-95"
+              style={{ background: bgColor, color: primary, zIndex: 1 }}
+            >
+              {/* Bottom-up fill sweep */}
+              <span
+                className="absolute inset-0 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 pointer-events-none"
+                style={{ background: `linear-gradient(135deg, ${primary}, ${secondary})` }}
+              />
+
+              {/* Shimmer on top of fill */}
+              <span
+                className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 delay-100 pointer-events-none z-10"
+                style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)' }}
+              />
+
+              {/* Expanding corner brackets */}
+              <span
+                className="absolute top-0.5 left-0.5 w-2 h-2 border-t-2 border-l-2 transition-all duration-300 group-hover:w-full group-hover:h-full group-hover:opacity-0 z-20"
+                style={{ borderColor: primary }}
+              />
+              <span
+                className="absolute bottom-0.5 right-0.5 w-2 h-2 border-b-2 border-r-2 transition-all duration-300 group-hover:w-full group-hover:h-full group-hover:opacity-0 z-20"
+                style={{ borderColor: secondary }}
+              />
+
+              {/* Scan line on hover */}
+              <span
+                className="absolute inset-x-0 h-px opacity-0 group-hover:opacity-40 transition-opacity duration-300 z-20"
+                style={{ top: '50%', background: `linear-gradient(to right, transparent, #000, transparent)` }}
+              />
+
+              {/* Icon */}
+              <Zap
+                className="w-3.5 h-3.5 relative z-30 transition-all duration-300 group-hover:rotate-12 group-hover:scale-125"
+                style={{ color: 'inherit' }}
+              />
+
+              {/* Label */}
+              <span className="relative z-30 group-hover:text-black transition-colors duration-300 group-hover:tracking-[0.2em]">
+                Get Access
+              </span>
+            </span>
           </button>
+
         </div>
+
+        {/* Bottom accent line */}
+        <div
+          className="absolute bottom-0 inset-x-0 h-px"
+          style={{ background: `linear-gradient(90deg, transparent, ${primary}50, ${secondary}50, transparent)` }}
+        />
       </header>
 
       {/* ══════════════════════════════════════════
@@ -363,16 +452,127 @@ export default function Template1({ data, onCheckout }: Template1Props) {
             {/* Quick info strip */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
-                { icon: <Calendar className="w-4 h-4" />, label: 'DATE & TIME', val: `${fmt(data.startDatetime)} · ${fmtTime(data.startDatetime)} — ${fmtTime(data.endDatetime)}`, color: primary },
-                { icon: <MapPin className="w-4 h-4" />, label: 'LOCATION', val: locationDisplay, color: secondary },
-              ].map(({ icon, label, val, color }) => (
-                <div key={label} className="flex gap-4 items-start p-5" style={glowBorder(color)}>
-                  <div className="p-2 border shrink-0" style={{ borderColor: `${color}45`, color, background: `${color}12` }}>
-                    {icon}
+                {
+                  icon: <Calendar className="w-5 h-5" />,
+                  label: 'Date & Time',
+                  val: fmt(data.startDatetime),
+                  sub: `${fmtTime(data.startDatetime)} — ${fmtTime(data.endDatetime)}`,
+                  color: primary,
+                },
+                {
+                  icon: <MapPin className="w-5 h-5" />,
+                  label: 'Location',
+                  val: data.venueName,
+                  sub: data.formattedAddress,
+                  color: secondary,
+                },
+              ].map(({ icon, label, val, sub, color }) => (
+                <div
+                  key={label}
+                  className="relative flex flex-col gap-4 p-5 overflow-hidden group transition-all duration-300 hover:-translate-y-0.5"
+                  style={glowBorder(color)}
+                >
+                  {/* Animated corner accent — top left */}
+                  <span
+                    className="absolute top-0 left-0 w-8 h-0.5 transition-all duration-500 group-hover:w-16"
+                    style={{ background: color }}
+                  />
+                  <span
+                    className="absolute top-0 left-0 w-0.5 h-8 transition-all duration-500 group-hover:h-16"
+                    style={{ background: color }}
+                  />
+                  {/* Bottom right mirror */}
+                  <span
+                    className="absolute bottom-0 right-0 w-8 h-0.5 transition-all duration-500 group-hover:w-16"
+                    style={{ background: color }}
+                  />
+                  <span
+                    className="absolute bottom-0 right-0 w-0.5 h-8 transition-all duration-500 group-hover:h-16"
+                    style={{ background: color }}
+                  />
+
+                  {/* Radial glow on hover */}
+                  <div
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                    style={{ background: `radial-gradient(ellipse at 20% 50%, ${color}14 0%, transparent 70%)` }}
+                  />
+
+                  {/* Scan line sweep */}
+                  <div
+                    className="absolute inset-y-0 w-px opacity-0 group-hover:opacity-30 transition-opacity duration-300 pointer-events-none"
+                    style={{ left: '50%', background: color }}
+                  />
+
+                  {/* Top row — icon + label */}
+                  <div className="flex items-center gap-3 relative z-10">
+                    <div
+                      className="p-2.5 border shrink-0 relative overflow-hidden transition-all duration-300 group-hover:scale-110"
+                      style={{ borderColor: `${color}45`, color, background: `${color}12` }}
+                    >
+                      {/* Icon box inner pulse */}
+                      <span
+                        className="absolute inset-0 opacity-0 group-hover:opacity-100 animate-pulse pointer-events-none"
+                        style={{ background: `${color}18` }}
+                      />
+                      <span className="relative z-10">{icon}</span>
+                    </div>
+                    <div>
+                      <p
+                        className="text-[9px] font-mono uppercase tracking-[0.25em] mb-0.5"
+                        style={{ color: `${color}90` }}
+                      >
+                        {label}
+                      </p>
+                      {/* Animated underline */}
+                      <div
+                        className="h-px w-0 group-hover:w-full transition-all duration-500"
+                        style={{ background: `linear-gradient(to right, ${color}, transparent)` }}
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-[10px] font-mono uppercase tracking-widest mb-1" style={{ color }}>{label}</p>
-                    <p className="text-sm leading-snug" style={{ color: textColor }}>{val}</p>
+
+                  {/* Value */}
+                  <div className="relative z-10 pl-1">
+                    <p
+                      className="text-sm font-bold leading-snug mb-1"
+                      style={{ color: textColor }}
+                    >
+                      {val}
+                    </p>
+                    <p
+                      className="text-xs font-mono leading-snug"
+                      style={{ color: mutedText }}
+                    >
+                      {sub}
+                    </p>
+                  </div>
+
+                  {/* Bottom — animated data readout */}
+                  <div className="relative z-10 flex items-center gap-2 overflow-hidden">
+                    {/* Pulsing dot */}
+                    <span className="relative flex h-1.5 w-1.5 shrink-0">
+                      <span
+                        className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60"
+                        style={{ background: color }}
+                      />
+                      <span
+                        className="relative inline-flex rounded-full h-1.5 w-1.5"
+                        style={{ background: color }}
+                      />
+                    </span>
+
+                    {/* Scrolling mono text */}
+                    <div className="overflow-hidden flex-1 h-4">
+                      <p
+                        className="text-[9px] font-mono uppercase tracking-widest animate-marquee whitespace-nowrap"
+                        style={{ color: `${color}80`, animationDuration: '10s' }}
+                      >
+                        {label === 'Date & Time'
+                          ? `${fmt(data.startDatetime)} · ${fmtTime(data.startDatetime)} — ${fmtTime(data.endDatetime)} · ${fmt(data.startDatetime)} · ${fmtTime(data.startDatetime)} — ${fmtTime(data.endDatetime)}`
+                          : `${locationDisplay} · ${locationDisplay} · ${locationDisplay}`
+                        }
+                      </p>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -386,9 +586,73 @@ export default function Template1({ data, onCheckout }: Template1Props) {
                 style={{ scrollMarginTop: HEADER_HEIGHT + 16 + 'px' }}
               >
                 <CyberHeading label="About This Event" primary={primary} secondary={secondary} />
-                <p className="leading-relaxed text-base whitespace-pre-wrap mt-6" style={{ color: textColor }}>
-                  {data.description}
-                </p>
+
+                <div className="mt-6 relative">
+                  {/* Left accent border with gradient fade */}
+                  <div
+                    className="absolute left-0 top-0 bottom-0 w-0.5"
+                    style={{ background: `linear-gradient(to bottom, ${primary}, ${secondary}60, transparent)` }}
+                  />
+
+                  {/* Subtle background wash */}
+                  <div
+                    className="absolute inset-0 pointer-events-none rounded-sm"
+                    style={{ background: `linear-gradient(135deg, ${primary}06 0%, transparent 60%)` }}
+                  />
+
+                  {/* Description text */}
+                  <div className="pl-6 pr-4 py-4 relative z-10">
+                    {/* Terminal prompt line */}
+                    <div className="flex items-center gap-2 mb-4">
+                      <FileText className="w-3.5 h-3.5 shrink-0" style={{ color: primary }} />
+                      <span className="text-[10px] font-mono uppercase tracking-widest" style={{ color: mutedText }}>
+                        Event Description
+                      </span>
+                      <span
+                        className="inline-block w-2 h-3.5 ml-1 animate-pulse"
+                        style={{ background: primary, animationDuration: '1s' }}
+                      />
+                    </div>
+
+                    {/* Description broken into paragraphs with stagger */}
+                    {data.description.split('\n').filter(Boolean).length > 1
+                      ? data.description.split('\n').filter(Boolean).map((para, i) => (
+                        <p
+                          key={i}
+                          className="text-sm leading-relaxed mb-3 last:mb-0"
+                          style={{ color: textColor, opacity: 1 }}
+                        >
+                          {i === 0 ? para : para}
+                        </p>
+                      ))
+                      : (
+                        <p className="text-sm leading-relaxed" style={{ color: textColor }}>
+                          {data.description}
+                        </p>
+                      )
+                    }
+
+                    {/* Bottom readout bar */}
+                    <div className="flex items-center gap-3 mt-6 pt-4 border-t" style={{ borderColor: `${primary}18` }}>
+                      <span className="relative flex h-1.5 w-1.5 shrink-0">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60"
+                          style={{ background: primary }} />
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ background: primary }} />
+                      </span>
+                      <div className="flex-1 overflow-hidden h-3">
+                        <p
+                          className="text-[9px] font-mono uppercase tracking-widest animate-marquee whitespace-nowrap"
+                          style={{ color: mutedText, animationDuration: '14s' }}
+                        >
+                          {data.organizerName} · {data.venueName} · {fmt(data.startDatetime)} · {fmtTime(data.startDatetime)} · {data.organizerName} · {data.venueName} · {fmt(data.startDatetime)} · {fmtTime(data.startDatetime)}
+                        </p>
+                      </div>
+                      <span className="text-[9px] font-mono shrink-0" style={{ color: `${primary}60` }}>
+                        EOF
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </section>
             )}
 
@@ -402,63 +666,93 @@ export default function Template1({ data, onCheckout }: Template1Props) {
                 <CyberHeading label="Schedule" primary={primary} secondary={secondary} />
 
                 {data.agenda.length === 0 ? (
-                  <p className="font-mono text-sm mt-6" style={{ color: mutedText }}>[ NO_SCHEDULE_DEFINED ]</p>
+                  <div className="mt-6 flex items-center gap-3 p-5 border font-mono text-sm"
+                    style={{ borderColor: `${primary}25`, background: `${primary}05`, color: mutedText }}>
+                    <Clock className="w-4 h-4 shrink-0" style={{ color: primary }} />
+                    No schedule defined yet.
+                  </div>
                 ) : (
-                  <div className="mt-6 space-y-3">
-                    {data.agenda.map((item, idx) => (
-                      <div
-                        key={item.id}
-                        className="flex items-start gap-4 p-5 transition-all hover:translate-x-1"
-                        style={glowBorder(idx % 2 === 0 ? primary : secondary)}
-                      >
-                        {/* Image or number */}
-                        {item.imageUrl ? (
-                          <div
-                            className="shrink-0 w-20 h-20 overflow-hidden border-2"
-                            style={{ borderColor: primary }}
-                          >
-                            <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
-                          </div>
-                        ) : (
-                          <div
-                            className="shrink-0 w-12 h-12 border flex items-center justify-center text-xs font-mono font-black relative"
-                            style={{ borderColor: primary, color: primary, background: `${primary}10` }}
-                          >
-                            <span className="absolute top-0.5 left-0.5 w-1.5 h-1.5" style={{ background: primary }} />
-                            {String(idx + 1).padStart(2, '0')}
-                          </div>
-                        )}
+                  <div className="mt-6 relative">
+                    {/* Vertical timeline line */}
+                    <div className="absolute left-[27px] top-0 bottom-0 w-px"
+                      style={{ background: `linear-gradient(to bottom, ${primary}60, ${secondary}40, transparent)` }} />
 
-                        <div className="flex-1 min-w-0">
-                          {/* Time + room chips */}
-                          <div className="flex flex-wrap gap-2 mb-2">
-                            <span
-                              className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 border"
-                              style={{ color: primary, borderColor: `${primary}40`, background: `${primary}0a` }}
-                            >
-                              <Clock className="w-3 h-3" />
-                              {fmtTime(item.startTime)} — {fmtTime(item.endTime)}
-                            </span>
-                            {item.roomOrLocation && (
-                              <span
-                                className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5"
-                                style={{ color: mutedText }}
-                              >
-                                <MapPin className="w-3 h-3" />{item.roomOrLocation}
-                              </span>
-                            )}
+                    <div className="space-y-4">
+                      {data.agenda.map((item, idx) => {
+                        const color = idx % 2 === 0 ? primary : secondary;
+                        return (
+                          <div
+                            key={item.id}
+                            className="flex items-start gap-4 group transition-all duration-300 hover:translate-x-1"
+                          >
+                            {/* Timeline node */}
+                            <div className="shrink-0 relative z-10 mt-5">
+                              {item.imageUrl ? (
+                                <div className="w-14 h-14 overflow-hidden border-2 transition-all duration-300 group-hover:scale-105"
+                                  style={{ borderColor: color }}>
+                                  <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
+                                </div>
+                              ) : (
+                                <div className="w-14 h-14 border flex items-center justify-center text-xs font-mono font-black relative overflow-hidden transition-all duration-300 group-hover:scale-105"
+                                  style={{ borderColor: color, color, background: `${color}10` }}>
+                                  <span className="absolute top-0.5 left-0.5 w-1.5 h-1.5" style={{ background: color }} />
+                                  {/* Inner pulse on hover */}
+                                  <span className="absolute inset-0 opacity-0 group-hover:opacity-100 animate-pulse"
+                                    style={{ background: `${color}15` }} />
+                                  <span className="relative z-10">{String(idx + 1).padStart(2, '0')}</span>
+                                </div>
+                              )}
+                              {/* Connector dot */}
+                              <span className="absolute -left-[13px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full border transition-all duration-300 group-hover:scale-150"
+                                style={{ background: color, borderColor: color, boxShadow: `0 0 6px ${color}` }} />
+                            </div>
+
+                            {/* Card */}
+                            <div className="flex-1 min-w-0 relative overflow-hidden"
+                              style={{
+                                border: `1px solid ${color}30`,
+                                background: `${color}05`,
+                                boxShadow: `0 0 20px ${color}08`,
+                              }}>
+                              {/* Top accent line */}
+                              <div className="h-0.5 w-0 group-hover:w-full transition-all duration-500"
+                                style={{ background: `linear-gradient(to right, ${color}, transparent)` }} />
+
+                              <div className="p-4">
+                                {/* Time + room chips */}
+                                <div className="flex flex-wrap gap-2 mb-2.5">
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 border"
+                                    style={{ color, borderColor: `${color}40`, background: `${color}0a` }}>
+                                    <Clock className="w-3 h-3" />
+                                    {fmtTime(item.startTime)} — {fmtTime(item.endTime)}
+                                  </span>
+                                  {item.roomOrLocation && (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 border"
+                                      style={{ color: mutedText, borderColor: `${color}20` }}>
+                                      <MapPin className="w-3 h-3" />{item.roomOrLocation}
+                                    </span>
+                                  )}
+                                </div>
+                                <h4 className="font-bold text-sm uppercase tracking-wide mb-1" style={{ color: textColor }}>
+                                  {item.title}
+                                </h4>
+                                {item.description && (
+                                  <p className="text-xs leading-relaxed" style={{ color: mutedText }}>
+                                    {item.description}
+                                  </p>
+                                )}
+                              </div>
+
+                              {/* Bottom right index */}
+                              <div className="absolute bottom-2 right-3 text-[9px] font-mono font-black opacity-10 select-none"
+                                style={{ color, fontSize: '2rem', lineHeight: 1 }}>
+                                {String(idx + 1).padStart(2, '0')}
+                              </div>
+                            </div>
                           </div>
-                          <h4 className="font-bold text-sm uppercase tracking-wide" style={{ color: textColor }}>
-                            {item.title}
-                          </h4>
-                          {item.description && (
-                            <p className="text-xs mt-1 leading-relaxed" style={{ color: mutedText }}>
-                              {item.description}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
               </section>
@@ -474,36 +768,67 @@ export default function Template1({ data, onCheckout }: Template1Props) {
                 <CyberHeading label="Ticket Tiers" primary={primary} secondary={secondary} />
 
                 {data.tickets.length === 0 ? (
-                  <p className="font-mono text-sm mt-6" style={{ color: mutedText }}>[ NO_TICKETS_DEFINED ]</p>
+                  <div className="mt-6 flex items-center gap-3 p-5 border font-mono text-sm"
+                    style={{ borderColor: `${primary}25`, background: `${primary}05`, color: mutedText }}>
+                    <Ticket className="w-4 h-4 shrink-0" style={{ color: primary }} />
+                    No tickets defined yet.
+                  </div>
                 ) : (
                   <div className="mt-6 space-y-3">
-                    {data.tickets.map((ticket, idx) => (
-                      <div
-                        key={ticket.id}
-                        className={`flex items-center justify-between p-5 transition-all ${ticket.soldOut ? 'opacity-40' : 'hover:translate-x-1'}`}
-                        style={glowBorder(idx % 2 === 0 ? primary : secondary)}
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className="p-2 border" style={{ borderColor: `${primary}45`, color: primary, background: `${primary}12` }}>
-                            <Ticket className="w-4 h-4" />
+                    {[...data.tickets].sort((a, b) => a.price - b.price).map((ticket, idx) => {
+                      const color = idx % 2 === 0 ? primary : secondary;
+                      return (
+                        <div
+                          key={ticket.id}
+                          className={`relative overflow-hidden flex items-center justify-between p-5 transition-all duration-300 group ${ticket.soldOut ? 'opacity-40' : 'hover:translate-x-1 '}`}
+                          style={{ border: `1px solid ${color}30`, background: `${color}05` }}
+                        >
+                          {/* Animated left fill on hover */}
+                          {!ticket.soldOut && (
+                            <div className="absolute inset-y-0 left-0 w-0 group-hover:w-1 transition-all duration-300"
+                              style={{ background: color }} />
+                          )}
+                          {/* Top sweep line */}
+                          <div className="absolute top-0 left-0 h-px w-0 group-hover:w-full transition-all duration-500"
+                            style={{ background: `linear-gradient(to right, ${color}, transparent)` }} />
+                          {/* Ghost number */}
+                          <div className="absolute right-24 top-1/2 -translate-y-1/2 text-[3rem] font-black font-mono opacity-[0.04] select-none pointer-events-none"
+                            style={{ color }}>
+                            {String(idx + 1).padStart(2, '0')}
                           </div>
-                          <div>
-                            <p className="font-bold text-sm uppercase tracking-wide" style={{ color: textColor }}>
-                              {ticket.tierName}
+
+                          <div className="flex items-center gap-4 relative z-10">
+                            <div className="p-2.5 border relative overflow-hidden transition-all duration-300 group-hover:scale-110"
+                              style={{ borderColor: `${color}45`, color, background: `${color}12` }}>
+                              <span className="absolute inset-0 opacity-0 group-hover:opacity-100 animate-pulse"
+                                style={{ background: `${color}20` }} />
+                              <Ticket className="w-4 h-4 relative z-10" />
+                            </div>
+                            <div>
+                              <p className="font-bold text-sm uppercase tracking-wide" style={{ color: textColor }}>
+                                {ticket.tierName}
+                              </p>
+                              {ticket.soldOut
+                                ? <span className="text-[10px] font-mono tracking-widest" style={{ color: '#ef4444' }}>SOLD OUT</span>
+                                : <span className="text-[10px] font-mono tracking-widest" style={{ color: `${color}80` }}>AVAILABLE</span>
+                              }
+                            </div>
+                          </div>
+
+                          <div className="relative z-10 text-right">
+                            <p className="text-2xl font-black font-mono tabular-nums"
+                              style={{ color: ticket.soldOut ? '#ef4444' : color }}>
+                              {ticket.soldOut ? '—' : `Rs.${ticket.price.toLocaleString()}`}
                             </p>
-                            {ticket.soldOut && (
-                              <span className="text-xs font-mono" style={{ color: '#ef4444' }}>SOLD_OUT</span>
+                            {!ticket.soldOut && (
+                              <p className="text-[9px] font-mono uppercase tracking-widest mt-0.5" style={{ color: mutedText }}>
+                                per person
+                              </p>
                             )}
                           </div>
                         </div>
-                        <p
-                          className="text-2xl font-black font-mono tabular-nums"
-                          style={{ color: ticket.soldOut ? '#ef4444' : primary }}
-                        >
-                          {ticket.soldOut ? '—' : `Rs.${ticket.price.toLocaleString()}`}
-                        </p>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </section>
@@ -518,32 +843,53 @@ export default function Template1({ data, onCheckout }: Template1Props) {
               >
                 <CyberHeading label="Location" primary={primary} secondary={secondary} />
 
-                <div className="mt-6 overflow-hidden border" style={{ borderColor: `${primary}35` }}>
-                  <iframe
-                    src={`https://maps.google.com/maps?q=${mapQuery}&output=embed&z=15`}
-                    width="100%"
-                    height="360"
-                    style={{ border: 0, filter: 'invert(90%) hue-rotate(180deg) saturate(0.75)' }}
-                    allowFullScreen
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                    title="Event Location"
-                  />
-                </div>
-                <div
-                  className="flex items-start gap-3 p-4 border mt-0"
-                  style={{ borderColor: `${primary}35`, borderTop: 'none', background: `${primary}07` }}
-                >
-                  <MapPin className="w-4 h-4 shrink-0 mt-0.5" style={{ color: primary }} />
-                  <div>
-                    <p className="font-semibold text-sm" style={{ color: textColor }}>{locationDisplay}</p>
+                <div className="mt-6 relative group">
+                  {/* Map container */}
+                  <div className="relative overflow-hidden border" style={{ borderColor: `${primary}35` }}>
+                    {/* Corner brackets that expand on hover */}
+                    <span className="absolute top-2 left-2 w-5 h-5 border-t-2 border-l-2 z-10 transition-all duration-500 group-hover:w-8 group-hover:h-8"
+                      style={{ borderColor: primary }} />
+                    <span className="absolute top-2 right-2 w-5 h-5 border-t-2 border-r-2 z-10 transition-all duration-500 group-hover:w-8 group-hover:h-8"
+                      style={{ borderColor: primary }} />
+                    <span className="absolute bottom-2 left-2 w-5 h-5 border-b-2 border-l-2 z-10 transition-all duration-500 group-hover:w-8 group-hover:h-8"
+                      style={{ borderColor: secondary }} />
+                    <span className="absolute bottom-2 right-2 w-5 h-5 border-b-2 border-r-2 z-10 transition-all duration-500 group-hover:w-8 group-hover:h-8"
+                      style={{ borderColor: secondary }} />
+                    <iframe
+                      src={`https://maps.google.com/maps?q=${mapQuery}&output=embed&z=15`}
+                      width="100%"
+                      height="340"
+                      style={{ border: 0, filter: 'invert(90%) hue-rotate(180deg) saturate(0.75)', display: 'block' }}
+                      allowFullScreen
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      title="Event Location"
+                    />
+                  </div>
+
+                  {/* Info strip below map */}
+                  <div className="relative overflow-hidden flex items-start justify-between gap-4 p-4 border border-t-0"
+                    style={{ borderColor: `${primary}30`, background: `${primary}07` }}>
+                    {/* Animated top accent */}
+                    <div className="absolute top-0 inset-x-0 h-px"
+                      style={{ background: `linear-gradient(to right, ${primary}60, ${secondary}40, transparent)` }} />
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                      <div className="p-2 border shrink-0" style={{ borderColor: `${primary}40`, color: primary, background: `${primary}12` }}>
+                        <MapPin className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[9px] font-mono uppercase tracking-[0.2em] mb-1" style={{ color: mutedText }}>Venue Address</p>
+                        <p className="font-semibold text-sm leading-snug" style={{ color: textColor }}>{locationDisplay}</p>
+                      </div>
+                    </div>
                     <a
                       href={`https://maps.google.com/maps?q=${mapQuery}`}
                       target="_blank" rel="noopener noreferrer"
-                      className="text-xs font-mono mt-1 inline-flex items-center gap-1 hover:underline"
-                      style={{ color: primary }}
+                      className="shrink-0 flex items-center gap-1.5 px-3 py-2 border text-[10px] font-mono uppercase tracking-widest transition-all hover:translate-x-1 group/link"
+                      style={{ borderColor: `${primary}40`, color: primary, background: `${primary}08` }}
                     >
-                      OPEN_IN_MAPS <ExternalLink className="w-3 h-3" />
+                      <ExternalLink className="w-3 h-3 transition-transform group-hover/link:rotate-12" />
+                      Open Maps
                     </a>
                   </div>
                 </div>
@@ -561,21 +907,43 @@ export default function Template1({ data, onCheckout }: Template1Props) {
 
                 <div className="mt-6 space-y-3">
                   {[
-                    { icon: <Users className="w-4 h-4" />, label: 'ORGANIZER', value: data.organizerName },
-                    { icon: <Mail className="w-4 h-4" />, label: 'EMAIL', value: data.organizerEmail, href: data.organizerEmail ? `mailto:${data.organizerEmail}` : undefined },
-                    { icon: <Phone className="w-4 h-4" />, label: 'PHONE', value: data.organizerPhone, href: data.organizerPhone ? `tel:${data.organizerPhone}` : undefined },
-                  ].filter(c => c.value).map(c => (
-                    <div key={c.label} className="flex items-center gap-4 p-4 border" style={{ borderColor: `${primary}28`, background: `${primary}06` }}>
-                      <div className="p-2 border shrink-0" style={{ borderColor: `${primary}45`, color: primary, background: `${primary}12` }}>
-                        {c.icon}
+                    { icon: <Users className="w-4 h-4" />, label: 'ORGANIZER', value: data.organizerName, href: undefined, color: primary },
+                    { icon: <Mail className="w-4 h-4" />, label: 'EMAIL', value: data.organizerEmail, href: data.organizerEmail ? `mailto:${data.organizerEmail}` : undefined, color: secondary },
+                    { icon: <Phone className="w-4 h-4" />, label: 'PHONE', value: data.organizerPhone, href: data.organizerPhone ? `tel:${data.organizerPhone}` : undefined, color: primary },
+                  ].filter(c => c.value).map((c, i) => (
+                    <div
+                      key={c.label}
+                      className="relative overflow-hidden flex items-center gap-4 p-4 border group transition-all duration-300 hover:translate-x-1"
+                      style={{ borderColor: `${c.color}28`, background: `${c.color}05` }}
+                    >
+                      {/* Hover fill */}
+                      <div className="absolute inset-y-0 left-0 w-0.5 transition-all duration-300 group-hover:w-1"
+                        style={{ background: c.color }} />
+                      {/* Top sweep */}
+                      <div className="absolute top-0 left-0 h-px w-0 group-hover:w-full transition-all duration-500"
+                        style={{ background: `linear-gradient(to right, ${c.color}, transparent)` }} />
+
+                      <div className="p-2.5 border shrink-0 relative overflow-hidden transition-all duration-300 group-hover:scale-110"
+                        style={{ borderColor: `${c.color}45`, color: c.color, background: `${c.color}12` }}>
+                        <span className="absolute inset-0 opacity-0 group-hover:opacity-100 animate-pulse"
+                          style={{ background: `${c.color}20` }} />
+                        <span className="relative z-10">{c.icon}</span>
                       </div>
-                      <div>
-                        <p className="text-[10px] font-mono uppercase tracking-widest mb-0.5" style={{ color: primary }}>{c.label}</p>
+
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[9px] font-mono uppercase tracking-[0.22em] mb-0.5" style={{ color: `${c.color}80` }}>
+                          {c.label}
+                        </p>
                         {c.href
-                          ? <a href={c.href} className="text-sm font-semibold hover:underline" style={{ color: secondary }}>{c.value}</a>
-                          : <p className="text-sm font-semibold" style={{ color: textColor }}>{c.value}</p>
+                          ? <a href={c.href} className="text-sm font-semibold hover:underline truncate block" style={{ color: c.color }}>{c.value}</a>
+                          : <p className="text-sm font-semibold truncate" style={{ color: textColor }}>{c.value}</p>
                         }
                       </div>
+
+                      {c.href && (
+                        <ExternalLink className="w-3.5 h-3.5 shrink-0 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:rotate-12"
+                          style={{ color: c.color }} />
+                      )}
                     </div>
                   ))}
                   {!data.organizerEmail && !data.organizerPhone && (
@@ -597,38 +965,69 @@ export default function Template1({ data, onCheckout }: Template1Props) {
                 <div className="mt-6 space-y-4">
                   {socialEntries.length > 0 && (
                     <div className="grid grid-cols-2 gap-3">
-                      {socialEntries.map(([key, url]) => (
-                        <a
-                          key={key}
-                          href={url as string}
-                          target="_blank" rel="noopener noreferrer"
-                          className="flex items-center gap-3 p-4 border transition-all hover:translate-x-1 group"
-                          style={{ borderColor: `${primary}30`, background: `${primary}06` }}
-                        >
-                          <div className="p-2 border" style={{ borderColor: `${primary}45`, color: primary, background: `${primary}12` }}>
-                            {SOCIAL_ICONS[key]}
-                          </div>
-                          <span className="text-sm font-mono" style={{ color: mutedText }}>{SOCIAL_LABELS[key]}</span>
-                          <ChevronRight className="w-3 h-3 ml-auto group-hover:translate-x-1 transition-transform" style={{ color: primary }} />
-                        </a>
-                      ))}
+                      {socialEntries.map(([key, url], i) => {
+                        const color = i % 2 === 0 ? primary : secondary;
+                        return (
+                          <a
+                            key={key}
+                            href={url as string}
+                            target="_blank" rel="noopener noreferrer"
+                            className="relative overflow-hidden flex items-center gap-3 p-4 border transition-all duration-300 hover:translate-x-1 group"
+                            style={{ borderColor: `${color}30`, background: `${color}06` }}
+                          >
+                            {/* Left fill bar */}
+                            <div className="absolute inset-y-0 left-0 w-0 group-hover:w-0.5 transition-all duration-300"
+                              style={{ background: color }} />
+                            {/* Top sweep */}
+                            <div className="absolute top-0 left-0 h-px w-0 group-hover:w-full transition-all duration-500"
+                              style={{ background: `linear-gradient(to right, ${color}, transparent)` }} />
+                            <div className="p-2 border relative overflow-hidden transition-all duration-300 group-hover:scale-110"
+                              style={{ borderColor: `${color}45`, color, background: `${color}12` }}>
+                              <span className="absolute inset-0 opacity-0 group-hover:opacity-100 animate-pulse"
+                                style={{ background: `${color}20` }} />
+                              <span className="relative z-10">{SOCIAL_ICONS[key]}</span>
+                            </div>
+                            <span className="text-sm font-mono flex-1" style={{ color: mutedText }}>{SOCIAL_LABELS[key]}</span>
+                            <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                              style={{ color }} />
+                          </a>
+                        );
+                      })}
                     </div>
                   )}
 
-                  <div className="p-5 border" style={{ borderColor: `${secondary}35`, background: `${secondary}06` }}>
-                    <div className="flex items-center gap-3 mb-3">
-                      <Share2 className="w-4 h-4" style={{ color: secondary }} />
-                      <p className="font-mono text-xs uppercase tracking-widest" style={{ color: textColor }}>Share This Event</p>
+                  {/* Share card */}
+                  <div className="relative overflow-hidden p-5 border group"
+                    style={{ borderColor: `${secondary}35`, background: `${secondary}06` }}>
+                    {/* Top gradient */}
+                    <div className="absolute top-0 inset-x-0 h-0.5"
+                      style={{ background: `linear-gradient(to right, transparent, ${secondary}60, transparent)` }} />
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 border" style={{ borderColor: `${secondary}40`, color: secondary, background: `${secondary}12` }}>
+                        <Share2 className="w-4 h-4" />
+                      </div>
+                      <p className="font-mono text-xs uppercase tracking-widest font-bold" style={{ color: textColor }}>
+                        Share This Event
+                      </p>
                     </div>
-                    <p className="text-xs break-all font-mono" style={{ color: mutedText }}>
-                      {typeof window !== 'undefined' ? window.location.href : ''}
-                    </p>
+                    {/* URL display */}
+                    <div className="flex items-center gap-2 px-3 py-2 border mb-3 overflow-hidden"
+                      style={{ borderColor: `${secondary}25`, background: `${secondary}08` }}>
+                      <span className="text-[9px] font-mono" style={{ color: secondary }}>URL</span>
+                      <div className="w-px h-3 shrink-0" style={{ background: `${secondary}40` }} />
+                      <p className="text-[10px] font-mono truncate flex-1" style={{ color: mutedText }}>
+                        {typeof window !== 'undefined' ? window.location.href : ''}
+                      </p>
+                    </div>
                     <button
                       onClick={() => navigator.clipboard?.writeText(window.location.href)}
-                      className="mt-3 text-xs font-mono px-4 py-2 border uppercase tracking-widest transition-all hover:brightness-150"
-                      style={{ borderColor: secondary, color: secondary }}
+                      className="relative overflow-hidden w-full py-2.5 text-[10px] font-mono border uppercase tracking-widest transition-all hover:brightness-125 group/btn flex items-center justify-center gap-2"
+                      style={{ borderColor: `${secondary}45`, color: secondary, background: `${secondary}08` }}
                     >
-                      COPY_LINK
+                      <span className="absolute inset-0 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-700"
+                        style={{ background: `linear-gradient(90deg, transparent, ${secondary}20, transparent)` }} />
+                      <Share2 className="w-3 h-3 relative z-10" />
+                      <span className="relative z-10">Copy Link</span>
                     </button>
                   </div>
                 </div>
@@ -645,67 +1044,136 @@ export default function Template1({ data, onCheckout }: Template1Props) {
                 <CyberHeading label="Sponsors" primary={primary} secondary={secondary} />
 
                 {!data.sponsors || data.sponsors.length === 0 ? (
-                  <p className="font-mono text-sm mt-6" style={{ color: mutedText }}>[ NO_SPONSORS ]</p>
+                  <div className="mt-6 flex items-center gap-3 p-5 border font-mono text-sm"
+                    style={{ borderColor: `${primary}25`, background: `${primary}05`, color: mutedText }}>
+                    <Star className="w-4 h-4 shrink-0" style={{ color: primary }} />
+                    No sponsors listed yet.
+                  </div>
                 ) : (
-                  <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-5">
-                    {data.sponsors.map(sponsor => {
+                  <div className="mt-6 space-y-3">
+                    {[...data.sponsors].sort((a, b) => {
+                      const order = { PLATINUM: 0, GOLD: 1, SILVER: 2, BRONZE: 3 };
+                      return (order[a.sponsorTier as keyof typeof order] ?? 4) - (order[b.sponsorTier as keyof typeof order] ?? 4);
+                    }).map((sponsor, i) => {
                       const ts = TIER_COLORS[sponsor.sponsorTier] || TIER_COLORS.BRONZE;
                       return (
                         <div
-                          key={sponsor.id}
-                          className="flex flex-col items-center p-6 border transition-all hover:-translate-y-0.5 group"
-                          style={{
-                            borderColor: `${ts.border}30`,
-                            background: ts.bg,
-                            boxShadow: `0 0 18px ${ts.border}18`,
-                          }}
+                          key={sponsor.id || i}
+                          className="relative flex items-center gap-5 p-5 border overflow-hidden transition-all duration-300 hover:translate-x-1 group"
+                          style={{ borderColor: `${ts.border}28`, background: `${ts.border}06` }}
                         >
-                          {sponsor.logoUrl && (
-                            <div className="w-24 h-24 flex items-center justify-center mb-4 p-3 border" style={{ borderColor: `${ts.border}25`, background: `${ts.border}08` }}>
-                              <img src={sponsor.logoUrl} alt={sponsor.name} className="w-full h-full object-contain opacity-85 group-hover:opacity-100 transition-opacity" />
-                            </div>
-                          )}
-                          <p className="font-bold text-sm text-center leading-tight mb-3" style={{ color: textColor }}>
-                            {sponsor.name}
-                          </p>
+                          {/* Animated left accent bar */}
+                          <div className="absolute left-0 inset-y-0 w-0.5 transition-all duration-300 group-hover:w-1"
+                            style={{ background: ts.border }} />
+
+                          {/* Top sweep line */}
+                          <div className="absolute top-0 left-0 h-px w-0 group-hover:w-full transition-all duration-500"
+                            style={{ background: `linear-gradient(to right, ${ts.border}, transparent)` }} />
+
+                          {/* Radial glow */}
+                          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                            style={{ background: `radial-gradient(ellipse at 0% 50%, ${ts.border}20 0%, transparent 60%)` }} />
+
+                          {/* Logo box */}
                           <div
-                            className="px-3 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider"
-                            style={{ color: ts.text, background: ts.bg, borderLeft: `3px solid ${ts.border}` }}
+                            className="shrink-0 w-16 h-16 flex items-center justify-center border relative overflow-hidden transition-all duration-300 group-hover:scale-105"
+                            style={{ borderColor: `${ts.border}35`, background: `${ts.border}0a` }}
                           >
-                            {sponsor.sponsorTier}
+                            <span className="absolute top-0.5 left-0.5 w-1.5 h-1.5" style={{ background: ts.border }} />
+                            <span className="absolute bottom-0.5 right-0.5 w-1.5 h-1.5" style={{ background: ts.border }} />
+                            <span className="absolute inset-0 opacity-0 group-hover:opacity-100 animate-pulse"
+                              style={{ background: `${ts.border}15` }} />
+                            {sponsor.logoUrl
+                              ? <img src={sponsor.logoUrl} alt={sponsor.name}
+                                className="w-10 h-10 object-contain relative z-10 opacity-80 group-hover:opacity-100 transition-opacity" />
+                              : <Star className="w-6 h-6 relative z-10" style={{ color: ts.border }} />
+                            }
                           </div>
-                          {sponsor.websiteUrl && (
-                            <a
-                              href={sponsor.websiteUrl}
-                              target="_blank" rel="noopener noreferrer"
-                              className="mt-4 inline-flex items-center gap-1.5 text-xs font-mono hover:opacity-80 transition-opacity"
-                              style={{ color: primary }}
+
+                          {/* Info */}
+                          <div className="flex-1 min-w-0 relative z-10">
+                            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                              <p className="font-black text-sm uppercase tracking-tight" style={{ color: textColor }}>
+                                {sponsor.name}
+                              </p>
+                              <div
+                                className="flex items-center gap-1.5 px-2 py-0.5 text-[9px] font-mono font-bold uppercase tracking-widest"
+                                style={{ color: ts.text, background: `${ts.border}15`, borderLeft: `2px solid ${ts.border}` }}
+                              >
+                                <span className="w-1 h-1 rounded-full animate-pulse" style={{ background: ts.border }} />
+                                {sponsor.sponsorTier}
+                              </div>
+                            </div>
+                            {sponsor.websiteUrl && (
+                              <a
+                                href={sponsor.websiteUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest transition-all duration-300 hover:gap-2.5"
+                                style={{ color: ts.border }}
+                              >
+                                <ExternalLink className="w-3 h-3" strokeWidth={1.5} />
+                                Visit Website
+                              </a>
+                            )}
+                          </div>
+
+                          {/* Right index number */}
+                          <div className="shrink-0 text-right relative z-10">
+                            <span
+                              className="text-[2.5rem] font-black font-mono leading-none select-none opacity-[0.07] group-hover:opacity-[0.12] transition-opacity duration-300"
+                              style={{ color: ts.border }}
                             >
-                              Visit site <ExternalLink className="w-3 h-3" strokeWidth={1.5} />
-                            </a>
-                          )}
+                              {String(i + 1).padStart(2, '0')}
+                            </span>
+                          </div>
                         </div>
                       );
                     })}
+
+                    {/* Bottom summary strip */}
+                    <div
+                      className="flex items-center justify-between px-5 py-3 border-t mt-2"
+                      style={{ borderColor: `${primary}20` }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="relative flex h-1.5 w-1.5">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60"
+                            style={{ background: primary }} />
+                          <span className="relative inline-flex rounded-full h-1.5 w-1.5"
+                            style={{ background: primary }} />
+                        </span>
+                        <span className="text-[9px] font-mono uppercase tracking-widest" style={{ color: mutedText }}>
+                          {data.sponsors.length} official sponsor{data.sponsors.length !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+                      <div className="flex gap-1.5">
+                        {data.sponsors.map((s, i) => (
+                          <span
+                            key={i}
+                            className="w-1 h-1 rounded-full"
+                            style={{ background: (TIER_COLORS[s.sponsorTier] || TIER_COLORS.BRONZE).border }}
+                          />
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 )}
               </section>
             )}
 
             {/* ── RECOVER TICKETS ── */}
-            {enabledTabs.includes('recover') && (
+            {enabledTabs.includes('recover' as TabName) && (
               <section
                 id="recover"
-                ref={el => { sectionRefs.current['recover'] = el; }}
+                ref={el => { sectionRefs.current['recover' as TabName] = el; }}
                 style={{ scrollMarginTop: HEADER_HEIGHT + 16 + 'px' }}
               >
                 <CyberHeading label="Recover Tickets" primary={primary} secondary={secondary} />
-
                 <div className="mt-6 space-y-4">
                   <p className="text-sm leading-relaxed" style={{ color: mutedText }}>
                     Enter the email address you used to purchase tickets. We'll send you a link to recover your tickets.
                   </p>
-
                   <div className="flex flex-col sm:flex-row gap-4 items-end">
                     <div className="flex-1 w-full">
                       <label htmlFor="recovery-email" className="block text-[10px] font-mono uppercase tracking-widest mb-1.5" style={{ color: primary }}>
@@ -717,37 +1185,27 @@ export default function Template1({ data, onCheckout }: Template1Props) {
                         value={recoveryEmail}
                         onChange={(e) => setRecoveryEmail(e.target.value)}
                         placeholder="you@example.com"
-                        className="w-full px-4 py-3 rounded-xl border bg-transparent text-sm outline-none transition-all focus:outline-2 focus:outline-offset-0"
-                        style={{
-                          borderColor: `${primary}40`,
-                          color: textColor,
-                          outlineColor: primary,
-                        }}
+                        className="w-full px-4 py-3 border bg-transparent text-sm outline-none transition-all"
+                        style={{ borderColor: `${primary}40`, color: textColor, outlineColor: primary }}
                       />
                     </div>
                     <button
                       onClick={handleRecoverTickets}
                       disabled={recovering}
-                      className="shrink-0 px-6 py-3 rounded-xl font-mono text-sm uppercase tracking-widest transition-all hover:opacity-80 disabled:opacity-50 flex items-center gap-2"
-                      style={{
-                        background: `linear-gradient(135deg, ${primary}, ${secondary})`,
-                        color: '#000',
-                      }}
+                      className="shrink-0 px-6 py-3 font-mono text-sm uppercase tracking-widest transition-all hover:opacity-80 disabled:opacity-50 flex items-center gap-2"
+                      style={{ background: `linear-gradient(135deg, ${primary}, ${secondary})`, color: '#000' }}
                     >
                       {recovering ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
                       {recovering ? 'Sending...' : 'Recover'}
                     </button>
                   </div>
-
                   {recoveryMessage && (
-                    <div
-                      className="p-4 rounded-xl border text-sm"
+                    <div className="p-4 border text-sm"
                       style={{
                         borderColor: recoveryMessage.type === 'success' ? `${primary}50` : '#ef4444',
                         background: recoveryMessage.type === 'success' ? `${primary}10` : 'rgba(239,68,68,0.08)',
                         color: recoveryMessage.type === 'success' ? primary : '#ef4444',
-                      }}
-                    >
+                      }}>
                       {recoveryMessage.text}
                     </div>
                   )}
@@ -760,69 +1218,125 @@ export default function Template1({ data, onCheckout }: Template1Props) {
           <div className="lg:col-span-4 hidden lg:flex flex-col gap-10">
 
             {/* ── 1. TICKET WIDGET ── */}
-            <div className="p-7 border space-y-5 relative overflow-hidden" style={{ ...glowBorder(primary), background: bgColor }}>
-              {/* Rotating ring decoration */}
-              <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full border-2 opacity-10 animate-spin"
-                style={{ borderColor: primary, animationDuration: '12s' }} />
-              <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full border opacity-10 animate-spin"
-                style={{ borderColor: secondary, animationDuration: '8s', animationDirection: 'reverse' }} />
-              {/* Corner brackets */}
-              <span className="absolute top-2.5 left-2.5 w-4 h-4 border-t border-l" style={{ borderColor: primary }} />
-              <span className="absolute top-2.5 right-2.5 w-4 h-4 border-t border-r" style={{ borderColor: primary }} />
-              <span className="absolute bottom-2.5 left-2.5 w-4 h-4 border-b border-l" style={{ borderColor: secondary }} />
-              <span className="absolute bottom-2.5 right-2.5 w-4 h-4 border-b border-r" style={{ borderColor: secondary }} />
+            <div className="border relative overflow-hidden" style={{ ...glowBorder(primary), background: bgColor }}>
 
-              <div>
-                <p className="text-[10px] font-mono uppercase tracking-widest mb-2 flex items-center gap-1.5" style={{ color: primary }}>
-                  <Zap className="w-3 h-3 animate-pulse" /> Access Pass
-                </p>
-                <p className="text-4xl font-black tabular-nums" style={{ color: textColor }}>
-                  {startPrice !== null ? `Rs.${startPrice.toLocaleString()}` : 'TBA'}
-                </p>
-                <p className="text-xs font-mono mt-0.5" style={{ color: mutedText }}>starting price</p>
+              {/* Rotating ring decorations */}
+              <div className="absolute -top-10 -right-10 w-36 h-36 rounded-full border-2 opacity-[0.07] animate-spin"
+                style={{ borderColor: primary, animationDuration: '14s' }} />
+              <div className="absolute -top-5 -right-5 w-20 h-20 rounded-full border opacity-[0.07] animate-spin"
+                style={{ borderColor: secondary, animationDuration: '9s', animationDirection: 'reverse' }} />
+
+              {/* Corner brackets */}
+              <span className="absolute top-2.5 left-2.5 w-4 h-4 border-t border-l z-10" style={{ borderColor: primary }} />
+              <span className="absolute top-2.5 right-2.5 w-4 h-4 border-t border-r z-10" style={{ borderColor: primary }} />
+              <span className="absolute bottom-2.5 left-2.5 w-4 h-4 border-b border-l z-10" style={{ borderColor: secondary }} />
+              <span className="absolute bottom-2.5 right-2.5 w-4 h-4 border-b border-r z-10" style={{ borderColor: secondary }} />
+
+              {/* Header */}
+              <div className="px-7 pt-7 pb-5">
+                <div className="flex items-end justify-between mb-1">
+                  <div>
+                    <p className="text-[10px] font-mono uppercase tracking-widest mb-2 flex items-center gap-1.5" style={{ color: primary }}>
+                      <Zap className="w-3 h-3 animate-pulse" /> Access Pass
+                    </p>
+                    <p className="text-4xl font-black tabular-nums leading-none" style={{ color: textColor }}>
+                      {startPrice !== null ? `Rs.${startPrice.toLocaleString()}` : 'TBA'}
+                    </p>
+                  </div>
+                  {/* Live badge */}
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 border mb-1"
+                    style={{ borderColor: `${primary}35`, background: `${primary}08` }}>
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ background: primary }} />
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ background: primary }} />
+                    </span>
+                    <span className="text-[9px] font-mono uppercase tracking-widest" style={{ color: primary }}>Live</span>
+                  </div>
+                </div>
+                <p className="text-xs font-mono mt-1" style={{ color: mutedText }}>lowest available price</p>
               </div>
 
-              <div className="border-t border-dashed" style={{ borderColor: `${primary}22` }} />
+              {/* Divider */}
+              <div className="h-px mx-7" style={{ background: `linear-gradient(to right, ${primary}40, ${secondary}30, transparent)` }} />
 
+              {/* Ticket rows — sorted ascending */}
               {data.tickets.length > 0 && (
-                <div className="space-y-2">
-                  {data.tickets.slice(0, 4).map((t, i) => (
-                    <div
-                      key={t.id}
-                      className="flex items-center justify-between px-3 py-2.5 border transition-all hover:translate-x-1"
-                      style={{ borderColor: `${i % 2 === 0 ? primary : secondary}28`, background: `${i % 2 === 0 ? primary : secondary}07` }}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Ticket className="w-3 h-3 shrink-0" style={{ color: i % 2 === 0 ? primary : secondary }} />
-                        <span className="text-xs font-mono" style={{ color: mutedText }}>{t.tierName}</span>
-                      </div>
-                      <span className="text-xs font-mono font-bold" style={{ color: t.soldOut ? '#ef4444' : primary }}>
-                        {t.soldOut ? 'SOLD_OUT' : `Rs.${t.price.toLocaleString()}`}
-                      </span>
-                    </div>
-                  ))}
+                <div className="px-4 py-4 space-y-2">
+                  {[...data.tickets]
+                    .sort((a, b) => a.price - b.price)
+                    .slice(0, 4)
+                    .map((t, i) => {
+                      const color = i % 2 === 0 ? primary : secondary;
+                      return (
+                        <div
+                          key={t.id}
+                          className="relative flex items-center justify-between px-3 py-2.5 border overflow-hidden transition-all duration-300 hover:translate-x-1 group"
+                          style={{ borderColor: `${color}28`, background: `${color}07` }}
+                        >
+                          {/* Left fill on hover */}
+                          <div className="absolute inset-y-0 left-0 w-0 group-hover:w-0.5 transition-all duration-300"
+                            style={{ background: color }} />
+                          {/* Top sweep */}
+                          <div className="absolute top-0 left-0 h-px w-0 group-hover:w-full transition-all duration-500"
+                            style={{ background: `linear-gradient(to right, ${color}, transparent)` }} />
+
+                          <div className="flex items-center gap-2 relative z-10">
+                            <div className="p-1 border relative overflow-hidden transition-all duration-200 group-hover:scale-110"
+                              style={{ borderColor: `${color}40`, color, background: `${color}12` }}>
+                              <span className="absolute inset-0 opacity-0 group-hover:opacity-100 animate-pulse"
+                                style={{ background: `${color}20` }} />
+                              <Ticket className="w-3 h-3 relative z-10" />
+                            </div>
+                            <span className="text-xs font-mono" style={{ color: mutedText }}>{t.tierName}</span>
+                          </div>
+
+                          <div className="relative z-10 text-right">
+                            <span className="text-xs font-mono font-bold" style={{ color: t.soldOut ? '#ef4444' : color }}>
+                              {t.soldOut ? 'SOLD OUT' : `Rs.${t.price.toLocaleString()}`}
+                            </span>
+                            {/* Rank badge */}
+                            <span className="block text-[8px] font-mono uppercase tracking-widest mt-0.5"
+                              style={{ color: `${color}60` }}>
+                              #{String(i + 1).padStart(2, '0')}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
                 </div>
               )}
 
-              <button
-                onClick={onCheckout}
-                className="w-full py-4 font-black text-sm uppercase tracking-widest transition-all hover:opacity-90 hover:-translate-y-0.5 active:scale-95 relative overflow-hidden group"
-                style={{ background: `linear-gradient(135deg, ${primary}, ${secondary})`, color: '#000' }}
-              >
-                <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700"
-                  style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)' }} />
-                <span className="relative z-10 flex items-center justify-center gap-2">
-                  <Zap className="w-4 h-4" /> Get Access
-                </span>
-              </button>
+              {/* CTA button */}
+              <div className="px-7 pb-2">
+                <button
+                  onClick={onCheckout}
+                  className="w-full py-4 font-black text-sm uppercase tracking-widest transition-all hover:-translate-y-0.5 active:scale-95 relative overflow-hidden group"
+                  style={{ background: `linear-gradient(135deg, ${primary}, ${secondary})`, color: '#000' }}
+                >
+                  {/* Shimmer */}
+                  <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700"
+                    style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)' }} />
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    <Zap className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
+                    Get Access
+                  </span>
+                </button>
+              </div>
 
-              <p className="text-center text-[10px] font-mono uppercase tracking-widest flex items-center justify-center gap-1.5" style={{ color: mutedText }}>
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-                JazzCash · EasyPaisa
-              </p>
+              {/* Payment footer */}
+              <div className="px-7 py-4 border-t flex items-center justify-between"
+                style={{ borderColor: `${primary}18`, background: `${primary}04` }}>
+                <p className="text-[9px] font-mono uppercase tracking-widest flex items-center gap-1.5" style={{ color: mutedText }}>
+                  <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                      d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  Secure Checkout
+                </p>
+                <p className="text-[9px] font-mono uppercase tracking-widest" style={{ color: mutedText }}>
+                  JazzCash · EasyPaisa
+                </p>
+              </div>
             </div>
 
             {/* ── 2. LIVE COUNTDOWN ── */}

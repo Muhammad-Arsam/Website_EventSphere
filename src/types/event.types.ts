@@ -1,4 +1,5 @@
 import { ThemeConfigJson } from '@/types/template.types';
+import { Sponsor } from '@/types/sponsor.types';
 
 export interface EventResponse {
   id: string;
@@ -169,6 +170,7 @@ export interface PublicEventPageResponse {
   landingPageDesign: PublicLandingPageDesign;
   tickets: PublicTicket[];
   agenda: PublicAgendaItem[];
+  sponsors?: Sponsor[];
 }
 
 // --- RECOVER TICKETS ---
