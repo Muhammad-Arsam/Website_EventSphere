@@ -288,7 +288,7 @@ export default function Template1({ data, onCheckout }: Template1Props) {
             >
               {/* Bottom-up fill sweep */}
               <span
-                className="absolute inset-0 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 pointer-events-none"
+                className="absolute inset-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300 pointer-events-none"
                 style={{ background: `linear-gradient(135deg, ${primary}, ${secondary})` }}
               />
 
@@ -1105,7 +1105,7 @@ export default function Template1({ data, onCheckout }: Template1Props) {
                       className="relative overflow-hidden w-full py-2.5 text-[10px] font-mono border uppercase tracking-widest transition-all hover:brightness-125 group/btn flex items-center justify-center gap-2"
                       style={{ borderColor: `${secondary}45`, color: secondary, background: `${secondary}08` }}
                     >
-                      <span className="absolute inset-0 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-700"
+                      <span className="absolute inset-0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700"
                         style={{ background: `linear-gradient(90deg, transparent, ${secondary}20, transparent)` }} />
                       <Share2 className="w-3 h-3 relative z-10" />
                       <span className="relative z-10">Copy Link</span>

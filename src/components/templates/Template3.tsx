@@ -326,7 +326,7 @@ export default function Template3({ data, onCheckout }: Template3Props) {
               <button
                 key={tab}
                 onClick={() => scrollTo(tab)}
-                className="relative shrink-0 px-3 sm:px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] whitespace-nowrap rounded-full overflow-hidden group"
+                className="relative shrink-0 px-3 sm:px-4 py-1.5 text-[11px] font-semibold uppercase tracking-widest whitespace-nowrap rounded-full overflow-hidden group"
                 style={{
                   background: isActive
                     ? `linear-gradient(135deg, ${primary}, ${secondary})`
@@ -428,14 +428,14 @@ export default function Template3({ data, onCheckout }: Template3Props) {
       </header>
 
       {/* ════════════════════════════════════════
-    HERO — Bento grid
+  HERO — Bento grid
 ════════════════════════════════════════ */}
       <div className="pt-24 px-4 sm:px-6 lg:px-8 max-w-[1440px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] xl:grid-cols-[1fr_420px] gap-4 min-h-[88vh]">
 
           {/* ── BIG IMAGE BENTO CARD ── */}
           <div
-            className="relative rounded-3xl overflow-hidden order-1 min-h-[55vw] lg:min-h-0 t3-card group"
+            className="relative rounded-3xl overflow-hidden order-1 min-h-[500px] sm:min-h-[600px] lg:min-h-0 t3-card group w-full flex flex-col"
             style={{ ...glass(0.05, 0.1) }}
           >
             {/* ── Parallax image ── */}
@@ -453,14 +453,15 @@ export default function Template3({ data, onCheckout }: Template3Props) {
             <div className="t3-shimmer" />
 
             {/* ── Layered gradients ── */}
+            {/* Adjusted gradient to ensure the middle of the image stays visible while protecting text contrast */}
             <div
-              className="absolute inset-0 rounded-3xl"
+              className="absolute inset-0 rounded-3xl pointer-events-none"
               style={{
-                background: `linear-gradient(to top, ${bgColor}f8 0%, ${bgColor}a0 32%, ${bgColor}30 58%, transparent 100%)`,
+                background: `linear-gradient(to top, ${bgColor}f8 0%, ${bgColor}b0 35%, ${bgColor}10 65%, transparent 100%)`,
               }}
             />
             <div
-              className="absolute inset-0 rounded-3xl"
+              className="absolute inset-0 rounded-3xl pointer-events-none"
               style={{
                 background: `linear-gradient(135deg, ${primary}35 0%, transparent 45%, ${secondary}22 100%)`,
               }}
@@ -526,11 +527,12 @@ export default function Template3({ data, onCheckout }: Template3Props) {
             />
 
             {/* ── Tags — top left, primary/secondary alternating ── */}
-            <div className="absolute top-5 left-5 z-10 flex flex-wrap gap-2">
+            {/* Added responsive max-width to prevent colliding with the status badge on mobile */}
+            <div className="absolute top-4 sm:top-6 left-4 sm:left-6 z-20 flex flex-wrap gap-2 max-w-[55%] sm:max-w-[65%] lg:max-w-none">
               {data.tags.map((tag, i) => (
                 <span
                   key={i}
-                  className="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full backdrop-blur-md transition-all duration-300 hover:scale-110 hover:-translate-y-0.5"
+                  className="px-3 py-1 text-[9px] sm:text-[10px] font-black uppercase tracking-widest rounded-full backdrop-blur-md transition-all duration-300 hover:scale-110 hover:-translate-y-0.5"
                   style={{
                     background: i % 2 === 0
                       ? `linear-gradient(135deg, ${primary}ee, ${primary}bb)`
@@ -550,7 +552,7 @@ export default function Template3({ data, onCheckout }: Template3Props) {
 
             {/* ── Status badge — top right ── */}
             <div
-              className="absolute top-5 right-5 z-10 flex items-center gap-2 px-3.5 py-2 rounded-full backdrop-blur-md t3-float"
+              className="absolute top-4 sm:top-6 right-4 sm:right-6 z-20 flex items-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-full backdrop-blur-md t3-float"
               style={{
                 background: 'rgba(0,0,0,0.55)',
                 border: `1px solid ${secondary}60`,
@@ -558,7 +560,7 @@ export default function Template3({ data, onCheckout }: Template3Props) {
               }}
             >
               {/* Triple-ring pulse */}
-              <span className="relative flex h-2 w-2 shrink-0">
+              <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2 shrink-0">
                 <span
                   className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60"
                   style={{ background: secondary, animationDuration: '1.6s' }}
@@ -568,12 +570,12 @@ export default function Template3({ data, onCheckout }: Template3Props) {
                   style={{ background: secondary, animationDuration: '2.2s', animationDelay: '0.4s' }}
                 />
                 <span
-                  className="relative inline-flex rounded-full h-2 w-2"
+                  className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2"
                   style={{ background: secondary, boxShadow: `0 0 8px ${secondary}` }}
                 />
               </span>
               <span
-                className="text-[10px] font-black uppercase tracking-widest"
+                className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest"
                 style={{ color: secondary }}
               >
                 {upcoming ? 'Upcoming' : 'Live Now'}
@@ -602,30 +604,32 @@ export default function Template3({ data, onCheckout }: Template3Props) {
             ))}
 
             {/* ── Hero text — bottom ── */}
-            <div className="absolute bottom-0 left-0 right-0 p-7 z-10 t3-slide-up">
+            {/* Made padding responsive (p-5 on mobile, p-8 on desktop) to give content room to breathe */}
+            <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-8 z-20 t3-slide-up">
 
               {/* Organiser row */}
-              <div className="flex items-center gap-2.5 mb-3">
+              <div className="flex items-center gap-2.5 mb-3 sm:mb-4">
                 <div
-                  className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 t3-pulse-slow"
+                  className="w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center shrink-0 t3-pulse-slow"
                   style={{
                     background: `linear-gradient(135deg, ${primary}, ${secondary})`,
                     boxShadow: `0 0 14px ${primary}60`,
                   }}
                 >
-                  <Users className="w-3.5 h-3.5 text-white" />
+                  <Users className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" />
                 </div>
-                <div className="h-px w-6" style={{ background: `linear-gradient(to right, ${primary}80, transparent)` }} />
-                <span className="text-xs font-bold text-white/75 uppercase tracking-widest">
+                <div className="h-px w-4 sm:w-6" style={{ background: `linear-gradient(to right, ${primary}80, transparent)` }} />
+                <span className="text-[10px] sm:text-xs font-bold text-white/80 uppercase tracking-widest line-clamp-1">
                   {data.organizerName}
                 </span>
               </div>
 
               {/* Title */}
+              {/* Slightly reduced the bottom bound of the clamp function to prevent messy mobile wrapping */}
               <h1
-                className="font-black leading-[0.88] tracking-tighter text-white mb-5"
+                className="font-black leading-[0.9] tracking-tighter text-white mb-4 sm:mb-5"
                 style={{
-                  fontSize: 'clamp(2.4rem, 5.5vw, 5.5rem)',
+                  fontSize: 'clamp(2rem, 6vw, 5.5rem)',
                   textShadow: `0 4px 30px rgba(0,0,0,0.65), 0 0 80px ${primary}45`,
                 }}
               >
@@ -635,16 +639,16 @@ export default function Template3({ data, onCheckout }: Template3Props) {
               {/* Date + venue + time chips */}
               <div className="flex flex-wrap gap-2">
                 {[
-                  { icon: <Calendar className="w-3 h-3" />, val: fmtShort(data.startDatetime), col: secondary },
-                  { icon: <Clock className="w-3 h-3" />, val: fmtTime(data.startDatetime), col: primary },
-                  { icon: <MapPin className="w-3 h-3" />, val: data.venueName, col: secondary },
+                  { icon: <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3" />, val: fmtShort(data.startDatetime), col: secondary },
+                  { icon: <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />, val: fmtTime(data.startDatetime), col: primary },
+                  { icon: <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3" />, val: data.venueName, col: secondary },
                 ].map(({ icon, val, col }, i) => (
                   <span
                     key={i}
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md transition-all duration-300 hover:scale-105 hover:-translate-y-0.5"
+                    className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-full text-[10px] sm:text-xs font-semibold backdrop-blur-md transition-all duration-300 hover:scale-105 hover:-translate-y-0.5"
                     style={{
                       background: 'rgba(0,0,0,0.45)',
-                      color: 'rgba(255,255,255,0.92)',
+                      color: 'rgba(255,255,255,0.95)',
                       border: `1px solid ${col}50`,
                       boxShadow: `0 2px 12px rgba(0,0,0,0.3), 0 0 0 0 ${col}`,
                     }}
@@ -657,7 +661,7 @@ export default function Template3({ data, onCheckout }: Template3Props) {
 
               {/* Bottom gradient line */}
               <div
-                className="mt-5 h-px w-full"
+                className="mt-4 sm:mt-5 h-px w-full"
                 style={{
                   background: `linear-gradient(to right, ${primary}70, ${secondary}50, transparent)`,
                 }}
@@ -2783,7 +2787,7 @@ export default function Template3({ data, onCheckout }: Template3Props) {
                 <ChevronRight className="w-4 h-4 group-hover/link:translate-x-1.5 transition-transform duration-300" />
               </a>
 
-              
+
             </div>
 
           </div>

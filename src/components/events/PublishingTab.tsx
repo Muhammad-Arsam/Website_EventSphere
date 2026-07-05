@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
     Globe, GlobeLock, Link2, Palette, LayoutTemplate, Loader2,
     CheckCircle2, ExternalLink, RefreshCw, Info, Type, Phone, Mail, Globe2,
@@ -85,6 +85,29 @@ export default function PublishingTab({ eventId, eventStatus, onStatusChange }: 
     const [enabledTabs, setEnabledTabs] = useState<TabName[]>([
         'overview', 'schedule', 'tickets', 'location', 'contact', 'social', 'sponsors', 'recover'
     ]);
+    // ── Auto-set colors on template change ──
+    const isInitialMount = useRef(true);
+
+    const TEMPLATE_DEFAULTS = {
+        STANDARD: { primary: '#06B6D4', secondary: '#3B82F6', background: '#030712' },
+        MINIMAL: { primary: '#0F172A', secondary: '#D97706', background: '#FFFFFF' },
+        MODERN: { primary: '#7C3AED', secondary: '#06B6D4', background: '#0F0F1A' },
+    } as const;
+
+    useEffect(() => {
+        // Skip on initial mount (when we load saved config)
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
+
+        const colors = TEMPLATE_DEFAULTS[templateName];
+        if (colors) {
+            setPrimaryColor(colors.primary);
+            setSecondaryColor(colors.secondary);
+            setBackgroundColor(colors.background);
+        }
+    }, [templateName]);
 
     const isPublished = eventStatus === 'PUBLISHED' || eventStatus === 'PB';
 

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { EventResponse } from '@/types/event.types';
 import { Calendar, MapPin, Image as ImageIcon, Pencil } from 'lucide-react';
-import EditEventForm from './EditEventForm'; 
+import EditEventForm from './EditEventForm';
 
 interface EventCardProps {
     event: EventResponse;
@@ -22,7 +22,7 @@ export default function EventCard({ event }: EventCardProps) {
     return (
         <>
             <div className="group bg-white rounded-2xl border border-gray-200/80 overflow-hidden flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-gray-300">
-                
+
                 {/* Clickable Area navigating to Event Details Page */}
                 <Link href={`/events/${event.id}`} className="flex flex-col grow cursor-pointer">
                     {/* Top Banner Image */}
@@ -52,13 +52,13 @@ export default function EventCard({ event }: EventCardProps) {
 
                         {/* Details Grid */}
                         <div className="grid gap-3 mt-auto">
-                            <div className="flex items-center gap-3 text-sm text-gray-600">
+                            <div className="flex items-center gap-3 text-sm text-gray-600 min-w-0 overflow-hidden">
                                 <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100 shrink-0">
                                     <Calendar className="w-4 h-4 text-gray-500" />
                                 </div>
-                                <span className="font-medium">{formattedDate}</span>
+                                <span className="font-medium truncate">{formattedDate}</span>
                             </div>
-                            <div className="flex items-center gap-3 text-sm text-gray-600">
+                            <div className="flex items-center gap-3 text-sm text-gray-600 min-w-0 overflow-hidden">
                                 <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100 shrink-0">
                                     <MapPin className="w-4 h-4 text-gray-500" />
                                 </div>
