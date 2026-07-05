@@ -716,14 +716,14 @@ export default function Template2({ data, onCheckout }: Template2Props) {
                 className="mt-12 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-px"
                 style={{ background: borderColor }}
               >
-                {data.sponsors.map(sponsor => {
+                {data.sponsors.map((sponsor, index) => {
                   const tierLabel =
                     sponsor.sponsorTier === 'PLATINUM' ? 'Platinum' :
                       sponsor.sponsorTier === 'GOLD' ? 'Gold' :
                         sponsor.sponsorTier === 'SILVER' ? 'Silver' : 'Bronze';
                   return (
                     <div
-                      key={sponsor.id}
+                      key={sponsor.id || index}
                       className="flex flex-col items-center justify-center gap-4 p-8 group transition-colors hover:brightness-95"
                       style={{ background: bg }}
                     >

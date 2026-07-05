@@ -341,39 +341,73 @@ export default function Template1({ data, onCheckout }: Template1Props) {
       ══════════════════════════════════════════ */}
       <div className="pt-16 relative">
         <div className="relative min-h-[calc(100vh-64px)] flex flex-col justify-end overflow-hidden">
-          {/* Background image */}
+
+          {/* ── Background image ── */}
           <div className="absolute inset-0">
             <img
               src={data.imageUrl}
               alt={data.title}
-              className="w-full h-full object-cover object-center opacity-40 scale-105"
-              style={{ transition: 'transform 8s ease' }}
+              className="w-full h-full object-cover object-center opacity-65"
             />
-            {/* Dual radial colour wash */}
+
+            {/* Vignette — softer edges */}
+            <div className="absolute inset-0"
+              style={{ background: 'radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.45) 100%)' }} />
+
+            {/* Left-side dark fade so text is readable */}
+            <div className="absolute inset-0"
+              style={{ background: `linear-gradient(to right, ${bgColor}cc 0%, ${bgColor}55 40%, transparent 70%)` }} />
+
+            {/* Bottom fade to page bg */}
+            <div className="absolute inset-0"
+              style={{ background: `linear-gradient(to bottom, transparent 0%, ${bgColor}20 55%, ${bgColor}e0 82%, ${bgColor} 100%)` }} />
+
+            {/* Colour wash — much lighter so image shows through clearly */}
             <div className="absolute inset-0" style={{
-              background: `radial-gradient(ellipse at 20% 20%, ${primary}28 0%, transparent 50%),
-                           radial-gradient(ellipse at 80% 80%, ${secondary}20 0%, transparent 50%)`,
+              background: `radial-gradient(ellipse at 15% 15%, ${primary}18 0%, transparent 40%),
+                 radial-gradient(ellipse at 85% 85%, ${secondary}12 0%, transparent 40%)`,
             }} />
-            {/* Bottom fade */}
-            <div className="absolute inset-0" style={{
-              background: `linear-gradient(to bottom, transparent 0%, ${bgColor}55 55%, ${bgColor}f0 88%, ${bgColor} 100%)`,
-            }} />
-            {/* Scan-lines texture */}
-            <div style={scanLines} className="absolute inset-0 opacity-15 pointer-events-none" />
+
+            {/* Scan-lines — very subtle */}
+            <div style={scanLines} className="absolute inset-0 opacity-[0.06] pointer-events-none" />
+
+            {/* Animated vertical light sweep */}
+            <div
+              className="absolute inset-y-0 w-px opacity-15 animate-pulse pointer-events-none"
+              style={{ left: '65%', background: `linear-gradient(to bottom, transparent, ${primary}, transparent)`, animationDuration: '4s' }}
+            />
           </div>
 
-          {/* Hero content */}
+          {/* ── Top-right floating event date badge ── */}
+          <div className="absolute top-6 right-6 z-20 hidden sm:flex flex-col items-end gap-1">
+            <div className="flex items-center gap-2 px-3 py-1.5 border backdrop-blur-sm"
+              style={{ borderColor: `${primary}40`, background: `${bgColor}80` }}>
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: primary }} />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ background: primary }} />
+              </span>
+              <span className="text-[10px] font-mono uppercase tracking-[0.2em]" style={{ color: primary }}>
+                {isUpcoming ? 'Upcoming' : 'Live Now'}
+              </span>
+            </div>
+            <span className="text-[9px] font-mono uppercase tracking-widest px-1" style={{ color: mutedText }}>
+              {fmtShort(data.startDatetime)}
+            </span>
+          </div>
+
+          {/* ── Hero content ── */}
           <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-12 pb-14 w-full">
+
             {/* Tags */}
-            <div className="flex flex-wrap gap-2 mb-8">
+            <div className="flex flex-wrap gap-2 mb-6">
               {data.tags.map((tag, i) => (
                 <span
                   key={i}
-                  className="px-3 py-1 text-xs font-mono uppercase tracking-widest border"
+                  className="px-3 py-1 text-xs font-mono uppercase tracking-widest border backdrop-blur-sm"
                   style={{
                     color: i % 2 === 0 ? primary : secondary,
-                    borderColor: i % 2 === 0 ? `${primary}50` : `${secondary}50`,
-                    background: i % 2 === 0 ? `${primary}0e` : `${secondary}0e`,
+                    borderColor: i % 2 === 0 ? `${primary}55` : `${secondary}55`,
+                    background: i % 2 === 0 ? `${primary}12` : `${secondary}12`,
                   }}
                 >
                   {tag}
@@ -381,59 +415,106 @@ export default function Template1({ data, onCheckout }: Template1Props) {
               ))}
             </div>
 
-            {/* Title with glitch shadows */}
-            <h1
-              className="font-black uppercase leading-[0.88] tracking-tighter mb-5"
-              style={{
-                color: textColor,
-                fontSize: 'clamp(3.5rem, 9vw, 8rem)',
-                textShadow: `3px 0 0 ${primary}55, -3px 0 0 ${secondary}55`,
-              }}
-            >
-              {data.title}
-            </h1>
+            {/* Title */}
+            <div className="relative mb-6">
+              {/* Ghost watermark behind title */}
+              <span
+                className="absolute -top-4 left-0 font-black uppercase leading-none select-none pointer-events-none opacity-[0.03] tracking-tighter"
+                style={{ color: primary, fontSize: 'clamp(4rem, 12vw, 11rem)' }}
+                aria-hidden
+              >
+                {data.title}
+              </span>
+              <h1
+                className="relative font-black uppercase leading-[0.88] tracking-tighter"
+                style={{
+                  color: textColor,
+                  fontSize: 'clamp(3.2rem, 8.5vw, 8rem)',
+                  textShadow: `3px 0 0 ${primary}55, -3px 0 0 ${secondary}45, 0 0 80px ${primary}20`,
+                }}
+              >
+                {data.title}
+              </h1>
+              {/* Underline sweep */}
+              <div className="mt-3 h-0.5 w-32"
+                style={{ background: `linear-gradient(to right, ${primary}, ${secondary}60, transparent)` }} />
+            </div>
 
             {/* Organiser + date row */}
             <div className="flex flex-wrap items-center gap-4 mb-10">
-              <span className="text-xs font-mono uppercase tracking-widest" style={{ color: mutedText }}>
-                <span style={{ color: primary }}>// </span>{data.organizerName}
-              </span>
-              <div className="h-px w-16" style={{ background: `linear-gradient(to right, ${primary}70, transparent)` }} />
-              <span className="text-xs font-mono" style={{ color: mutedText }}>
-                <span style={{ color: secondary }}>&gt; </span>{fmt(data.startDatetime)}
-              </span>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 border flex items-center justify-center shrink-0"
+                  style={{ borderColor: `${primary}50`, background: `${primary}12` }}>
+                  <Terminal className="w-3 h-3" style={{ color: primary }} />
+                </div>
+                <span className="text-xs font-mono uppercase tracking-widest" style={{ color: mutedText }}>
+                  {data.organizerName}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <div className="h-px w-8" style={{ background: `linear-gradient(to right, ${primary}60, transparent)` }} />
+                <div className="w-1 h-1" style={{ background: primary }} />
+                <div className="h-px w-8" style={{ background: `linear-gradient(to left, ${secondary}60, transparent)` }} />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Calendar className="w-3.5 h-3.5 shrink-0" style={{ color: secondary }} />
+                <span className="text-xs font-mono" style={{ color: mutedText }}>
+                  {fmt(data.startDatetime)}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Clock className="w-3.5 h-3.5 shrink-0" style={{ color: primary }} />
+                <span className="text-xs font-mono" style={{ color: mutedText }}>
+                  {fmtTime(data.startDatetime)}
+                </span>
+              </div>
             </div>
 
-            {/* Countdown tiles */}
+            {/* Countdown */}
             {isUpcoming && (
-              <div className="flex flex-wrap gap-3">
-                {[
-                  { v: diffDays, l: 'DAYS' },
-                  { v: diffHrs, l: 'HRS' },
-                  { v: diffMins, l: 'MIN' },
-                  { v: diffSecs, l: 'SEC' },
-                ].map(({ v, l }, i) => (
-                  <div
-                    key={l}
-                    className="relative min-w-[72px] text-center py-3 px-4"
-                    style={{
-                      border: `1px solid ${i === 0 ? primary : secondary}40`,
-                      background: `${i === 0 ? primary : secondary}08`,
-                    }}
-                  >
-                    {/* Corner pip */}
-                    <span className="absolute top-1 left-1 w-1.5 h-1.5" style={{ background: i === 0 ? primary : secondary }} />
-                    <span
-                      className="block text-3xl sm:text-4xl font-black font-mono tabular-nums"
-                      style={{ color: i === 0 ? primary : secondary }}
+              <div className="space-y-3">
+                <p className="text-[9px] font-mono uppercase tracking-[0.3em] flex items-center gap-2" style={{ color: mutedText }}>
+                  <span className="w-1.5 h-1.5 rounded-full animate-pulse inline-block" style={{ background: secondary }} />
+                  Event starts in
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  {[
+                    { v: diffDays, l: 'DAYS', color: primary },
+                    { v: diffHrs, l: 'HRS', color: secondary },
+                    { v: diffMins, l: 'MIN', color: primary },
+                    { v: diffSecs, l: 'SEC', color: secondary },
+                  ].map(({ v, l, color }, i) => (
+                    <div
+                      key={l}
+                      className="relative min-w-20 text-center py-4 px-4 group overflow-hidden"
+                      style={{ border: `1px solid ${color}40`, background: `${color}08` }}
                     >
-                      {String(v).padStart(2, '0')}
-                    </span>
-                    <span className="text-[10px] font-mono tracking-[0.2em]" style={{ color: mutedText }}>
-                      {l}
-                    </span>
-                  </div>
-                ))}
+                      {/* Corner pip top-left */}
+                      <span className="absolute top-1 left-1 w-1.5 h-1.5" style={{ background: color }} />
+                      {/* Corner pip bottom-right */}
+                      <span className="absolute bottom-1 right-1 w-1 h-1" style={{ background: `${color}80` }} />
+                      {/* Hover glow */}
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                        style={{ background: `radial-gradient(ellipse at 50% 100%, ${color}20 0%, transparent 70%)` }} />
+                      {/* Top accent line */}
+                      <div className="absolute top-0 inset-x-0 h-0.5"
+                        style={{ background: `linear-gradient(to right, transparent, ${color}80, transparent)` }} />
+
+                      <span
+                        className="block text-3xl sm:text-4xl font-black font-mono tabular-nums relative z-10"
+                        style={{ color, textShadow: `0 0 20px ${color}60` }}
+                      >
+                        {String(v).padStart(2, '0')}
+                      </span>
+                      <span className="text-[10px] font-mono tracking-[0.22em] mt-1 block relative z-10" style={{ color: mutedText }}>
+                        {l}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
