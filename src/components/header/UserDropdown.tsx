@@ -105,7 +105,7 @@ export default function UserDropdown() {
             </DropdownItem>
           </li> */}
 
-          <li>
+          {/* <li>
             <DropdownItem
               onItemClick={closeDropdown}
               tag="a"
@@ -115,7 +115,7 @@ export default function UserDropdown() {
               <HelpCircle className="text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300" />
               Support
             </DropdownItem>
-          </li>
+          </li> */}
         </ul>
 
         <button

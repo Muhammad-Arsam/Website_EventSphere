@@ -44,10 +44,13 @@ export default function SignInForm() {
 
   // --- ERROR HANDLER ---
   const handleApiError = (err: any, fallbackMessage: string) => {
-    const data = err.response?.data;
     let errorMessage = fallbackMessage;
 
-    if (data) {
+    if (err?.message) {
+      errorMessage = err.message;
+    }
+    else if (err?.response?.data) {
+      const data = err.response.data;
       if (data.invalidFields && Object.keys(data.invalidFields).length > 0) {
         errorMessage = Object.values(data.invalidFields)[0] as string;
       } else if (data.detail) {

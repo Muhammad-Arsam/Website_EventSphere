@@ -56,8 +56,8 @@ export default function SignUpForm() {
       setAlert({ variant: "success", title: "OTP Sent", message: response.message || "Please check your email." });
       setStep(2);
     } catch (error: any) {
-      const backendMessage = error.response?.data?.detail || "Failed to send OTP.";
-      setAlert({ variant: "error", title: "Error", message: backendMessage });
+      const message = error.message || "Failed to send OTP.";
+      setAlert({ variant: "error", title: "Error", message });
     } finally {
       setLoading(false);
     }
@@ -79,11 +79,8 @@ export default function SignUpForm() {
       
       setStep(3);
     } catch (error: any) {
-      const backendMessage = error.response?.data?.invalidFields?.otp || 
-                             error.response?.data?.detail || 
-                             "Invalid OTP code.";
-                             
-      setAlert({ variant: "error", title: "Verification Failed", message: backendMessage });
+      const message = error.message || "Invalid OTP code.";
+      setAlert({ variant: "error", title: "Verification Failed", message });
     } finally {
       setLoading(false);
     }
