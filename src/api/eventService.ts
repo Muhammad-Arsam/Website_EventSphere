@@ -11,8 +11,20 @@ import {
   ConfigureLandingPageRequest,
   EventOrder,
   AttendeeTicket,
+  ScanTicketRequest,
+  ScanTicketResponse,
 } from '@/types/event.types';
 import { ThemeConfigJson } from '@/types/template.types';
+
+// Error type for the scan endpoint. Keeps the HTTP status so the UI can react to it.
+export class ScanTicketError extends Error {
+  status?: number;
+  constructor(message: string, status?: number) {
+    super(message);
+    this.name = 'ScanTicketError';
+    this.status = status;
+  }
+}
 
 export const eventService = {
   getOrgEvents: async (organizationId: string): Promise<EventResponse[]> => {
@@ -300,4 +312,25 @@ configureLandingPage: async (
     throw new Error('Network error. Please check your connection.');
   }
 },
+
+
+  // --- QR CHECK-IN ---
+
+  scanTicket: async (eventId: string, data: ScanTicketRequest): Promise<ScanTicketResponse> => {
+    try {
+      const response = await API.post<ScanTicketResponse>(`/api/event/scan-ticket/${eventId}`, data);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        const body = error.response.data;
+        const backendMessage =
+          (typeof body === 'string' && body.trim() ? body : undefined) ||
+          body?.detail ||
+          body?.message ||
+          'Failed to check in this ticket.';
+        throw new ScanTicketError(backendMessage, error.response.status);
+      }
+      throw new ScanTicketError('Network error. Please check your connection.');
+    }
+  },
 };

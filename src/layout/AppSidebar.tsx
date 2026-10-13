@@ -15,7 +15,7 @@ import {
   ListIcon,
   UserCircleIcon,
 } from "../icons";
-import { Mail, Tickets, Loader2 } from "lucide-react";
+import { Mail, Tickets, Loader2, ScanLine } from "lucide-react";
 
 type NavItem = {
   name: string;
@@ -33,6 +33,7 @@ const organizerNavItems: NavItem[] = [
   { icon: <CalenderIcon />, name: "Events Oversight", path: "/events" },
   { icon: <ListIcon />, name: "Orders", path: "/orders" },
   { icon: <Tickets />, name: "Tickets", path: "/tickets" },
+  { icon: <ScanLine />, name: "Check-In", path: "/check-in" },
 ];
 
 const organizerOthersItems: NavItem[] = [

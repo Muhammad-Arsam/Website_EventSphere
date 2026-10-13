@@ -239,6 +239,7 @@ export interface AttendeeTicket {
   eventName: string;
   eventDate: string;
   ticketStatus: string;
+  checkedIn?: boolean;
   assignedName: string;
   assignedEmail: string;
   assignedPhone: string;
@@ -249,3 +250,19 @@ export interface AttendeeTicket {
 }
 
 export type GetAllTicketsResponse = AttendeeTicket[];
+
+
+// --- SCAN TICKET (QR CHECK-IN)
+
+export interface ScanTicketRequest {
+  qrCodeHash: string;
+  latitude: number;
+  longitude: number;
+}
+
+export interface ScanTicketResponse {
+  assignedName: string;
+  tierName: string;
+  checkInTime: string; // ISO date-time
+  distanceMeters?: number | null;
+}
