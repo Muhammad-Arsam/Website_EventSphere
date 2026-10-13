@@ -41,7 +41,6 @@ interface Coords {
 }
 
 const SAME_CODE_COOLDOWN_MS = 5000; // ignore the same QR code again for 5 seconds
-const SUCCESS_AUTO_CLEAR_MS = 3500; // success card disappears and scanning continues
 const DECODE_INTERVAL_MS = 120; // ~8 decode attempts per second is enough and saves battery
 
 export default function CheckInScanner() {
@@ -258,12 +257,6 @@ export default function CheckInScanner() {
                 addHistory(`${data.assignedName} (${data.tierName})`, true);
                 if (typeof navigator !== 'undefined' && 'vibrate' in navigator) navigator.vibrate(80);
                 refreshStats(eventId);
-
-                // success: let the camera continue automatically after a short pause
-                clearTimerRef.current = setTimeout(() => {
-                    holdRef.current = false;
-                    setResult(null);
-                }, SUCCESS_AUTO_CLEAR_MS);
             } catch (err) {
                 const message = err instanceof Error ? err.message : 'Check-in failed.';
                 const status = err instanceof ScanTicketError ? err.status : undefined;
@@ -639,6 +632,12 @@ export default function CheckInScanner() {
                                         </div>
                                     )}
                                 </dl>
+                                <button
+                                    onClick={clearResult}
+                                    className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-green-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-green-700"
+                                >
+                                    Scan next
+                                </button>
                             </div>
                         )}
 
