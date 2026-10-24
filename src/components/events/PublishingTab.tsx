@@ -4,7 +4,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
     Globe, GlobeLock, Link2, Palette, LayoutTemplate, Loader2,
     CheckCircle2, ExternalLink, RefreshCw, Info, Type, Phone, Mail, Globe2,
-    MessageCircle, PanelsTopLeft,
+    MessageCircle, PanelsTopLeft, Bot,
 } from 'lucide-react';
 import {
     FaFacebook,
@@ -85,6 +85,7 @@ export default function PublishingTab({ eventId, eventStatus, onStatusChange }: 
     const [enabledTabs, setEnabledTabs] = useState<TabName[]>([
         'overview', 'schedule', 'tickets', 'location', 'contact', 'social', 'sponsors', 'recover'
     ]);
+    const [chatbotEnabled, setChatbotEnabled] = useState(false);
     // ── Auto-set colors on template change ──
     const isInitialMount = useRef(true);
 
@@ -130,6 +131,7 @@ export default function PublishingTab({ eventId, eventStatus, onStatusChange }: 
                 setSocialLinks(parsed.socialLinks || {});
                 const tabs = parsed.enabledTabs || ['overview', 'schedule', 'tickets', 'location', 'contact', 'social', 'sponsors', 'recover'];
                 setEnabledTabs(tabs);
+                setChatbotEnabled(parsed.chatbotEnabled ?? false);
             }
         } catch {
             setLandingPage(null);
@@ -186,7 +188,7 @@ export default function PublishingTab({ eventId, eventStatus, onStatusChange }: 
             const themeConfig: ThemeConfigJson = {
                 primaryColor, secondaryColor, backgroundColor,
                 fontStyle, templateName, organizerName,
-                organizerEmail, organizerPhone, socialLinks, enabledTabs,
+                organizerEmail, organizerPhone, socialLinks, enabledTabs, chatbotEnabled,
             };
             const updated = await eventService.configureLandingPage(eventId, {
                 slug: slug.trim(),
@@ -201,8 +203,8 @@ export default function PublishingTab({ eventId, eventStatus, onStatusChange }: 
         }
     };
 
-    // const landingPageUrl = slug ? `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/explore/${slug}` : null;
-    const landingPageUrl = slug ? `${process.env.NEXT_PUBLIC_SITE_URL || 'https://web-eventsphere.vercel.app'}/explore/${slug}` : null;
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : '');
+    const landingPageUrl = slug && siteUrl ? `${siteUrl}/explore/${slug}` : null;
 
 
     return (
@@ -421,6 +423,40 @@ export default function PublishingTab({ eventId, eventStatus, onStatusChange }: 
                                     );
                                 })}
                             </div>
+                        </div>
+
+                        {/* ── AI Chatbot ── */}
+                        <div className="space-y-3">
+                            <label className="flex text-sm font-semibold text-gray-700 items-center gap-2">
+                                <Bot className="w-4 h-4 text-gray-400" /> AI Chatbot
+                            </label>
+                            <p className="text-xs text-gray-400">Show a floating chat assistant on your landing page. Attendees can ask questions about your event.</p>
+                            <button
+                                type="button"
+                                role="switch"
+                                aria-checked={chatbotEnabled}
+                                onClick={() => setChatbotEnabled(prev => !prev)}
+                                className={`w-full flex items-center justify-between gap-4 p-4 rounded-2xl border-2 text-left transition-all duration-200 ${chatbotEnabled ? 'border-brand-500 bg-brand-50/50' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${chatbotEnabled ? 'bg-brand-100 text-brand-600 border-brand-200' : 'bg-gray-50 text-gray-400 border-gray-200'}`}>
+                                        <Bot className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <span className={`block font-bold text-sm ${chatbotEnabled ? 'text-brand-700' : 'text-gray-800'}`}>
+                                            Event Assistant Chatbot
+                                        </span>
+                                        <span className="block text-xs text-gray-500">
+                                            {chatbotEnabled
+                                                ? 'Visible on your landing page. If it cannot help, visitors are sent to your WhatsApp (Organizer Phone).'
+                                                : 'Hidden. Turn on to show the chat button on your landing page.'}
+                                        </span>
+                                    </div>
+                                </div>
+                                <span className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors duration-200 ${chatbotEnabled ? 'bg-brand-600' : 'bg-gray-300'}`}>
+                                    <span className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200 ${chatbotEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
+                                </span>
+                            </button>
                         </div>
 
                         {/* ── Social Links ── */}

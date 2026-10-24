@@ -10,6 +10,7 @@ import Template1 from '@/components/templates/Template1';
 import Template2 from '@/components/templates/Template2';
 import Template3 from '@/components/templates/Template3';
 import CheckoutModal from '@/components/checkout/CheckoutModal';
+import EventChatbot from '@/components/chatbot/EventChatbot';
 
 import { Loader2, Ticket, AlertTriangle, ArrowRight } from 'lucide-react';
 
@@ -117,6 +118,20 @@ export default function PublicEventPage() {
         primaryColor={templateData.primaryColor}
         secondaryColor={templateData.secondaryColor ?? templateData.primaryColor}
       />
+
+      {/* AI Chatbot (only if the organizer turned it on in the Publishing tab) */}
+      {templateData.chatbotEnabled && templateData.eventId && (
+        <EventChatbot
+          eventId={templateData.eventId}
+          eventTitle={templateData.title}
+          eventImageUrl={templateData.imageUrl}
+          organizerPhone={templateData.organizerPhone}
+          primaryColor={templateData.primaryColor}
+          secondaryColor={templateData.secondaryColor}
+          backgroundColor={templateData.backgroundColor}
+          fontStyle={templateData.fontStyle}
+        />
+      )}
     </>
   );
 }

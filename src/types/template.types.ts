@@ -26,6 +26,7 @@ export interface ThemeConfigJson {
   organizerPhone?: string;
   socialLinks?: SocialLinks;
   enabledTabs?: TabName[];
+  chatbotEnabled?: boolean;
 }
 
 export interface TicketTierPublic {
@@ -67,6 +68,7 @@ export interface EventTemplateData {
   organizerPhone?: string;
   socialLinks?: SocialLinks;
   enabledTabs?: TabName[];
+  chatbotEnabled?: boolean;
   // From tickets & agenda (API)
   tickets: TicketTierPublic[];
   agenda: AgendaItemPublic[];

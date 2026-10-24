@@ -9,6 +9,35 @@ import {
   RecoverTicketsResponse,
 } from '@/types/event.types';
 import { EventTemplateData, ThemeConfigJson } from '@/types/template.types';
+import {
+  ChatMessageRequest,
+  ChatMessageResponse,
+  ChatJobResponse,
+  ChatAnswerResult,
+} from '@/types/chat.types';
+
+// Public chat calls use their own axios instance: no login token and no
+// refresh/redirect-to-signin logic, so visitors are never sent to /signin.
+const publicChatClient = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  headers: { 'Content-Type': 'application/json' },
+});
+
+// Backend marked the job as FAILED (a server error on their side).
+export class ChatJobFailedError extends Error {
+  constructor(message?: string) {
+    super(message || 'Chat job failed.');
+    this.name = 'ChatJobFailedError';
+  }
+}
+
+// The job stayed "pending" until our timeout.
+export class ChatTimeoutError extends Error {
+  constructor() {
+    super('The assistant is taking too long to reply.');
+    this.name = 'ChatTimeoutError';
+  }
+}
 
 export const publicService = {
   getPublishedEvents: async (): Promise<PublicEventCard[]> => {
@@ -116,6 +145,7 @@ export const publicService = {
       organizerPhone: theme.organizerPhone,
       socialLinks: theme.socialLinks,
       enabledTabs: theme.enabledTabs,
+      chatbotEnabled: theme.chatbotEnabled ?? false,
       tickets: response.tickets ?? [],
       agenda: response.agenda ?? [],
       sponsors: response.sponsors ?? [],
@@ -137,4 +167,94 @@ export const publicService = {
     throw new Error('Network error. Please check your connection.');
   }
 },
+
+  // --- CHATBOT (public, async job based) ---
+  // Step 1: send the question. The backend returns a job_id (status "pending").
+  sendChatMessage: async (
+    eventId: string,
+    payload: ChatMessageRequest,
+    signal?: AbortSignal,
+  ): Promise<ChatMessageResponse> => {
+    try {
+      const response = await publicChatClient.post<ChatMessageResponse>(
+         `/api/public/event/${encodeURIComponent(eventId)}/chat`,
+        payload,
+        { signal },
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isCancel(error)) throw new Error('Request cancelled.');
+      if (axios.isAxiosError(error) && error.response) {
+        const backendMessage =
+          error.response.data?.detail ||
+          error.response.data?.message ||
+          'Failed to send your message.';
+        throw new Error(backendMessage);
+      }
+      throw new Error('Network error. Please check your connection.');
+    }
+  },
+
+  // Step 2: read the job. status is PENDING, COMPLETED or FAILED.
+  getChatJob: async (jobId: string, signal?: AbortSignal): Promise<ChatJobResponse> => {
+    try {
+      const response = await publicChatClient.get<ChatJobResponse>(
+        `/api/public/event/chat/jobs/${encodeURIComponent(jobId)}`,
+        { signal },
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isCancel(error)) throw new Error('Request cancelled.');
+      if (axios.isAxiosError(error) && error.response) {
+        const backendMessage =
+          error.response.data?.detail ||
+          error.response.data?.message ||
+          'Failed to fetch the chatbot reply.';
+        throw new Error(backendMessage);
+      }
+      throw new Error('Network error. Please check your connection.');
+    }
+  },
+
+  // Polls the job until it is COMPLETED (returns the answer text),
+  // FAILED (throws ChatJobFailedError) or the timeout is reached
+  // (throws ChatTimeoutError). PENDING and unknown statuses keep polling.
+  waitForChatAnswer: async (
+    jobId: string,
+    options: { intervalMs?: number; timeoutMs?: number; signal?: AbortSignal } = {},
+  ): Promise<ChatAnswerResult> => {
+    const { intervalMs = 1500, timeoutMs = 180000, signal } = options;
+    const startedAt = Date.now();
+
+    while (Date.now() - startedAt < timeoutMs) {
+      if (signal?.aborted) throw new Error('Request cancelled.');
+
+      const job = await publicService.getChatJob(jobId, signal);
+      const status = String(job.status ?? '').toUpperCase();
+
+      if (status === 'FAILED') {
+        throw new ChatJobFailedError(job.error_message ?? undefined);
+      }
+      if (status === 'COMPLETED' || status === 'COMPLETE') {
+        return { status: 'COMPLETED', answer: (job.answer ?? '').trim() };
+      }
+      if (status === 'IRRELEVANT') {
+        return { status: 'IRRELEVANT', answer: (job.answer ?? '').trim() };
+      }
+
+      await new Promise<void>((resolve, reject) => {
+        const timer = setTimeout(resolve, intervalMs);
+        signal?.addEventListener(
+          'abort',
+          () => {
+            clearTimeout(timer);
+            reject(new Error('Request cancelled.'));
+          },
+          { once: true },
+        );
+      });
+    }
+
+    throw new ChatTimeoutError();
+  },
 };
