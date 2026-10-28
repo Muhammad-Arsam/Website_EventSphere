@@ -23,17 +23,20 @@ export default function TypewriterText({ text, animate, caretColor, onProgress, 
   const blocks = useMemo(() => parseMarkdown(text), [text]);
   const total = useMemo(() => countVisibleChars(blocks), [blocks]);
 
-  const [count, setCount] = useState(shouldAnimate ? 0 : total);
+  const [count, setCount] = useState(0);
+  // when not animating, the full text is shown (no state to keep in sync)
+  const shown = shouldAnimate ? Math.min(count, total) : total;
 
   // keep the latest callbacks without restarting the animation
   const progressRef = useRef(onProgress);
   const doneRef = useRef(onDone);
-  progressRef.current = onProgress;
-  doneRef.current = onDone;
+  useEffect(() => {
+    progressRef.current = onProgress;
+    doneRef.current = onDone;
+  });
 
   useEffect(() => {
     if (!shouldAnimate) {
-      setCount(total);
       if (animate) doneRef.current?.(); // reduced motion: finish at once
       return;
     }
@@ -57,8 +60,8 @@ export default function TypewriterText({ text, animate, caretColor, onProgress, 
     return () => cancelAnimationFrame(raf);
   }, [total, shouldAnimate, animate]);
 
-  const typing = count < total;
-  const visible = useMemo(() => (typing ? sliceBlocks(blocks, count) : blocks), [typing, blocks, count]);
+  const typing = shown < total;
+  const visible = useMemo(() => (typing ? sliceBlocks(blocks, shown) : blocks), [typing, blocks, shown]);
 
   const caret = typing ? (
     <motion.span

@@ -242,8 +242,11 @@ export const publicService = {
         return { status: 'IRRELEVANT', answer: (job.answer ?? '').trim() };
       }
 
+      const elapsed = Date.now() - startedAt;
+      const delay = elapsed < 10000 ? intervalMs : elapsed < 30000 ? 3000 : 5000;
+
       await new Promise<void>((resolve, reject) => {
-        const timer = setTimeout(resolve, intervalMs);
+        const timer = setTimeout(resolve, delay);
         signal?.addEventListener(
           'abort',
           () => {

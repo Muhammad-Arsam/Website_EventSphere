@@ -21,12 +21,20 @@ export default function WhatsAppHandoff({ link, autoOpen, onFinished, muted, bor
   const [seconds, setSeconds] = useState(COUNTDOWN_SECONDS);
   const firedRef = useRef(false);
   const finishedRef = useRef(onFinished);
-  finishedRef.current = onFinished;
+  useEffect(() => {
+    finishedRef.current = onFinished;
+  });
 
   useEffect(() => {
     if (state !== 'counting') return;
 
-    if (seconds <= 0) {
+    const timer = setTimeout(() => {
+      if (seconds > 1) {
+        setSeconds(seconds - 1);
+        return;
+      }
+
+      // countdown finished: open WhatsApp (only once)
       if (firedRef.current) return;
       firedRef.current = true;
       // Do not use the "noopener" feature here: it makes window.open() always return null,
@@ -43,10 +51,8 @@ export default function WhatsAppHandoff({ link, autoOpen, onFinished, muted, bor
         setState('blocked');
       }
       finishedRef.current();
-      return;
-    }
+    }, 1000);
 
-    const timer = setTimeout(() => setSeconds((s) => s - 1), 1000);
     return () => clearTimeout(timer);
   }, [state, seconds, link]);
 
