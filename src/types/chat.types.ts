@@ -22,11 +22,8 @@ export interface ChatAnswerResult {
   answer: string;
 }
 
-export interface StoredChatMessage {
-  id: string;
-  role: 'user' | 'bot';
-  text: string;
-  kind?: 'normal' | 'error';
-  time: number;
-  handoffLink?: string;
+export interface ChatHistoryItem {
+  content: string;
+  role: 'user' | 'assistant';
+  created_at: string;
 }

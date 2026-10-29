@@ -13,16 +13,18 @@ interface ChatInputProps {
   onChange: (value: string) => void;
   onSend: () => void;
   isPending: boolean;
+  disabled?: boolean; // true while the previous messages are loading
 }
 
-export default function ChatInput({ palette, value, onChange, onSend, isPending }: ChatInputProps) {
+export default function ChatInput({ palette, value, onChange, onSend, isPending, disabled = false }: ChatInputProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // focus the input when the panel opens (this component mounts when the panel opens)
+  // focus the input when the panel opens, and again when it becomes usable after loading the history
   useEffect(() => {
+    if (disabled) return;
     const t = setTimeout(() => inputRef.current?.focus(), 350);
     return () => clearTimeout(t);
-  }, []);
+  }, [disabled]);
 
   // textarea grows with the text, up to 4 lines
   useEffect(() => {
@@ -33,13 +35,13 @@ export default function ChatInput({ palette, value, onChange, onSend, isPending 
   }, [value]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+    if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing && !disabled) {
       e.preventDefault();
       onSend();
     }
   };
 
-  const canSend = value.trim().length > 0 && !isPending;
+  const canSend = value.trim().length > 0 && !isPending && !disabled;
 
   return (
         <div
@@ -56,7 +58,8 @@ export default function ChatInput({ palette, value, onChange, onSend, isPending 
               onChange={(e) => onChange(e.target.value.slice(0, MAX_MESSAGE_LENGTH))}
               onKeyDown={handleKeyDown}
               rows={1}
-              placeholder={isPending ? 'Waiting for the reply…' : 'Ask about this event…'}
+              disabled={disabled}
+              placeholder={disabled ? 'Loading previous messages…' : isPending ? 'Waiting for the reply…' : 'Ask about this event…'}
               aria-label="Type your question"
               className="max-h-28 flex-1 resize-none bg-transparent py-1.5 text-[14px] outline-none placeholder:opacity-50"
               style={{ color: palette.text }}

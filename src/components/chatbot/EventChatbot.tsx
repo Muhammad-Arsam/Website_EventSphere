@@ -11,7 +11,7 @@ import ChatInput from './parts/ChatInput';
 import ChatLauncher from './parts/ChatLauncher';
 
 export interface EventChatbotProps {
-  eventId: string; // the event's UUID (used by the chat API and for saving the chat history)
+  eventId: string;
   eventTitle: string;
   eventImageUrl?: string;
   organizerPhone?: string;
@@ -48,7 +48,14 @@ export default function EventChatbot({
     settleMessages();
   }, [settleMessages]);
 
-  const togglePanel = () => (open ? closePanel() : setOpen(true));
+  // opening: show the panel and load the earlier messages of this visitor (if any)
+  const { loadHistory } = chat;
+  const openPanel = () => {
+    setOpen(true);
+    loadHistory();
+  };
+
+  const togglePanel = () => (open ? closePanel() : openPanel());
 
   // Esc closes, and the page behind does not scroll when the panel is full screen (mobile)
   useEffect(() => {
@@ -104,6 +111,8 @@ export default function EventChatbot({
               eventTitle={eventTitle}
               messages={chat.messages}
               isPending={chat.isPending}
+              historyStatus={chat.historyStatus}
+              onRetryHistory={chat.loadHistory}
               onPick={chat.send}
               onTypingDone={chat.handleTypingDone}
               onHandoffFinished={chat.handleHandoffFinished}
@@ -116,13 +125,14 @@ export default function EventChatbot({
               onChange={chat.setInput}
               onSend={() => chat.send(chat.input)}
               isPending={chat.isPending}
+              disabled={chat.historyStatus === 'loading'}
             />
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* ── Floating button ── */}
-      <ChatLauncher palette={palette} open={open} onOpen={() => setOpen(true)} onToggle={togglePanel} />
+      <ChatLauncher palette={palette} open={open} onOpen={openPanel} onToggle={togglePanel} />
     </div>
   );
 }

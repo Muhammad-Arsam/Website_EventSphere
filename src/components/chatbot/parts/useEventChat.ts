@@ -3,11 +3,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { publicService, ChatJobFailedError, ChatTimeoutError } from '@/api/publicService';
-import { loadChat, saveChat, clearChat } from '@/utils/chatSession';
+import { getStoredSessionId, getOrCreateSessionId, touchSession, clearChat } from '@/utils/chatSession';
 import { CHAT_FAILED_MESSAGE, buildChatWhatsAppMessage, buildWhatsAppLink } from '@/utils/chatHelpers';
 
 import { CHAT_FAILED_NO_WHATSAPP_MESSAGE, CHAT_IRRELEVANT_FALLBACK } from './chatConstants';
 import { ChatMsg } from './types';
+import { historyToMessages } from './historyMapper';
+
+export type HistoryStatus = 'idle' | 'loading' | 'ready' | 'error';
 
 interface UseEventChatOptions {
   eventId: string;
@@ -15,52 +18,78 @@ interface UseEventChatOptions {
   organizerPhone?: string;
 }
 
+// All chat logic: messages, chat history from the server, session id, sending a question, polling result,
+// failure / irrelevant handling (WhatsApp handoff), retry and "New chat".
+// It has no screen code, so it can be read and tested on its own.
 export function useEventChat({ eventId, eventTitle, organizerPhone }: UseEventChatOptions) {
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState('');
   const [isPending, setIsPending] = useState(false);
-  const [hydrated, setHydrated] = useState(false); // saved chat has been loaded
+  const [historyStatus, setHistoryStatus] = useState<HistoryStatus>('idle');
 
-  const abortRef = useRef<AbortController | null>(null);
+  const abortRef = useRef<AbortController | null>(null); // running question
+  const historyAbortRef = useRef<AbortController | null>(null); // running history request
+  const historyDoneRef = useRef(false); // true once the history is loaded (or there is nothing to load)
   const sessionIdRef = useRef('');
   const idCounter = useRef(0);
 
   const nextId = () => `m-${Date.now()}-${idCounter.current++}`;
 
-  // ── load the saved chat (session_id + history) for this event ──
+  // ── cancel running requests when the page is closed ──
   useEffect(() => {
-    const saved = loadChat(eventId);
-    sessionIdRef.current = saved.sessionId;
-    setMessages(saved.messages.map((m) => ({ ...m, animate: false, autoOpen: false })));
-    setHydrated(true);
-  }, [eventId]);
-
-  // ── save the chat whenever it changes (only after loading, so we never overwrite it with an empty list) ──
-  useEffect(() => {
-    if (!hydrated) return;
-    saveChat(
-      eventId,
-      sessionIdRef.current,
-      messages.filter((m) => !m.retryText), // temporary "try again" errors are not history
-    );
-  }, [messages, hydrated, eventId]);
-
-  // ── cancel any running request when the page is closed ──
-  useEffect(() => {
-    return () => abortRef.current?.abort();
+    return () => {
+      abortRef.current?.abort();
+      historyAbortRef.current?.abort();
+    };
   }, []);
+
+  // ── load the previous messages of this visitor (called when the chat is opened) ──
+  // Only visitors who chatted before have a saved session id. For everyone else nothing is requested.
+  const loadHistory = useCallback(async () => {
+    if (historyDoneRef.current || historyAbortRef.current) return; // already loaded, or loading right now
+
+    const sessionId = getStoredSessionId(eventId);
+    if (!sessionId) {
+      historyDoneRef.current = true;
+      setHistoryStatus('ready');
+      return;
+    }
+
+    sessionIdRef.current = sessionId;
+    const controller = new AbortController();
+    historyAbortRef.current = controller;
+    setHistoryStatus('loading');
+
+    try {
+      const items = await publicService.getChatHistory(sessionId, controller.signal);
+      if (controller.signal.aborted) return;
+      setMessages((prev) => (prev.length ? prev : historyToMessages(items)));
+      touchSession(eventId);
+      historyDoneRef.current = true;
+      setHistoryStatus('ready');
+    } catch {
+      if (controller.signal.aborted) return;
+      setHistoryStatus('error'); // the visitor can try again, or just start chatting
+    } finally {
+      if (historyAbortRef.current === controller) historyAbortRef.current = null;
+    }
+  }, [eventId]);
 
   // ── stop typing animations and WhatsApp auto-open (called when the panel closes) ──
   const settleMessages = useCallback(() => {
     setMessages((prev) => prev.map((m) => ({ ...m, animate: false, autoOpen: false })));
   }, []);
 
-  // ── new chat: stop any running request, forget the history, start a new session ──
+  // ── new chat: stop running requests, forget the session. The next question starts a new session ──
   const startNewChat = () => {
     abortRef.current?.abort();
+    historyAbortRef.current?.abort();
+    historyAbortRef.current = null;
+    historyDoneRef.current = true; // nothing to load for a new session
+    setHistoryStatus('ready');
     setIsPending(false);
     clearChat(eventId);
-    sessionIdRef.current = loadChat(eventId).sessionId; // creates and saves a fresh session_id
+    sessionIdRef.current = '';
     setMessages([]);
     setInput('');
   };
@@ -78,7 +107,7 @@ export function useEventChat({ eventId, eventTitle, organizerPhone }: UseEventCh
   const send = useCallback(
     async (rawText: string, isRetry = false) => {
       const text = rawText.trim();
-      if (!text || isPending) return;
+      if (!text || isPending || historyStatus === 'loading') return;
 
       setInput('');
       if (!isRetry) {
@@ -108,8 +137,9 @@ export function useEventChat({ eventId, eventTitle, organizerPhone }: UseEventCh
       };
 
       try {
-        // Created once per event and saved in the browser; the same value is sent with every message.
-        if (!sessionIdRef.current) sessionIdRef.current = loadChat(eventId).sessionId;
+        // Created with the first question and saved in the browser; the same value is sent with every message.
+        if (sessionIdRef.current) touchSession(eventId);
+        else sessionIdRef.current = getOrCreateSessionId(eventId);
 
         const { job_id } = await publicService.sendChatMessage(
           eventId,
@@ -171,7 +201,7 @@ export function useEventChat({ eventId, eventTitle, organizerPhone }: UseEventCh
         if (!controller.signal.aborted) setIsPending(false);
       }
     },
-    [eventId, eventTitle, isPending, organizerPhone],
+    [eventId, eventTitle, historyStatus, isPending, organizerPhone],
   );
 
   const handleRetry = (msg: ChatMsg) => {
@@ -185,6 +215,8 @@ export function useEventChat({ eventId, eventTitle, organizerPhone }: UseEventCh
     input,
     setInput,
     isPending,
+    historyStatus,
+    loadHistory,
     send,
     handleRetry,
     startNewChat,

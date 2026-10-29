@@ -14,6 +14,7 @@ import {
   ChatMessageResponse,
   ChatJobResponse,
   ChatAnswerResult,
+  ChatHistoryItem,
 } from '@/types/chat.types';
 
 // Public chat calls use their own axios instance: no login token and no
@@ -66,7 +67,7 @@ export const publicService = {
     }
   },
 
-    checkout: async (eventId: string, payload: CheckoutRequest): Promise<CheckoutResponse> => {
+  checkout: async (eventId: string, payload: CheckoutRequest): Promise<CheckoutResponse> => {
     try {
       const response = await API.post<CheckoutResponse>(
         `/api/public/checkout/${eventId}`,
@@ -86,20 +87,20 @@ export const publicService = {
   },
 
   validatePromoCode: async (eventId: string, code: string): Promise<ValidatePromoCodeResponse> => {
-  try {
-    const response = await API.get<ValidatePromoCodeResponse>(
-      `/api/public/discount-code/validate/${eventId}`,
-      { params: { code } }
-    );
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      const backendMessage = error.response.data?.detail || 'Failed to validate promo code.';
-      throw new Error(backendMessage);
+    try {
+      const response = await API.get<ValidatePromoCodeResponse>(
+        `/api/public/discount-code/validate/${eventId}`,
+        { params: { code } }
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        const backendMessage = error.response.data?.detail || 'Failed to validate promo code.';
+        throw new Error(backendMessage);
+      }
+      throw new Error('Network error. Please check your connection.');
     }
-    throw new Error('Network error. Please check your connection.');
-  }
-},
+  },
 
   parseThemeConfig: (themeConfigJson: string): ThemeConfigJson | null => {
     try {
@@ -153,20 +154,20 @@ export const publicService = {
   },
 
   recoverTickets: async (eventId: string, email: string): Promise<RecoverTicketsResponse> => {
-  try {
-    const response = await API.post<RecoverTicketsResponse>(
-      `/api/public/tickets/recover/${eventId}`,
-      { email }
-    );
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      const backendMessage = error.response.data?.detail || 'Failed to recover tickets.';
-      throw new Error(backendMessage);
+    try {
+      const response = await API.post<RecoverTicketsResponse>(
+        `/api/public/tickets/recover/${eventId}`,
+        { email }
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        const backendMessage = error.response.data?.detail || 'Failed to recover tickets.';
+        throw new Error(backendMessage);
+      }
+      throw new Error('Network error. Please check your connection.');
     }
-    throw new Error('Network error. Please check your connection.');
-  }
-},
+  },
 
   // --- CHATBOT (public, async job based) ---
   // Step 1: send the question. The backend returns a job_id (status "pending").
@@ -177,7 +178,7 @@ export const publicService = {
   ): Promise<ChatMessageResponse> => {
     try {
       const response = await publicChatClient.post<ChatMessageResponse>(
-         `/api/public/event/${encodeURIComponent(eventId)}/chat`,
+        `/api/public/event/${encodeURIComponent(eventId)}/chat`,
         payload,
         { signal },
       );
@@ -210,6 +211,27 @@ export const publicService = {
           error.response.data?.detail ||
           error.response.data?.message ||
           'Failed to fetch the chatbot reply.';
+        throw new Error(backendMessage);
+      }
+      throw new Error('Network error. Please check your connection.');
+    }
+  },
+
+  getChatHistory: async (sessionId: string, signal?: AbortSignal): Promise<ChatHistoryItem[]> => {
+    try {
+      const response = await publicChatClient.get<ChatHistoryItem[]>(
+        `/api/public/event/chat/history/${encodeURIComponent(sessionId)}`,
+        { signal },
+      );
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+      if (axios.isCancel(error)) throw new Error('Request cancelled.');
+      if (axios.isAxiosError(error) && error.response) {
+        if (error.response.status === 404) return [];
+        const backendMessage =
+          error.response.data?.detail ||
+          error.response.data?.message ||
+          'Failed to load the chat history.';
         throw new Error(backendMessage);
       }
       throw new Error('Network error. Please check your connection.');
