@@ -15,7 +15,7 @@ import {
   ListIcon,
   UserCircleIcon,
 } from "../icons";
-import { Mail, Tickets, Loader2, ScanLine } from "lucide-react";
+import { Mail, Tickets, Loader2, ScanLine, TrendingUp } from "lucide-react";
 
 type NavItem = {
   name: string;
@@ -34,6 +34,7 @@ const organizerNavItems: NavItem[] = [
   { icon: <ListIcon />, name: "Orders", path: "/orders" },
   { icon: <Tickets />, name: "Tickets", path: "/tickets" },
   { icon: <ScanLine />, name: "Check-In", path: "/check-in" },
+  { icon: <TrendingUp />, name: "Demand Forecast", path: "/demand-forecast" },
 ];
 
 const organizerOthersItems: NavItem[] = [
@@ -150,7 +151,7 @@ const AppSidebar: React.FC = () => {
   };
 
   const renderMenuItems = (items: NavItem[], type: "main" | "others") => (
-    <ul className="flex flex-col gap-4">
+    <ul className="flex flex-col gap-2">
       {items.map((nav, index) => (
         <li key={`${type}-${index}`}>
           {nav.subItems ? (
@@ -256,14 +257,14 @@ const AppSidebar: React.FC = () => {
       )}
 
       <aside
-        className={`fixed top-0 left-0 h-screen px-5 border-r transition-all duration-300 bg-white dark:bg-gray-900 z-50
+        className={`fixed top-0 left-0 h-screen overflow-y-auto no-scrollbar px-5 border-r transition-all duration-300 bg-white dark:bg-gray-900 z-50
       ${isSidebarOpen ? "w-[290px]" : "w-[90px]"}
       ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
         onMouseEnter={() => !isExpanded && setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         {/* LOGO */}
-        <div className="pt-40 pb-8 md:py-8 flex justify-center">
+        <div className="pt-40 pb-8 md:py-5 flex justify-center">
           <div className="flex items-center justify-center w-full overflow-hidden">
             {userRole === "ORGANIZER" && logoLoading ? (
               <Loader2
@@ -275,8 +276,8 @@ const AppSidebar: React.FC = () => {
                 src={imageUrl}
                 alt="Organization Logo"
                 className={`object-contain transition-all duration-300 ${isSidebarOpen || isMobileOpen
-                  ? "max-h-[80px] w-auto"
-                  : "max-h-[40px] w-[40px] rounded-full"
+                  ? "max-h-20 w-auto"
+                  : "max-h-10 w-10 rounded-full"
                   }`}
                 style={{
                   maxWidth: isSidebarOpen || isMobileOpen ? "180px" : "40px",
@@ -306,7 +307,7 @@ const AppSidebar: React.FC = () => {
         </div>
 
         {/* MENU */}
-        <nav className="space-y-6">
+        <nav className="space-y-4 pb-24">
           <div>
             <h2 className="text-xs text-gray-400 mb-4">
               {isExpanded || isHovered || isMobileOpen ? "Menu" : <HorizontaLDots />}
