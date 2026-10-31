@@ -180,7 +180,7 @@ export const buildKpis = (f: DemandForecast): Kpi[] => {
       value: t.projected,
       kind: 'int',
       caption: `Naive baseline: ${formatInt(t.naive)}`,
-      tone: 'violet',
+      tone: 'brand',
       icon: 'target',
     },
     {
@@ -189,7 +189,7 @@ export const buildKpis = (f: DemandForecast): Kpi[] => {
       value: t.projectedPct,
       kind: 'percent',
       caption: 'of total capacity',
-      tone: 'amber',
+      tone: 'brand',
       icon: 'gauge',
     },
   ];
@@ -211,7 +211,7 @@ export const buildKpis = (f: DemandForecast): Kpi[] => {
       value: t.projectedRevenue,
       kind: 'money',
       caption: 'At current ticket prices',
-      tone: 'rose',
+      tone: 'brand',
       icon: 'wallet',
     });
   }

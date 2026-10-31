@@ -76,7 +76,7 @@ export default function DemandForecastDashboard() {
 
       {forecast && !forecastLoading && (
         <div key={forecast.eventId} className="space-y-6">
-          <Reveal><SyntheticDataBanner forecast={forecast} /></Reveal>
+          {/* <Reveal><SyntheticDataBanner forecast={forecast} /></Reveal> */}
 
           {tiers.length === 0 ? (
             <ForecastMessage

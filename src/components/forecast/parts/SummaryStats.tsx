@@ -38,7 +38,7 @@ export default function SummaryStats({ forecast }: { forecast: DemandForecast })
             whileHover={{ y: -4 }}
             className={`${CARD} group relative overflow-hidden p-6 transition-shadow hover:shadow-xl`}
           >
-            <div className={`absolute inset-x-0 top-0 h-1 ${tone.bar}`} />
+            <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-brand-400 to-brand-600" />
             <Icon
               className="absolute -bottom-6 -right-6 h-28 w-28 text-gray-100 transition-transform duration-500 group-hover:scale-110 dark:text-white/3"
               strokeWidth={1.2}
