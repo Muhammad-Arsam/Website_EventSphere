@@ -28,7 +28,7 @@ export default function ForecastHero({
   const daysAhead = forecast ? daysBetween(forecast.asOf, forecast.eventDate) : null;
 
   return (
-    <div className="relative rounded-3xl bg-linear-to-br from-brand-950 via-brand-800 to-brand-900 p-6 text-white shadow-xl sm:p-8">
+    <div className="relative z-30 rounded-3xl bg-linear-to-br from-brand-950 via-brand-800 to-brand-900 p-6 text-white shadow-xl sm:p-8">
       {/* Decoration (clipped to the card, so the dropdown can still overflow it) */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl" aria-hidden="true">
         <div
@@ -41,7 +41,7 @@ export default function ForecastHero({
           transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
-          className="absolute -bottom-28 left-1/4 h-64 w-64 rounded-full bg-violet-500/25 blur-3xl"
+          className="absolute -bottom-28 left-1/4 h-64 w-64 rounded-full bg-brand-400/25 blur-3xl"
           animate={reduceMotion ? undefined : { y: [0, -16, 0], x: [0, 14, 0] }}
           transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut' }}
         />
@@ -56,7 +56,7 @@ export default function ForecastHero({
           />
           <motion.path
             d="M250 70 C 300 55, 350 35, 420 14"
-            stroke="#a78bfa" strokeWidth="3" strokeLinecap="round" strokeDasharray="2 9"
+            stroke="#aee0d4" strokeWidth="3" strokeLinecap="round" strokeDasharray="2 9"
             initial={reduceMotion ? false : { pathLength: 0 }}
             animate={{ pathLength: 1 }}
             transition={{ duration: 1.2, delay: 1.2, ease: 'easeOut' }}
@@ -98,7 +98,7 @@ export default function ForecastHero({
             disabled={loading}
             aria-label="Refresh forecast"
             title="Refresh forecast"
-            className="flex h-[58px] w-[58px] shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white backdrop-blur-xl transition hover:bg-white/20 disabled:opacity-50"
+            className="flex h-[58px] w-[58px] shrink-0 items-center justify-center rounded-2xl border border-brand-300/30 bg-brand-400/15 text-brand-100 backdrop-blur-xl transition hover:bg-brand-400/25 disabled:opacity-50"
           >
             <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
           </button>
