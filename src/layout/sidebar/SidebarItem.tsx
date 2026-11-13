@@ -82,10 +82,9 @@ export default function SidebarItem({ item, isOpen, index, onNavigate }: Props) 
   );
 
   return (
-    <motion.li
-      initial={{ opacity: 0, x: -12 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: 0.05 + index * 0.04, duration: 0.3, ease: "easeOut" }}
+    <li
+      className="animate-item-in"
+      style={{ animationDelay: `${0.05 + index * 0.04}s` }}
     >
       {hasSub ? (
         <button
@@ -141,6 +140,6 @@ export default function SidebarItem({ item, isOpen, index, onNavigate }: Props) 
           </motion.ul>
         )}
       </AnimatePresence>
-    </motion.li>
+    </li>
   );
 }
