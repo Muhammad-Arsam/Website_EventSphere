@@ -1,131 +1,86 @@
 "use client";
-import { useState, useEffect } from "react";
-import { User, ChevronDown, HelpCircle, LogOut } from "lucide-react";
-import { DropdownItem } from "../ui/dropdown/DropdownItem";
-import { Dropdown } from "../ui/dropdown/Dropdown";
-import { profileService } from "../../api/profileService";
+
+import Link from "next/link";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { ChevronDown, LogOut, UserRound } from "lucide-react";
 import { authService } from "../../api/authService";
-import { UserProfile } from "../../types/profile.types";
+import { useHydrated } from "@/hooks/useHydrated";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import UserAvatar from "./user-menu/UserAvatar";
+import UserMenuHeader from "./user-menu/UserMenuHeader";
 
-export default function UserDropdown() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+const itemClass =
+  "group flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-700 outline-none transition-colors data-highlighted:bg-brand-50 data-highlighted:text-brand-700 dark:text-gray-300 dark:data-highlighted:bg-brand-500/15 dark:data-highlighted:text-brand-200";
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const data = await profileService.getProfile();
-        setProfile(data);
-      } catch (error) {
-        console.error("Failed to load profile data:", error);
-      }
-    };
-
-    fetchProfile();
-  }, []);
-
-  function toggleDropdown() {
-    setIsOpen(!isOpen);
-  }
-
-  function closeDropdown() {
-    setIsOpen(false);
-  }
+export default function UserDropdown({ roleLabel }: { roleLabel?: string }) {
+  const { profile, isLoading } = useUserProfile();
+  const isHydrated = useHydrated();
 
   const handleLogout = async () => {
     await authService.logout();
   };
 
+  // Radix generates ids that can differ between server and browser.
+  // Until the page is hydrated, show a same-size placeholder instead.
+  if (!isHydrated) {
+    return (
+      <div
+        aria-hidden
+        className="h-11 w-14 rounded-xl border border-gray-200 bg-white shadow-theme-xs sm:w-44 dark:border-white/10 dark:bg-white/5"
+      />
+    );
+  }
+
   return (
-    <div className="relative">
-      <button
-        onClick={toggleDropdown}
-        className="flex items-center text-gray-700 dropdown-toggle dark:text-gray-400"
-      >
-        <span className="mr-3 flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
-          {profile?.profilePic ? (
-            <img
-              src={profile.profilePic}
-              alt="User Profile"
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <User className="h-6 w-6 text-gray-400 dark:text-gray-500" />
-          )}
-        </span>
-
-        <span className="block mr-1 font-medium text-theme-sm">
-          {profile ? profile.name : "Loading..."}
-        </span>
-
-        <ChevronDown
-          className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${
-            isOpen ? "rotate-180" : ""
-          }`}
-          size={18}
-        />
-      </button>
-
-      <Dropdown
-        isOpen={isOpen}
-        onClose={closeDropdown}
-        className="absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark"
-      >
-        <div>
-          <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-            {profile ? profile.name : "Loading..."}
-          </span>
-          <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-            {profile ? profile.email : "Loading..."}
-          </span>
-        </div>
-
-        <ul className="flex flex-col gap-1 pt-4 pb-3 border-b border-gray-200 dark:border-gray-800">
-          <li>
-            <DropdownItem
-              onItemClick={closeDropdown}
-              tag="a"
-              href="/profile"
-              className="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
-            >
-              <User className="text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300" />
-              Edit profile
-            </DropdownItem>
-          </li>
-
-          {/* <li>
-            <DropdownItem
-              onItemClick={closeDropdown}
-              tag="a"
-              to="/profile"
-              className="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
-            >
-              <Settings className="text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300" />
-              Account settings
-            </DropdownItem>
-          </li> */}
-
-          {/* <li>
-            <DropdownItem
-              onItemClick={closeDropdown}
-              tag="a"
-              href="/profile"
-              className="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
-            >
-              <HelpCircle className="text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300" />
-              Support
-            </DropdownItem>
-          </li> */}
-        </ul>
-
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger asChild>
         <button
-          onClick={handleLogout}
-          className="flex w-full items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+          type="button"
+          className="group flex h-11 items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 py-1 pl-1 pr-2.5 outline-none backdrop-blur transition-colors hover:border-brand-300/40 hover:bg-white/10 focus-visible:ring-3 focus-visible:ring-brand-300/30"
         >
-          <LogOut className="text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300" />
-          Sign out
+          <UserAvatar name={profile?.name} src={profile?.profilePic} className="size-9" />
+
+          {isLoading ? (
+            <span className="hidden h-3.5 w-20 animate-pulse rounded bg-white/15 sm:block" />
+          ) : (
+            <span className="hidden max-w-32 truncate text-sm font-medium text-gray-100 sm:block">
+              {profile?.name}
+            </span>
+          )}
+
+          <ChevronDown className="size-4 text-gray-400 transition-transform duration-200 group-data-[state=open]:rotate-180" />
         </button>
-      </Dropdown>
-    </div>
+      </DropdownMenu.Trigger>
+
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content
+          align="end"
+          sideOffset={10}
+          collisionPadding={12}
+          className="z-999999 w-72 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-xl data-[state=closed]:animate-menu-out data-[state=open]:animate-menu-in dark:border-white/10 dark:bg-gray-dark"
+        >
+          <UserMenuHeader profile={profile} roleLabel={roleLabel} />
+
+          <div className="p-2">
+            <DropdownMenu.Item asChild>
+              <Link href="/profile" className={itemClass}>
+                <UserRound className="size-[18px] text-gray-500 transition-colors group-data-highlighted:text-brand-600 dark:text-gray-400 dark:group-data-highlighted:text-brand-300" />
+                Edit profile
+              </Link>
+            </DropdownMenu.Item>
+
+            <DropdownMenu.Separator className="my-1.5 h-px bg-gray-100 dark:bg-white/10" />
+
+            <DropdownMenu.Item
+              onSelect={handleLogout}
+              className="group flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-700 outline-none transition-colors data-highlighted:bg-error-50 data-highlighted:text-error-600 dark:text-gray-300 dark:data-highlighted:bg-error-500/10 dark:data-highlighted:text-error-400"
+            >
+              <LogOut className="size-[18px]" />
+              Sign out
+            </DropdownMenu.Item>
+          </div>
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
   );
 }

@@ -98,7 +98,7 @@ export default function EventPicker({ events, selectedId, onSelect }: Props) {
   }, [open, isMobile]);
 
   const sheet = (
-    <div className="fixed inset-0 z-[100000] flex items-end" role="dialog" aria-modal="true" aria-label="Select an event">
+    <div className="fixed inset-0 z-100000 flex items-end" role="dialog" aria-modal="true" aria-label="Select an event">
       <motion.div
         className="absolute inset-0 bg-brand-950/60 backdrop-blur-[2px]"
         initial={{ opacity: 0 }}
