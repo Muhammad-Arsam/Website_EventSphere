@@ -53,7 +53,7 @@ export const DASH_COLORS = {
   brand700: '#1F6F5F',
   amber: '#f79009',
   amberLight: '#fdb022',
-  unsoldOnDark: 'rgba(255,255,255,0.16)',
+  unsoldOnDark: '#698A80',
 };
 
 export type OrderBucket = 'paid' | 'pending' | 'failed' | 'other';
