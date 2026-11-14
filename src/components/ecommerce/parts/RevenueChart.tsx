@@ -25,6 +25,13 @@ type Mode = 'total' | 'bars';
 
 const TONE = 'mint' as const;
 const S = PANEL[TONE];
+// Small stacked tooltip for phones: title / value / note on separate lines (about 130px wide).
+const compactTooltip = (title: string, value: string, note: string, isDark: boolean) =>
+  `<div style="padding:8px 12px;min-width:110px;max-width:160px;line-height:1.4;color:${isDark ? '#f2f4f7' : '#101828'}">` +
+  `<div style="font-size:11px;opacity:.7">${title}</div>` +
+  `<div style="font-size:14px;font-weight:700">${value}</div>` +
+  (note ? `<div style="font-size:11px;opacity:.7">${note}</div>` : '') +
+  '</div>';
 
 interface Props {
   orders: EventOrder[] | null;
@@ -93,11 +100,11 @@ export default function RevenueChart({ orders, loading, error }: Props) {
       // Small value above each bar (so small weeks are readable next to one very big week)
       dataLabels: isBars
         ? {
-            enabled: true, offsetY: -20,
-            formatter: (v: number, opts?: { dataPointIndex: number }) =>
-              v > 0 && (showAllValues || opts?.dataPointIndex === bestBucket) ? formatCompactNumber(v) : '',
-            style: { fontSize: '10px', fontWeight: 600, colors: [text] },
-          }
+          enabled: true, offsetY: -20,
+          formatter: (v: number, opts?: { dataPointIndex: number }) =>
+            v > 0 && (showAllValues || opts?.dataPointIndex === bestBucket) ? formatCompactNumber(v) : '',
+          style: { fontSize: '10px', fontWeight: 600, colors: [text] },
+        }
         : { enabled: false },
       markers: { size: !isBars && points.length <= 2 ? 5 : 0, hover: { size: 6 } },
       grid: {
@@ -106,26 +113,42 @@ export default function RevenueChart({ orders, loading, error }: Props) {
       },
       xaxis: isBars
         ? {
-            type: 'category',
-            axisBorder: { show: false }, axisTicks: { show: false }, tooltip: { enabled: false },
-            labels: {
-              style: { colors: text, fontSize: width < 480 ? '11px' : '12px' },
-              rotate: 0,
-              hideOverlappingLabels: true,
-              // Show only every `labelStep`-th label, so labels never touch each other
-              formatter: (value: string, _timestamp?: number, opts?: { i?: number }) =>
-                (opts?.i ?? 0) % labelStep === 0 ? value : '',
-            },
-          }
-        : {
-            type: 'datetime',
-            axisBorder: { show: false }, axisTicks: { show: false }, tooltip: { enabled: false },
-            labels: { style: { colors: text }, datetimeUTC: false },
+          type: 'category',
+          axisBorder: { show: false }, axisTicks: { show: false }, tooltip: { enabled: false },
+          labels: {
+            style: { colors: text, fontSize: width < 480 ? '11px' : '12px' },
+            rotate: 0,
+            hideOverlappingLabels: true,
+            // Show only every `labelStep`-th label, so labels never touch each other
+            formatter: (value: string, _timestamp?: number, opts?: { i?: number }) =>
+              (opts?.i ?? 0) % labelStep === 0 ? value : '',
           },
+        }
+        : {
+          type: 'datetime',
+          axisBorder: { show: false }, axisTicks: { show: false }, tooltip: { enabled: false },
+          labels: { style: { colors: text }, datetimeUTC: false },
+        },
       yaxis: { min: 0, labels: { style: { colors: text }, formatter: (v: number) => formatCompactRs(v) } },
       legend: { show: false },
       tooltip: {
         theme: isDark ? 'dark' : 'light',
+        // Phones: use the short stacked tooltip so it always fits inside the chart
+        ...(width < 480
+          ? {
+            custom: ({ dataPointIndex }: { dataPointIndex: number }) => {
+              if (isBars) {
+                const b = grouped.buckets[dataPointIndex];
+                if (!b) return '';
+                return compactTooltip(b.tooltip, formatRs(b.revenue), `${b.orders} ${b.orders === 1 ? 'order' : 'orders'}`, isDark);
+              }
+              const p = points[dataPointIndex];
+              if (!p) return '';
+              const date = new Date(p.x).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+              return compactTooltip(date, formatRs(p.cumulative), 'Total revenue', isDark);
+            },
+          }
+          : {}),
         x: isBars
           ? { formatter: (_v: number, opts?: { dataPointIndex: number }) => grouped.buckets[opts?.dataPointIndex ?? 0]?.tooltip ?? '' }
           : { format: 'dd MMM yyyy' },
@@ -138,7 +161,7 @@ export default function RevenueChart({ orders, loading, error }: Props) {
         },
       },
     };
-  }, [isDark, isBars, grouped, points.length, bestBucket, chartWidth]);
+  }, [isDark, isBars, grouped, points, bestBucket, chartWidth]);
 
   const modes: { id: Mode; label: string }[] = [
     { id: 'total', label: 'Total' },
@@ -173,9 +196,8 @@ export default function RevenueChart({ orders, loading, error }: Props) {
                   role="tab"
                   aria-selected={active}
                   onClick={() => setMode(m.id)}
-                  className={`relative rounded-xl px-3.5 py-1.5 text-sm font-semibold transition-colors ${
-                    active ? 'text-white' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
-                  }`}
+                  className={`relative rounded-xl px-3.5 py-1.5 text-sm font-semibold transition-colors ${active ? 'text-white' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+                    }`}
                 >
                   {active && (
                     <motion.span
