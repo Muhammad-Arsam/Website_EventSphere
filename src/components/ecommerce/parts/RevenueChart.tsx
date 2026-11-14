@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 import type { ApexOptions } from 'apexcharts';
 import { useTheme } from '@/context/ThemeContext';
+import { useElementWidth } from '@/hooks/useElementWidth';
 import type { EventOrder } from '@/types/event.types';
 import { formatInt, formatRs } from '../dashboardShared';
 import { DASH_COLORS, PANEL } from '../dashboardTheme';
@@ -39,6 +40,7 @@ export default function RevenueChart({ orders, loading, error }: Props) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [mode, setMode] = useState<Mode>('total');
+  const { ref: chartBoxRef, width: chartWidth } = useElementWidth<HTMLDivElement>();
 
   const points = useMemo(() => buildRevenueSeries(orders ?? []), [orders]);
   const grouped = useMemo(() => buildRevenueBuckets(orders ?? []), [orders]);
@@ -65,6 +67,14 @@ export default function RevenueChart({ orders, loading, error }: Props) {
     const barBest = isDark ? DASH_COLORS.brand300 : DASH_COLORS.brand700;
     const barCount = grouped.buckets.length;
 
+    // Responsive x-axis: about 60px per label, never more than 12 labels.
+    // Phone (~290px) -> 4 labels, tablet -> ~8, laptop -> 12 (same as before).
+    const width = chartWidth || 360;
+    const maxLabels = Math.min(12, Math.max(3, Math.floor(width / 60)));
+    const labelStep = Math.max(1, Math.ceil(barCount / maxLabels));
+    // Show every bar's value only when each bar has enough room, otherwise only the best bar's.
+    const showAllValues = width / Math.max(barCount, 1) >= 30;
+
     return {
       chart: {
         type: isBars ? 'bar' : 'area', height: 340, fontFamily: 'Outfit, sans-serif', background: 'transparent',
@@ -84,7 +94,8 @@ export default function RevenueChart({ orders, loading, error }: Props) {
       dataLabels: isBars
         ? {
             enabled: true, offsetY: -20,
-            formatter: (v: number) => (v > 0 ? formatCompactNumber(v) : ''),
+            formatter: (v: number, opts?: { dataPointIndex: number }) =>
+              v > 0 && (showAllValues || opts?.dataPointIndex === bestBucket) ? formatCompactNumber(v) : '',
             style: { fontSize: '10px', fontWeight: 600, colors: [text] },
           }
         : { enabled: false },
@@ -96,9 +107,15 @@ export default function RevenueChart({ orders, loading, error }: Props) {
       xaxis: isBars
         ? {
             type: 'category',
-            tickAmount: barCount > 10 ? 10 : undefined,
             axisBorder: { show: false }, axisTicks: { show: false }, tooltip: { enabled: false },
-            labels: { style: { colors: text }, rotate: 0, hideOverlappingLabels: true },
+            labels: {
+              style: { colors: text, fontSize: width < 480 ? '11px' : '12px' },
+              rotate: 0,
+              hideOverlappingLabels: true,
+              // Show only every `labelStep`-th label, so labels never touch each other
+              formatter: (value: string, _timestamp?: number, opts?: { i?: number }) =>
+                (opts?.i ?? 0) % labelStep === 0 ? value : '',
+            },
           }
         : {
             type: 'datetime',
@@ -121,7 +138,7 @@ export default function RevenueChart({ orders, loading, error }: Props) {
         },
       },
     };
-  }, [isDark, isBars, grouped, points.length, bestBucket]);
+  }, [isDark, isBars, grouped, points.length, bestBucket, chartWidth]);
 
   const modes: { id: Mode; label: string }[] = [
     { id: 'total', label: 'Total' },
@@ -184,15 +201,17 @@ export default function RevenueChart({ orders, loading, error }: Props) {
         emptyText="Revenue will appear here as soon as the first order is paid."
         height={340}
       >
-        <div className="mb-4 grid grid-cols-3 gap-3">
-          {facts.map((f) => (
-            <div key={f.label} className={`rounded-2xl p-3.5 ${S.tile}`}>
+        <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {facts.map((f, i) => (
+            <div key={f.label} className={`rounded-2xl p-3.5 ${S.tile} ${i === 2 ? 'col-span-2 sm:col-span-1' : ''}`}>
               <p className={`text-[11px] ${S.muted}`}>{f.label}</p>
               <p className={`mt-0.5 truncate text-sm font-bold sm:text-base ${S.strong}`}>{f.value}</p>
             </div>
           ))}
         </div>
-        <ReactApexChart key={`${mode}-${theme}`} type={isBars ? 'bar' : 'area'} height={340} series={series} options={options} />
+        <div ref={chartBoxRef}>
+          <ReactApexChart key={`${mode}-${theme}`} type={isBars ? 'bar' : 'area'} height={340} series={series} options={options} />
+        </div>
         <p className={`mt-3 text-xs ${S.muted}`}>
           Counts orders with status Paid or Success ({formatInt(stats.counts.paid)} of {formatInt(stats.total)} orders).
           {isBars && ` Each bar is one ${grouped.unit}; the darkest bar is the best ${grouped.unit}.`}
