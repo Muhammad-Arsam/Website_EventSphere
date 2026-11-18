@@ -13,7 +13,8 @@ interface Props {
   children?: ReactNode; // content shown in the middle of the ring
 }
 
-// Two arcs on one ring: the faint violet arc is the projection, the green arc is what is sold now.
+// Made for the dark green top of a tier card.
+// Two arcs on one ring: the faint amber arc is the projection, the green arc is what is sold now.
 export default function ProgressRing({ sold, projected, size = 118, stroke = 11, children }: Props) {
   const reduceMotion = useReducedMotion();
   const gradientId = useId();
@@ -31,14 +32,13 @@ export default function ProgressRing({ sold, projected, size = 118, stroke = 11,
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90" aria-hidden="true">
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#6FCF97" />
-            <stop offset="100%" stopColor={CHART_COLORS.actual} />
+            <stop offset="0%" stopColor="#c9f0dc" />
+            <stop offset="100%" stopColor={CHART_COLORS.brand300} />
           </linearGradient>
         </defs>
-        <circle cx={center} cy={center} r={radius} fill="none" strokeWidth={stroke}
-          className="stroke-gray-100 dark:stroke-white/10" />
+        <circle cx={center} cy={center} r={radius} fill="none" strokeWidth={stroke} className="stroke-white/15" />
         <motion.circle cx={center} cy={center} r={radius} fill="none" strokeWidth={stroke}
-          strokeLinecap="round" stroke={CHART_COLORS.model} strokeOpacity={0.3}
+          strokeLinecap="round" stroke={CHART_COLORS.modelDark} strokeOpacity={0.55}
           {...arcProps(projected, 0.1)} />
         <motion.circle cx={center} cy={center} r={radius} fill="none" strokeWidth={stroke}
           strokeLinecap="round" stroke={`url(#${gradientId})`}

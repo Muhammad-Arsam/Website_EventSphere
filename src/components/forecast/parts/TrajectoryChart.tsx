@@ -7,28 +7,22 @@ import type { ApexOptions } from 'apexcharts';
 import { useTheme } from '@/context/ThemeContext';
 import type { DemandForecast } from '@/types/analytics.types';
 import { buildTrajectory, getViewMeta, type ChartPoint } from '../forecastHelpers';
-import { CARD, CHART_COLORS } from '../forecastTheme';
-import SectionHeader from './SectionHeader';
+import { CHART_COLORS } from '../forecastTheme';
+import { PANEL, PanelHeader, PanelShell } from '../forecastPanels';
 
 const ReactApexChart = dynamic(() => import('react-apexcharts'), {
   ssr: false,
-  loading: () => <div className="h-[360px] animate-pulse rounded-2xl bg-gray-100 dark:bg-white/5" />,
+  loading: () => <div className="h-[360px] animate-pulse rounded-2xl bg-white/70 dark:bg-white/5" />,
 });
+
+const TONE = 'mint' as const;
+const S = PANEL[TONE];
 
 interface Props {
   forecast: DemandForecast;
   activeTierId: string;
   onSelectTier: (tierId: string) => void;
 }
-
-// Picks a "nice" top value and tick count (e.g. 125 with ticks every 25) instead of odd numbers like 108.
-const niceAxis = (value: number): { max: number; ticks: number } => {
-  const target = Math.max(value, 1) * 1.05;
-  const steps = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 5000, 10000];
-  const step = steps.find((st) => target / st <= 5) ?? Math.ceil(target / 5);
-  const max = Math.ceil(target / step) * step;
-  return { max, ticks: max / step };
-};
 
 interface Layer {
   name: string;
@@ -39,6 +33,15 @@ interface Layer {
   dash: number;
   gradient: boolean;
 }
+
+// Picks a "nice" top value and tick count (e.g. 125 with ticks every 25) instead of odd numbers like 108.
+const niceAxis = (value: number): { max: number; ticks: number } => {
+  const target = Math.max(value, 1) * 1.05;
+  const steps = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 5000, 10000];
+  const step = steps.find((st) => target / st <= 5) ?? Math.ceil(target / 5);
+  const max = Math.ceil(target / step) * step;
+  return { max, ticks: max / step };
+};
 
 export default function TrajectoryChart({ forecast, activeTierId, onSelectTier }: Props) {
   const { theme } = useTheme();
@@ -51,8 +54,8 @@ export default function TrajectoryChart({ forecast, activeTierId, onSelectTier }
 
     // Only draw the lines that have data (the "what really happened" line exists for backtests only)
     const allLayers: Layer[] = [
-      { name: 'Actual sales', color: CHART_COLORS.actual, data: t.actual, width: 3, curve: 'stepline', dash: 0, gradient: true },
-      { name: 'Model projection', color: CHART_COLORS.model, data: t.model, width: 3, curve: 'straight', dash: 7, gradient: true },
+      { name: 'Actual sales', color: isDark ? CHART_COLORS.actualDark : CHART_COLORS.actual, data: t.actual, width: 3, curve: 'stepline', dash: 0, gradient: true },
+      { name: 'Model projection', color: isDark ? CHART_COLORS.modelDark : CHART_COLORS.model, data: t.model, width: 3, curve: 'straight', dash: 7, gradient: true },
       { name: 'Naive baseline', color: CHART_COLORS.naive, data: t.naive, width: 2.5, curve: 'straight', dash: 4, gradient: false },
       { name: 'What really happened', color: CHART_COLORS.outcome, data: t.outcome, width: 3, curve: 'stepline', dash: 0, gradient: false },
     ];
@@ -60,7 +63,7 @@ export default function TrajectoryChart({ forecast, activeTierId, onSelectTier }
 
     const highest = Math.max(t.capacity, ...layers.flatMap((l) => l.data.map((p) => p.y)));
     const axis = niceAxis(highest);
-    const text = isDark ? '#98a2b3' : '#667085';
+    const text = isDark ? '#98a2b3' : '#475467';
     const labelStyle = { fontSize: '11px', fontWeight: 600 };
 
     const options: ApexOptions = {
@@ -84,12 +87,12 @@ export default function TrajectoryChart({ forecast, activeTierId, onSelectTier }
       fill: {
         type: layers.map((l) => (l.gradient ? 'gradient' : 'solid')),
         opacity: layers.map((l) => (l.gradient ? 1 : 0)),
-        gradient: { shadeIntensity: 1, opacityFrom: 0.32, opacityTo: 0.02, stops: [0, 95, 100] },
+        gradient: { shadeIntensity: 1, opacityFrom: 0.38, opacityTo: 0.03, stops: [0, 95, 100] },
       },
       dataLabels: { enabled: false },
       markers: { size: 0, hover: { size: 5 } },
       grid: {
-        borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#eef0f3',
+        borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(19,68,58,0.12)',
         strokeDashArray: 4,
         padding: { left: 8, right: 24 },
       },
@@ -137,16 +140,16 @@ export default function TrajectoryChart({ forecast, activeTierId, onSelectTier }
         xaxis: [
           {
             x: t.asOfTs,
-            borderColor: isDark ? '#667085' : '#98a2b3',
+            borderColor: isDark ? '#667085' : '#13443a',
             strokeDashArray: 4,
             label: {
               text: isBacktest ? 'Forecast made' : 'Today',
               position: 'top',
               textAnchor: 'end',
-              offsetY: 0,
               orientation: 'horizontal',
               borderColor: 'transparent',
-              style: { ...labelStyle, color: isDark ? '#e4e7ec' : '#344054', background: isDark ? '#344054' : '#f2f4f7' },
+              offsetY: 0,
+              style: { ...labelStyle, color: '#ffffff', background: isDark ? '#344054' : '#13443a' },
             },
           },
           {
@@ -157,10 +160,10 @@ export default function TrajectoryChart({ forecast, activeTierId, onSelectTier }
               text: 'Target date',
               position: 'top',
               textAnchor: 'end',
-              offsetY: 24,
               orientation: 'horizontal',
               borderColor: 'transparent',
-              style: { ...labelStyle, color: '#fff', background: CHART_COLORS.model },
+              offsetY: 24,
+              style: { ...labelStyle, color: '#ffffff', background: '#b54708' },
             },
           },
         ],
@@ -171,12 +174,17 @@ export default function TrajectoryChart({ forecast, activeTierId, onSelectTier }
   }, [forecast, tier, isDark, isBacktest]);
 
   return (
-    <section className={`${CARD} p-5 sm:p-6`}>
-      <SectionHeader
+    <PanelShell tone={TONE}>
+      <PanelHeader
+        tone={TONE}
         title="Sales trajectory"
         subtitle="Cumulative tickets sold: what happened, and where the model expects it to go."
         right={
-          <div className="-mx-1 flex max-w-full gap-1 overflow-x-auto rounded-2xl bg-gray-100 p-1 dark:bg-white/5" role="tablist" aria-label="Choose a ticket tier">
+          <div
+            className="flex max-w-full gap-1 overflow-x-auto rounded-2xl bg-white/70 p-1 ring-1 ring-brand-100 dark:bg-white/5 dark:ring-white/10"
+            role="tablist"
+            aria-label="Choose a ticket tier"
+          >
             {forecast.predictions.map((t) => {
               const active = t.tierId === tier.tierId;
               return (
@@ -205,17 +213,14 @@ export default function TrajectoryChart({ forecast, activeTierId, onSelectTier }
         }
       />
 
-      <ReactApexChart
-        key={`${tier.tierId}-${theme}`}
-        type="area"
-        height={360}
-        series={series}
-        options={options}
-      />
+      {/* globals.css forces all ApexCharts text to gray, so the two vertical-line labels are made white here */}
+      <div className="[&_.apexcharts-xaxis-annotation-label]:fill-white!">
+        <ReactApexChart key={`${tier.tierId}-${theme}`} type="area" height={360} series={series} options={options} />
+      </div>
 
-      <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+      <p className={`mt-3 text-xs ${S.muted}`}>
         Values are running totals, not daily sales. The naive baseline is the simple estimate the model is compared against.
       </p>
-    </section>
+    </PanelShell>
   );
 }

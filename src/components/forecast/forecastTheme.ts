@@ -58,11 +58,15 @@ export const TONES: Record<Tone, ToneStyle> = {
 
 // Chart colors (hex, because ApexCharts needs real color values)
 export const CHART_COLORS = {
-  actual: '#2FA084', // brand green: tickets really sold
-  model: '#7a5af8', // violet: the model's projection
-  naive: '#f79009', // amber: the simple baseline
-  outcome: '#0ba5ec', // sky: what really happened (backtest only)
-  capacity: '#98a2b3', // gray: capacity line
+  actual: '#1F6F5F', // brand-700: tickets really sold (light mode)
+  actualDark: '#6FCF97', // brand-300: same line in dark mode
+  model: '#f79009', // amber: the model's projection
+  modelDark: '#fdb022',
+  naive: '#98a2b3', // gray: the simple baseline
+  outcome: '#12b76a', // green: what really happened (backtest only)
+  capacity: '#667085',
+  brand300: '#6FCF97',
+  brand500: '#2FA084',
 };
 
 // Shared card look (same style as the dashboard cards)

@@ -6,8 +6,10 @@ import type { ForecastHistorical } from '@/types/analytics.types';
 import {
   clamp01, formatDate, formatInt, formatPct, formatRs, formatShortDate, getPhaseMeta,
 } from '../forecastHelpers';
-import { CARD } from '../forecastTheme';
-import SectionHeader from './SectionHeader';
+import { PANEL, PanelHeader, PanelShell } from '../forecastPanels';
+
+const TONE = 'mint' as const;
+const S = PANEL[TONE];
 
 // Real sales data (not predictions). Shown for live and finished events.
 export default function HistoricalPanel({ historical }: { historical: ForecastHistorical }) {
@@ -21,12 +23,13 @@ export default function HistoricalPanel({ historical }: { historical: ForecastHi
   ];
 
   return (
-    <section className={`${CARD} p-5 sm:p-6`}>
-      <SectionHeader
+    <PanelShell tone={TONE}>
+      <PanelHeader
+        tone={TONE}
         title={phase.title}
         subtitle={`Real sales recorded through ${formatDate(historical.salesThroughDate)}.`}
         right={
-          <span className="inline-flex w-fit items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700 dark:bg-white/10 dark:text-gray-300">
+          <span className="inline-flex w-fit items-center rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-brand-800 ring-1 ring-brand-200 dark:bg-white/10 dark:text-brand-200 dark:ring-white/15">
             {phase.label}
           </span>
         }
@@ -34,9 +37,9 @@ export default function HistoricalPanel({ historical }: { historical: ForecastHi
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {stats.map((s) => (
-          <div key={s.label} className="rounded-2xl bg-gray-50 p-4 dark:bg-white/5">
-            <p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p>
-            <p className="mt-1 text-lg font-bold text-gray-900 dark:text-white">{s.value}</p>
+          <div key={s.label} className={`rounded-2xl p-4 ${S.tile}`}>
+            <p className={`text-xs ${S.muted}`}>{s.label}</p>
+            <p className={`mt-1 text-lg font-bold ${S.strong}`}>{s.value}</p>
           </div>
         ))}
       </div>
@@ -52,10 +55,10 @@ export default function HistoricalPanel({ historical }: { historical: ForecastHi
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.45, delay: i * 0.07 }}
-              className="rounded-2xl border border-gray-100 p-4 dark:border-gray-800"
+              className={`rounded-2xl p-4 ${S.tile}`}
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="flex items-center gap-2 font-semibold text-gray-900 dark:text-white">
+                <p className={`flex items-center gap-2 font-semibold ${S.strong}`}>
                   {tier.tierName}
                   {isTop && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700 ring-1 ring-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:ring-amber-500/30">
@@ -63,14 +66,14 @@ export default function HistoricalPanel({ historical }: { historical: ForecastHi
                     </span>
                   )}
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className={`text-sm ${S.muted}`}>
                   {formatInt(tier.soldTickets)} / {formatInt(tier.capacity)} sold · {formatPct(tier.actualSellThroughPercent)} · {formatRs(tier.faceValueGross)}
                 </p>
               </div>
 
-              <div className="mt-3 h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
+              <div className={`mt-3 h-2 overflow-hidden rounded-full ${S.track}`}>
                 <motion.div
-                  className="h-full rounded-full bg-linear-to-r from-brand-300 to-brand-600"
+                  className="h-full rounded-full bg-linear-to-r from-brand-400 to-brand-700"
                   initial={{ width: 0 }}
                   whileInView={{ width: `${fraction * 100}%` }}
                   viewport={{ once: true }}
@@ -78,18 +81,18 @@ export default function HistoricalPanel({ historical }: { historical: ForecastHi
                 />
               </div>
 
-              <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
-                <span>First sale: <b className="text-gray-700 dark:text-gray-300">{formatShortDate(tier.firstSaleDate)}</b></span>
-                <span>Last sale: <b className="text-gray-700 dark:text-gray-300">{formatShortDate(tier.lastSaleDate)}</b></span>
+              <div className={`mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs ${S.muted}`}>
+                <span>First sale: <b className={S.body}>{formatShortDate(tier.firstSaleDate)}</b></span>
+                <span>Last sale: <b className={S.body}>{formatShortDate(tier.lastSaleDate)}</b></span>
                 <span>
-                  Best day: <b className="text-gray-700 dark:text-gray-300">{formatShortDate(tier.peakSalesDate)}</b>
+                  Best day: <b className={S.body}>{formatShortDate(tier.peakSalesDate)}</b>
                   {' '}({formatInt(tier.peakDailyTickets)} {tier.peakDailyTickets === 1 ? 'ticket' : 'tickets'})
                 </span>
               </div>
 
               {tier.insight && (
-                <p className="mt-3 flex gap-2 text-xs leading-relaxed text-gray-600 dark:text-gray-400">
-                  <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-sky-500" />
+                <p className={`mt-3 flex gap-2 text-xs leading-relaxed ${S.body}`}>
+                  <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-500" />
                   {tier.insight}
                 </p>
               )}
@@ -97,6 +100,6 @@ export default function HistoricalPanel({ historical }: { historical: ForecastHi
           );
         })}
       </div>
-    </section>
+    </PanelShell>
   );
 }

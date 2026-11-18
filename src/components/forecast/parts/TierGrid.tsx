@@ -2,7 +2,6 @@
 
 import type { DemandForecast } from '@/types/analytics.types';
 import { findReplayTier, showRecommendations } from '../forecastHelpers';
-import SectionHeader from './SectionHeader';
 import TierCard from './TierCard';
 
 interface Props {
@@ -16,10 +15,12 @@ export default function TierGrid({ forecast, activeTierId, onSelectTier }: Props
 
   return (
     <section>
-      <SectionHeader
-        title="Ticket tiers"
-        subtitle="Select a tier to see its sales curve in the chart below."
-      />
+      <div className="mb-5">
+        <h3 className="text-lg font-bold tracking-tight text-brand-950 dark:text-white">Ticket tiers</h3>
+        <p className="mt-0.5 text-sm font-medium text-brand-950 dark:text-white/75">
+          Select a tier to see its sales curve in the chart below.
+        </p>
+      </div>
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
         {forecast.predictions.map((tier, index) => (
           <TierCard

@@ -29,7 +29,8 @@ export default function DemandForecastDashboard() {
   if (eventsLoading) {
     return (
       <div className="space-y-6">
-        <div className="h-52 animate-pulse rounded-3xl bg-gray-200 dark:bg-white/5" />
+        <div className="h-52 animate-pulse rounded-3xl bg-brand-900/70" />
+        <SummaryStats forecast={null} />
         <ForecastSkeleton />
       </div>
     );
@@ -68,7 +69,12 @@ export default function DemandForecastDashboard() {
         onReload={reload}
       />
 
-      {forecastLoading && <ForecastSkeleton />}
+      {forecastLoading && (
+        <>
+          <SummaryStats forecast={null} />
+          <ForecastSkeleton />
+        </>
+      )}
 
       {forecastError && !forecastLoading && (
         <ForecastMessage variant="error" title="Could not load the forecast" text={forecastError} onRetry={reload} />
