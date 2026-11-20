@@ -30,8 +30,7 @@ export default function DemandForecastDashboard() {
     return (
       <div className="space-y-6">
         <div className="h-52 animate-pulse rounded-3xl bg-brand-900/70" />
-        <SummaryStats forecast={null} />
-        <ForecastSkeleton />
+        <ForecastSkeleton withKpis />
       </div>
     );
   }
